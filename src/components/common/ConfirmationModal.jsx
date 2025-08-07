@@ -1,0 +1,109 @@
+import React from 'react'
+import {
+  FaExclamationTriangle,
+  FaQuestionCircle,
+  FaInfoCircle,
+  FaCheckCircle
+} from 'react-icons/fa'
+import Modal from './Modal'
+import Button from './Button';
+
+const ConfirmationModal = ({
+  isOpen,
+  onClose,
+  title = 'Confirm Action',
+  message = 'Are you sure you want to proceed?',
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+  onConfirm,
+  onCancel,
+  isLoading = false,
+  type = 'warning', // warning, danger, info, success
+  size = 'md', // sm, md, lg
+  showIcon = true,
+  confirmButtonVariant = 'primary',
+  cancelButtonVariant = 'outline',
+  className = ''
+}) => {
+  if (!isOpen) return null;
+
+  const getIcon = () => {
+    switch (type) {
+      case 'danger':
+        return <FaExclamationTriangle className="w-6 h-6 text-red-500" />;
+      case 'info':
+        return <FaInfoCircle className="w-6 h-6 text-blue-500" />;
+      case 'success':
+        return <FaCheckCircle className="w-6 h-6 text-green-500" />;
+      default:
+        return <FaQuestionCircle className="w-6 h-6 text-yellow-500" />;
+    }
+  };
+
+  const getSizeClasses = () => {
+    switch (size) {
+      case 'sm':
+        return 'max-w-sm';
+      case 'lg':
+        return 'max-w-lg';
+      default:
+        return 'max-w-md';
+    }
+  };
+
+  // const handleBackdropClick = (e) => {
+  //   if (e.target === e.currentTarget) {
+  //     onClose();
+  //   }
+  // };
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose}>
+      {/* <div className={`bg-white rounded-lg shadow-xl ${getSizeClasses()} w-full ${className}`}> */}
+      {/* Header */}
+      <div className="p-6 border-b border-gray-200">
+        <div className="flex items-center gap-3">
+          {showIcon && getIcon()}
+          <h3 className="text-lg font-semibold text-gray-900">
+            {title}
+          </h3>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="p-6">
+        <p className="text-gray-600">
+          {message}
+        </p>
+      </div>
+
+      {/* Footer */}
+      <div className="p-6 bg-gray-50 rounded-b-lg flex items-center justify-end gap-3">
+        <Button
+          variant={cancelButtonVariant}
+          onClick={() => {
+            if (onCancel) onCancel();
+            onClose();
+          }}
+          disabled={isLoading}
+          loading={isLoading}
+        >
+          {cancelText}
+        </Button>
+        <Button
+          variant={confirmButtonVariant}
+          onClick={onConfirm}
+          disabled={isLoading}
+          className={type === 'danger' ? 'bg-red-600 hover:bg-red-700' : ''}
+          loading={isLoading}
+        >
+          {confirmText}
+        </Button>
+      </div>
+      {/* </div> */}
+      {/* </div> */}
+    </Modal>
+  )
+}
+
+export default ConfirmationModal

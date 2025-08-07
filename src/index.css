@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply font-sans;
+
+}
+
+html {
+  font-size: 90%;
+
+}
+
+*:disabled {
+  cursor: not-allowed;
+}
+
+select:disabled,
+input:disabled,
+textarea:disabled {
+  background-color: #e5e7eb;
+  color: #6b7280;
+}
+
+/* a.active {
+  background: #cba135;
+} */
+
+input:focus,
+button:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid #2C4FD8;
+  outline-offset: -1px;
+}
+
+/* Loader Animation */
+.loader-dual-ring {
+  display: inline-block;
+  border-style: solid;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-dots {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
