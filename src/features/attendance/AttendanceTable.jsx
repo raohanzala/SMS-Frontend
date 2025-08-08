@@ -2,12 +2,15 @@ import React, { useState } from 'react'
 import { FiEdit, FiEye, FiTrash2 } from 'react-icons/fi';
 import { useAttendance } from './useAttendance';
 import AddAttendance from './AddAttendance';
+import { useClassesAttendance } from './useClassesAttendance';
 
 function AttendanceTable({ isShowModal, setIsShowModal }) {
 
   const [classToDelete, setClassToDelete] = useState(null);
   const [classToEdit, setClassToEdit] = useState(null)
   const [isDeleteModal, setIsDeleteModal] = useState(false);
+
+  const { classes } = useClassesAttendance()
 
   const { attendance, isPending } = useAttendance()
 
@@ -140,7 +143,9 @@ function AttendanceTable({ isShowModal, setIsShowModal }) {
         isLoading={isDeleting}
       /> */}
 
-      <AddAttendance />
+      <AddAttendance isOpen={isShowModal}
+        onClose={() => setIsShowModal(false)}
+        classToEdit={classToEdit} />
     </>
   )
 }
