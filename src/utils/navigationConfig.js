@@ -18,6 +18,7 @@ import {
 export const adminNav = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: FiHome },
   { name: 'Students', href: '/admin/students', icon: FiUsers },
+  { name: 'Parents', href: '/admin/parents', icon: FiUsers },
   { name: 'Teachers', href: '/admin/teachers', icon: FiUserCheck },
   { name: 'Classes', href: '/admin/classes', icon: FiBookOpen },
   { name: 'Subjects', href: '/admin/subjects', icon: FiBookOpen },

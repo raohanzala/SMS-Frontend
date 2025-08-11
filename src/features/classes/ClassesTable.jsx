@@ -5,6 +5,7 @@ import ConfirmationModal from '../../components/common/ConfirmationModal';
 import { useClasses } from './useClasses';
 import { useDeleteClass } from './useDeleteClass';
 import AddClass from './AddClass';
+import Pagination from '../../components/common/Pagination';
 
 function ClassesTable({ isShowModal, setIsShowModal }) {
 
@@ -81,26 +82,60 @@ function ClassesTable({ isShowModal, setIsShowModal }) {
             <tbody className="bg-white divide-y divide-gray-200">
               {classes?.map((classItem) => (
                 <tr key={classItem._id} className="hover:bg-gray-50">
+                  {/* Class Name */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {classItem.name}
                   </td>
 
+                  {/* Section */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {classItem.section}
                   </td>
 
+                  {/* Subjects */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {classItem.subjects?.length > 0 ? classItem.subjects.join(', ') : '—'}
+                    {classItem.subjects?.length > 0
+                      ? classItem.subjects.map((sub) => sub.name).join(', ')
+                      : '—'}
                   </td>
 
+                  {/* Assigned Teachers */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {classItem.assignedTeachers?.length > 0 ? classItem.assignedTeachers.join(', ') : '—'}
+                    {classItem.assignedTeachers?.length > 0 ? (
+                      <div className="flex flex-col space-y-1">
+                        {classItem.assignedTeachers.map((teacher) => (
+                          <div key={teacher._id} className="flex items-center space-x-2">
+                            {teacher.profileImage ? (
+                              <img
+                                src={teacher.profileImage}
+                                alt={teacher.name}
+                                className="w-6 h-6 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-700">
+                                {teacher.name.charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                            <div className="flex flex-col leading-tight">
+                              <span className="text-gray-900">{teacher.name}</span>
+                              {teacher.email && (
+                                <span className="text-gray-400 text-xs">{teacher.email}</span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      '—'
+                    )}
                   </td>
 
+                  {/* Created At */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(classItem.createdAt).toLocaleDateString()}
                   </td>
 
+                  {/* Actions */}
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
                       <button className="text-blue-600 hover:text-blue-900">
@@ -127,7 +162,7 @@ function ClassesTable({ isShowModal, setIsShowModal }) {
               ))}
             </tbody>
           </table>
-
+          <Pagination pagination={pagination} />
         </div>
       </div>
 

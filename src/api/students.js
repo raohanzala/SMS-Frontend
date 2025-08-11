@@ -3,7 +3,7 @@ import axiosInstance from "./axiosInstance";
 
 // ✅ Get all students (with filters/pagination)
 export const getAllStudents = async (params = {}) => {
-  const { data } = await axiosInstance.get("/students", params);
+  const { data } = await axiosInstance.get("/students", { params });
   return data;
 };
 

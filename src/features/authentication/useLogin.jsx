@@ -21,8 +21,18 @@ export function useLogin() {
   const { mutate: login, isPending } = useMutation({
     mutationFn: ({ email, password }) => signin({ email, password }),
     onSuccess: (data) => {
+
+      // Redux store update
       queryClient.setQueryData(['user'], data.user);
       dispatch(setCredentials(data.data))
+
+      console.log(data)
+      // First login check
+      if (data.isFirstLogin && data.data.user.role !== 'admin') {
+        navigate('/change-password');
+        return;
+      }
+
       const redirectPath = roleRoutes[user?.role] || '/login';
       navigate(redirectPath)
     },

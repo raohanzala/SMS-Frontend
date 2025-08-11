@@ -38,7 +38,7 @@ const Login = () => {
   return (
     <>
       <FormikProvider value={formik}>
-        <form onSubmit={(e) => { e.preventDefault(); console.log("Form submit event triggered"); formik.handleSubmit(e); }}>
+        <form onSubmit={formik.handleSubmit}>
 
           {/* Email */}
           <div>

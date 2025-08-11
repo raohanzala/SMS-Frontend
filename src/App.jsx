@@ -16,11 +16,15 @@ import Layout from './components/layout/Layout';
 import Login from './pages/public/Login';
 import Register from './pages/public/Register';
 import ForgotPassword from './pages/public/ForgotPassword';
+import ChangePassword from './pages/public/ChangePassword';
+
 
 // Protected Route Component
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { adminNav, ParentNav, studentNav, teacherNav } from './utils/navigationConfig';
-
+import AdminParentDetails from './pages/private/admin/ParentDetail';
+import StudentDetail from './pages/private/admin/StudentDetail';
+import TeacherDetail from './pages/private/admin/TeacherDetail';
 // Create a client
 const queryClient = new QueryClient();
 
@@ -38,6 +42,7 @@ function App() {
                   <Route path="login" element={<Login />} />
                   <Route path="register" element={<Register />} />
                   <Route path="forgot-password" element={<ForgotPassword />} />
+                  <Route path="change-password" element={<ChangePassword />} />
                 </Route>
 
                 {/* Admin Routes */}
@@ -49,7 +54,11 @@ function App() {
                   <Route index element={<Navigate to="/admin/dashboard" replace />} />
                   <Route path="dashboard" element={<AdminDashboard />} />
                   <Route path="students" element={<AdminStudents />} />
+                  <Route path="students/:studentId" element={<StudentDetail />} />
+                  <Route path="parents" element={<AdminParents />} />
+                  <Route path="parents/:parentId" element={<AdminParentDetails />} />
                   <Route path="teachers" element={<AdminTeachers />} />
+                  <Route path="teachers/:teacherId" element={<TeacherDetail />} />
                   <Route path="classes" element={<AdminClasses />} />
                   <Route path="subjects" element={<AdminSubjects />} />
                   <Route path="timetable" element={<AdminTimetable />} />
@@ -120,6 +129,7 @@ function App() {
 const AdminDashboard = React.lazy(() => import('./pages/private/admin/Dashboard'));
 const AdminStudents = React.lazy(() => import('./pages/private/admin/Students'));
 const AdminTeachers = React.lazy(() => import('./pages/private/admin/Teachers'));
+const AdminParents = React.lazy(() => import('./pages/private/admin/Parents'));
 const AdminClasses = React.lazy(() => import('./pages/private/admin/Classes'));
 const AdminSubjects = React.lazy(() => import('./pages/private/admin/Subjects'));
 const AdminTimetable = React.lazy(() => import('./pages/private/admin/Timetable'));

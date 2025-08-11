@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { FiEdit, FiEye, FiTrash2 } from 'react-icons/fi';
-import { useStudents } from './useStudents';
-import AddStudent from './AddStudent';
-import { useDeleteStudent } from './useDeleteStudent';
+import { useParents } from './useParents';
+import { useDeleteParent } from './useDeleteParent';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
+import AddParent from './AddParent';
 import { useNavigate } from 'react-router-dom';
 import Pagination from '../../components/common/Pagination';
 
-function StudentsTable({ isShowModal, setIsShowModal }) {
+function ParentsTable({ isShowModal, setIsShowModal }) {
 
   const [studentToDelete, setStudentToDelete] = useState(null);
   const [studentToEdit, setStudentToEdit] = useState(null)
@@ -15,8 +15,8 @@ function StudentsTable({ isShowModal, setIsShowModal }) {
 
   const navigate = useNavigate()
 
-  const { students, isPending, error, pagination } = useStudents();
-  const { deleteStudent, isDeleting } = useDeleteStudent();
+  const { pagination, parents } = useParents()
+  const { deleteParent, isDeleting } = useDeleteParent();
 
   const handleDelete = (id) => {
     setStudentToDelete(id);
@@ -25,7 +25,7 @@ function StudentsTable({ isShowModal, setIsShowModal }) {
 
   const confirmDelete = () => {
     if (studentToDelete) {
-      deleteStudent(studentToDelete, {
+      deleteParent(studentToDelete, {
         onSuccess: () => {
           setIsDeleteModal(false);
           setStudentToDelete(null);
@@ -53,7 +53,7 @@ function StudentsTable({ isShowModal, setIsShowModal }) {
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-medium text-gray-900">
-            Students ({students?.length})
+            Parents ({parents?.length})
           </h3>
         </div>
         <div className="overflow-x-auto">
@@ -61,16 +61,16 @@ function StudentsTable({ isShowModal, setIsShowModal }) {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Student
+                  Parent
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Class & Section
+                  Children
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Contact
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Admission Date
+                  Joined
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -78,72 +78,71 @@ function StudentsTable({ isShowModal, setIsShowModal }) {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {students?.map((student) => (
-                <tr key={student._id} className="hover:bg-gray-50">
-                  {/* Student Info */}
+              {parents?.map((parent) => (
+                <tr key={parent._id} className="hover:bg-gray-50">
+                  {/* Parent info */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
                         <img
-                          className="h-10 w-10 rounded-full object-cover border"
-                          src={student.profileImage || '/default-avatar.png'}
-                          alt={student.name}
+                          className="h-10 w-10 rounded-full object-cover"
+                          src={parent.profileImage || "/default-avatar.png"}
+                          alt={parent.name}
                         />
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">
-                          {student.name}
+                          {parent.name}
                         </div>
-                        <div className="text-sm text-gray-500">
-                          {student.rollNumber || 'N/A'}
-                        </div>
+                        <div className="text-sm text-gray-500">{parent.email}</div>
                       </div>
                     </div>
                   </td>
 
-                  {/* Class & Section */}
+                  {/* Children */}
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {student.classId?.name || 'N/A'}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {student.classId?.section || student.section || ''}
-                    </div>
+                    {parent.children?.length > 0 ? (
+                      <div className="text-sm text-gray-900">
+                        {parent.children.map((child) => child.name).join(", ")}
+                      </div>
+                    ) : (
+                      <span className="text-sm text-gray-400 italic">No children</span>
+                    )}
                   </td>
 
                   {/* Contact */}
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{student.email}</div>
-                    <div className="text-sm text-gray-500">
-                      {student.phone || 'No phone'}
-                    </div>
+                    {parent.phone ? (
+                      <>
+                        <div className="text-sm text-gray-900">{parent.phone}</div>
+                      </>
+                    ) : (
+                      <span className="text-sm text-gray-400 italic">No phone</span>
+                    )}
                   </td>
 
-                  {/* Admission Date */}
+                  {/* Joined */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(student.createdAt).toLocaleDateString()}
+                    {new Date(parent.createdAt).toLocaleDateString()}
                   </td>
 
                   {/* Actions */}
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
                       <button
-                        onClick={() => navigate(`/admin/students/${student._id}`)}
+                        onClick={() => navigate(`/admin/parents/${parent._id}`)}
                         className="text-blue-600 hover:text-blue-900"
                       >
                         <FiEye className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => {
-                          setIsShowModal(true);
-                          setStudentToEdit(student);
-                        }}
+                        onClick={() => { setIsShowModal(true); setStudentToEdit(parent); }}
                         className="text-green-600 hover:text-green-900"
                       >
                         <FiEdit className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(student._id)}
+                        onClick={() => handleDelete(parent._id)}
                         className="text-red-600 hover:text-red-900"
                       >
                         <FiTrash2 className="h-4 w-4" />
@@ -158,7 +157,7 @@ function StudentsTable({ isShowModal, setIsShowModal }) {
         </div>
       </div>
 
-      <AddStudent
+      <AddParent
         isOpen={isShowModal}
         onClose={() => setIsShowModal(false)}
         studentToEdit={studentToEdit}
@@ -179,4 +178,4 @@ function StudentsTable({ isShowModal, setIsShowModal }) {
   )
 }
 
-export default StudentsTable
+export default ParentsTable

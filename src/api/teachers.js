@@ -8,7 +8,7 @@ export const getAllTeachers = async (params = {}) => {
 };
 
 // ✅ Get single student by ID
-export const getStudentById = async (id) => {
+export const getTeacherById = async (id) => {
   const { data } = await axiosInstance.get(`/teachers/${id}`);
   return data;
 };
@@ -35,20 +35,3 @@ export const deleteTeacher = async (id) => {
   return data;
 };
 
-// ✅ Assign class to student
-export const assignClassToStudent = async ({ id, classId }) => {
-  const { data } = await axiosInstance.patch(`/students/${id}/assign-class`, { classId });
-  return data;
-};
-
-// ✅ Get students by class
-export const getStudentsByClass = async (classId) => {
-  const { data } = await axiosInstance.get(`/students/class/${classId}`);
-  return data;
-};
-
-// ✅ Bulk add students
-export const bulkAddStudents = async (studentsArray) => {
-  const { data } = await axiosInstance.post("/students/bulk-add", studentsArray);
-  return data;
-};
