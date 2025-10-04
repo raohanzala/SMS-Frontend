@@ -1,8 +1,8 @@
 import React from 'react';
 import { FormikProvider, useFormik } from 'formik';
-import FormRowVertical from '../../components/common/FormRowVerticle';
-import Input from '../../components/common/Input';
-import Button from '../../components/common/Button';
+import FormRowVertical from '@/components/common/FormRowVerticle';
+import Input from '@/components/common/Input';
+import Button from '@/components/common/Button';
 
 import { useCreateAttendance } from './useCreateAttendance';
 import { useStudents } from '../students/useStudents';

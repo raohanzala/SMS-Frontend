@@ -28,6 +28,7 @@
     "react-lazy-load-image-component": "^1.6.2",
     "react-redux": "^9.2.0",
     "react-router-dom": "^6.26.1",
+    "react-select": "^5.10.2",
     "react-to-pdf": "^2.0.1",
     "react-toastify": "^10.0.5",
     "recharts": "^2.15.1",

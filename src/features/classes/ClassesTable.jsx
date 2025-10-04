@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import { FiEdit, FiEye, FiTrash2 } from 'react-icons/fi';
 // import AddStudent from './AddStudent';
-import ConfirmationModal from '../../components/common/ConfirmationModal';
+import ConfirmationModal from '@/components/common/ConfirmationModal';
 import { useClasses } from './useClasses';
 import { useDeleteClass } from './useDeleteClass';
 import AddClass from './AddClass';
-import Pagination from '../../components/common/Pagination';
+import Pagination from '@/components/common/Pagination';
 
 function ClassesTable({ isShowModal, setIsShowModal }) {
 

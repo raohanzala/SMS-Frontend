@@ -1,5 +1,5 @@
 import React from "react";
-import { useParent } from "../../../features/Parents/useParent";
+import { useParent } from "@/features/Parents/useParent";
 
 function ParentDetails() {
   const { parent, isPending } = useParent();

@@ -1,7 +1,7 @@
 import React from "react";
 import { FiBookOpen, FiArrowLeft } from "react-icons/fi";
 import { Link } from "react-router-dom";
-import ChangePasswordForm from "../../features/authentication/ChangePasswordForm";
+import ChangePasswordForm from "@/features/authentication/ChangePasswordForm";
 
 const ChangePassword = () => {
   return (

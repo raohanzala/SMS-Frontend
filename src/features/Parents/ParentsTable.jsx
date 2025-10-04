@@ -1,52 +1,8 @@
-import React, { useState } from 'react'
-import { FiEdit, FiEye, FiTrash2 } from 'react-icons/fi';
-import { useParents } from './useParents';
-import { useDeleteParent } from './useDeleteParent';
-import ConfirmationModal from '../../components/common/ConfirmationModal';
-import AddParent from './AddParent';
-import { useNavigate } from 'react-router-dom';
-import Pagination from '../../components/common/Pagination';
+import ViewButton from '@/components/common/ViewButton';
+import EditButton from '@/components/common/EditButton';
+import DeleteButton from '@/components/common/DeleteButton';
 
-function ParentsTable({ isShowModal, setIsShowModal }) {
-
-  const [studentToDelete, setStudentToDelete] = useState(null);
-  const [studentToEdit, setStudentToEdit] = useState(null)
-  const [isDeleteModal, setIsDeleteModal] = useState(false);
-
-  const navigate = useNavigate()
-
-  const { pagination, parents } = useParents()
-  const { deleteParent, isDeleting } = useDeleteParent();
-
-  const handleDelete = (id) => {
-    setStudentToDelete(id);
-    setIsDeleteModal(true);
-  };
-
-  const confirmDelete = () => {
-    if (studentToDelete) {
-      deleteParent(studentToDelete, {
-        onSuccess: () => {
-          setIsDeleteModal(false);
-          setStudentToDelete(null);
-        },
-      });
-    }
-  }
-
-
-  const getStatusBadge = (status) => {
-    return status === "active" ? (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-        Active
-      </span>
-    ) : (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-        Inactive
-      </span>
-    );
-  };
-
+function ParentsTable({ onEdit, onDelete, parents }) {
 
   return (
     <>
@@ -129,51 +85,17 @@ function ParentsTable({ isShowModal, setIsShowModal }) {
                   {/* Actions */}
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
-                      <button
-                        onClick={() => navigate(`/admin/parents/${parent._id}`)}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        <FiEye className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => { setIsShowModal(true); setStudentToEdit(parent); }}
-                        className="text-green-600 hover:text-green-900"
-                      >
-                        <FiEdit className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(parent._id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        <FiTrash2 className="h-4 w-4" />
-                      </button>
+                      <ViewButton />
+                      <EditButton onClick={() => onEdit(parent)} />
+                      <DeleteButton onClick={() => onDelete(parent._id)} />
                     </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <Pagination pagination={pagination} />
         </div>
       </div>
-
-      <AddParent
-        isOpen={isShowModal}
-        onClose={() => setIsShowModal(false)}
-        studentToEdit={studentToEdit}
-      />
-
-      <ConfirmationModal
-        isOpen={isDeleteModal}
-        onClose={() => setIsDeleteModal(false)}
-        title="Delete Student"
-        message="Are you sure you want to delete this student? This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
-        type="danger"
-        onConfirm={confirmDelete}
-        isLoading={isDeleting}
-      />
     </>
   )
 }

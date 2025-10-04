@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FiCalendar } from 'react-icons/fi';
-import TimetableList from '../../../features/timetable/TimetableList'; // new component to show created timetables
-import CreateTimetableForm from '../../../features/timetable/CreateTimetableForm';
+import TimetableList from '@/features/timetable/TimetableList'; // new component to show created timetables
+import CreateTimetableForm from '@/features/timetable/CreateTimetableForm';
 
 const AdminTimetable = () => {
   const [selectedClassId, setSelectedClassId] = useState(null);

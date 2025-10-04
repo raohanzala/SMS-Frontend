@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   FaExclamationTriangle,
   FaQuestionCircle,
@@ -58,10 +57,10 @@ const ConfirmationModal = ({
   // };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} className='p-3'>
       {/* <div className={`bg-white rounded-lg shadow-xl ${getSizeClasses()} w-full ${className}`}> */}
       {/* Header */}
-      <div className="p-6 border-b border-gray-200">
+      <div className="pb-4 border-b border-gray-200">
         <div className="flex items-center gap-3">
           {showIcon && getIcon()}
           <h3 className="text-lg font-semibold text-gray-900">
@@ -71,14 +70,14 @@ const ConfirmationModal = ({
       </div>
 
       {/* Body */}
-      <div className="p-6">
-        <p className="text-gray-600">
+      <div>
+        <p className="py-4 text-gray-600">
           {message}
         </p>
       </div>
 
       {/* Footer */}
-      <div className="p-6 bg-gray-50 rounded-b-lg flex items-center justify-end gap-3">
+      <div className="pt-3 rounded-b-lg flex items-center justify-between gap-3">
         <Button
           variant={cancelButtonVariant}
           onClick={() => {

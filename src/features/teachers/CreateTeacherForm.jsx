@@ -1,35 +1,39 @@
 import { FormikProvider, useFormik } from 'formik';
-import FormRowVertical from '../../components/common/FormRowVerticle';
-import Button from '../../components/common/Button';
-// import { addStudentSchema } from '../../validations/validationSchemas';
-import Input from '../../components/common/Input';
+import FormRowVertical from '@/components/common/FormRowVerticle';
+import Button from '@/components/common/Button';
+// import { addStudentSchema } from '@/validations/validationSchemas';
+import Input from '@/components/common/Input';
 import { useCreateTeacher } from './useCreateTeacher';
 import { useClasses } from '../classes/useClasses';
 
 function CreateTeacherForm({ teacherToEdit, onClose }) {
   const { createTeacher, isCreating } = useCreateTeacher();
-  const { classes } = useClasses()
+  const { classes } = useClasses();
   const isEditMode = !!teacherToEdit;
 
   const formik = useFormik({
     initialValues: {
       name: teacherToEdit?.name || "",
       email: teacherToEdit?.email || "",
-      password: "",
-      confirmPassword: "",
       phone: teacherToEdit?.phone || "",
       address: teacherToEdit?.address || "",
+      gender: teacherToEdit?.gender || "",
       subjects: teacherToEdit?.subjects?.join(", ") || "",
       assignedClasses: teacherToEdit?.assignedClasses?.map(cls => cls._id) || [],
+      salaryAmount: teacherToEdit?.salary?.amount || 0,
+      salaryCurrency: teacherToEdit?.salary?.currency || "PKR",
       timetable: teacherToEdit?.timetable || []
     },
-    // validationSchema: teacherSchema,
     onSubmit: async (values) => {
       const payload = {
         ...values,
         subjects: values.subjects
           ? values.subjects.split(",").map((s) => s.trim())
           : [],
+        salary: {
+          amount: values.salaryAmount,
+          currency: values.salaryCurrency,
+        },
       };
 
       if (!isEditMode) {
@@ -39,7 +43,7 @@ function CreateTeacherForm({ teacherToEdit, onClose }) {
           },
         });
       } else {
-        // updateTeacher logic yahan dal sakte ho
+        // TODO: updateTeacher logic
       }
     },
   });
@@ -90,33 +94,6 @@ function CreateTeacherForm({ teacherToEdit, onClose }) {
           </FormRowVertical>
         </div>
 
-        {/* Password + Confirm Password */}
-        {!isEditMode && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormRowVertical label="Password" name="password">
-              <Input
-                type="password"
-                id="password"
-                name="password"
-                placeholder="Enter password"
-                disabled={formik.isSubmitting}
-                {...formik.getFieldProps("password")}
-              />
-            </FormRowVertical>
-
-            <FormRowVertical label="Confirm Password" name="confirmPassword">
-              <Input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                placeholder="Confirm password"
-                disabled={formik.isSubmitting}
-                {...formik.getFieldProps("confirmPassword")}
-              />
-            </FormRowVertical>
-          </div>
-        )}
-
         {/* Address */}
         <FormRowVertical label="Address" name="address">
           <Input
@@ -140,6 +117,20 @@ function CreateTeacherForm({ teacherToEdit, onClose }) {
             {...formik.getFieldProps("subjects")}
           />
         </FormRowVertical>
+        <FormRowVertical label="Gender" name="gender">
+          <select
+            id="gender"
+            name="gender"
+            className="block w-full px-4 py-2 border rounded-lg"
+            disabled={formik.isSubmitting}
+            value={formik.values.gender}
+            onChange={(e) => formik.setFieldValue("gender", e.target.value)}
+          >
+            <option value="">Select Gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </FormRowVertical>
 
         {/* Assigned Classes */}
         <FormRowVertical label="Assigned Classes" name="assignedClasses">
@@ -158,8 +149,7 @@ function CreateTeacherForm({ teacherToEdit, onClose }) {
             }
           >
             <option value="">Select Class</option>
-            {/* Map through available classes */}
-            {classes.map(cls => (
+            {classes?.map(cls => (
               <option key={cls._id} value={cls._id}>
                 {cls.name} - {cls.section}
               </option>
@@ -167,7 +157,35 @@ function CreateTeacherForm({ teacherToEdit, onClose }) {
           </select>
         </FormRowVertical>
 
-        {/* Submit */}
+        {/* Salary */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormRowVertical label="Salary Amount" name="salaryAmount">
+            <Input
+              type="number"
+              id="salaryAmount"
+              name="salaryAmount"
+              placeholder="Enter salary amount"
+              disabled={formik.isSubmitting}
+              {...formik.getFieldProps("salaryAmount")}
+            />
+          </FormRowVertical>
+
+          <FormRowVertical label="Currency" name="salaryCurrency">
+            <select
+              id="salaryCurrency"
+              name="salaryCurrency"
+              className="block w-full px-4 py-2 border rounded-lg"
+              disabled={formik.isSubmitting}
+              value={formik.values.salaryCurrency}
+              onChange={(e) => formik.setFieldValue("salaryCurrency", e.target.value)}
+            >
+              <option value="PKR">PKR</option>
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+            </select>
+          </FormRowVertical>
+        </div>
+
         <div>
           <Button
             fullWidth={true}
@@ -182,5 +200,6 @@ function CreateTeacherForm({ teacherToEdit, onClose }) {
     </FormikProvider>
   );
 }
+
 
 export default CreateTeacherForm

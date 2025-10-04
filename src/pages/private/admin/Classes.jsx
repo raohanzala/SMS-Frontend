@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import ClassesTable from '../../../features/classes/ClassesTable';
-import TableOperations from '../../../components/common/TableOperations';
+import ClassesTable from '@/features/classes/ClassesTable';
+import PageToolbar from '@/components/common/PageToolbar';
 
 const AdminClasses = () => {
   const [isShowModal, setIsShowModal] = useState(false);
 
   return (
     <div className="space-y-6">
-      <TableOperations
+      <PageToolbar
         operationTitle="Classes Management"
         operationDesc="Manage all classes in the school"
         onClick={() => setIsShowModal(true)}

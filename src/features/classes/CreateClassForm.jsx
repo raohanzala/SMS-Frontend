@@ -1,7 +1,7 @@
 import { FormikProvider, useFormik } from 'formik';
-import FormRowVertical from '../../components/common/FormRowVerticle';
-import Button from '../../components/common/Button';
-import Input from '../../components/common/Input';
+import FormRowVertical from '@/components/common/FormRowVerticle';
+import Button from '@/components/common/Button';
+import Input from '@/components/common/Input';
 import { useCreateClass } from './useCreateClass';
 import { useUpdateClass } from './useUpdateClass';
 import { useTeachers } from '../teachers/useTeachers';

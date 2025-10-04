@@ -1,14 +1,12 @@
 import { FormikProvider, useFormik } from 'formik';
-import React from 'react'
-import FormRowVertical from '../../components/common/FormRowVerticle';
-import Button from '../../components/common/Button';
-import Input from '../../components/common/Input';
-// import { addParentSchema } from '../../validations/validationSchemas';
-import { editParent } from '../../api/parents';
+import FormRowVertical from '@/components/common/FormRowVerticle';
+import Button from '@/components/common/Button';
+import Input from '@/components/common/Input';
+import { editParent } from '@/api/parents';
 import { useCreateParent } from './useCreateParent';
 import { useStudents } from '../students/useStudents';
 
-function CreateParentForm({ parentToEdit, onClose }) {
+function CreateParentForm({ parentToEdit, onClose, onSuccess, context = "parent" }) {
   const { createParent, isCreating } = useCreateParent();
   const { students, isPending } = useStudents();
 
@@ -16,22 +14,31 @@ function CreateParentForm({ parentToEdit, onClose }) {
 
   const formik = useFormik({
     initialValues: {
-      name: parentToEdit?.name || '',
-      email: parentToEdit?.email || '',
-      phone: parentToEdit?.phone || '',
-      address: parentToEdit?.address || '',
+      name: parentToEdit?.name || "",
+      email: parentToEdit?.email || "",
+      phone: parentToEdit?.phone || "",
+      address: parentToEdit?.address || "",
       children: parentToEdit?.children || [],
     },
     // validationSchema: addParentSchema,
     onSubmit: async (values) => {
+      const payload = { ...values };
+
+      // If creating from student modal → no children linking
+      if (context === "student") delete payload.children;
+
       if (!isEditMode) {
-        createParent(values, {
-          onSuccess: () => onClose?.(),
+        createParent(payload, {
+          onSuccess: ({ data }) => {
+            onSuccess?.(data?.parent); // Return new parent if needed
+            onClose?.();
+          },
         });
       } else {
-        editParent({ id: parentToEdit?._id, values }, {
-          onSuccess: () => onClose?.(),
-        });
+        editParent(
+          { id: parentToEdit?._id, values },
+          { onSuccess: () => onClose?.() }
+        );
       }
     },
   });
@@ -82,35 +89,37 @@ function CreateParentForm({ parentToEdit, onClose }) {
           </FormRowVertical>
         </div>
 
-        {/* Address */}
+        {/* Address (optional) */}
         <FormRowVertical label="Address" name="address">
           <Input
             type="text"
             id="address"
             name="address"
             disabled={formik.isSubmitting}
-            placeholder="Enter address"
+            placeholder="Enter address (optional)"
             {...formik.getFieldProps("address")}
           />
         </FormRowVertical>
 
-        {/* Children (Students) */}
-        <FormRowVertical label="Select Children (Students)" name="children">
-          <select
-            id="children"
-            name="children"
-            multiple
-            className="block w-full px-4 py-2 border rounded-lg"
-            disabled={formik.isSubmitting}
-            {...formik.getFieldProps("children")}
-          >
-            {students?.map((student) => (
-              <option key={student._id} value={student._id}>
-                {student.name} ({student.rollNumber})
-              </option>
-            ))}
-          </select>
-        </FormRowVertical>
+        {/* Children (only visible in Parent context) */}
+        {context === "parent" && (
+          <FormRowVertical label="Select Children (Students)" name="children">
+            <select
+              id="children"
+              name="children"
+              multiple
+              className="block w-full px-4 py-2 border rounded-lg"
+              disabled={formik.isSubmitting || isPending}
+              {...formik.getFieldProps("children")}
+            >
+              {students?.map((student) => (
+                <option key={student._id} value={student._id}>
+                  {student.name} ({student.rollNumber})
+                </option>
+              ))}
+            </select>
+          </FormRowVertical>
+        )}
 
         {!isEditMode && (
           <p className="text-sm text-gray-500 italic">
@@ -120,8 +129,13 @@ function CreateParentForm({ parentToEdit, onClose }) {
 
         {/* Submit */}
         <div>
-          <Button fullWidth type="submit" disabled={formik.isSubmitting} loading={isCreating}>
-            {!isEditMode ? 'Add Parent' : 'Edit Parent'}
+          <Button
+            fullWidth
+            type="submit"
+            disabled={formik.isSubmitting}
+            loading={isCreating}
+          >
+            {!isEditMode ? "Add Parent" : "Edit Parent"}
           </Button>
         </div>
       </form>

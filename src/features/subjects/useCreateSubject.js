@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { createSubject as createSubjectApi } from "../../api/subjects";
+import { createSubject as createSubjectApi } from "@/api/subjects";
 
 export function useCreateSubject() {
   const queryClient = useQueryClient();

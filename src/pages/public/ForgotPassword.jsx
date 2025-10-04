@@ -1,7 +1,7 @@
 import React from "react";
 import { FiBookOpen, FiArrowLeft } from "react-icons/fi";
 import { Link } from "react-router-dom";
-import ForgotPasswordForm from "../../features/authentication/ForgotPasswordForm";
+import ForgotPasswordForm from "@/features/authentication/ForgotPasswordForm";
 
 const ForgotPassword = () => {
   return (

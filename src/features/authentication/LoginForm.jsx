@@ -1,8 +1,8 @@
 import { FormikProvider, useFormik } from 'formik';
-import FormRowVertical from '../../components/common/FormRowVerticle';
-import Input from '../../components/common/Input';
-import Button from '../../components/common/Button';
-import { loginSchema } from '../../validations/validationSchemas';
+import FormRowVertical from '@/components/common/FormRowVerticle';
+import Input from '@/components/common/Input';
+import Button from '@/components/common/Button';
+import { loginSchema } from '@/validations/validationSchemas';
 import { useLogin } from './useLogin';
 import { Link } from 'react-router-dom';
 

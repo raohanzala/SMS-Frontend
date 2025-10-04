@@ -1,6 +1,7 @@
 import { createPortal } from "react-dom";
 import { HiXMark } from "react-icons/hi2";
-import { useOutsideClick } from "../../hooks/useOutsideClick";
+import { useOutsideClick } from "@/hooks/useOutsideClick";
+import Tooltip from "./Tooltip";
 
 export default function Modal({ isOpen, onClose, children }) {
   const ref = useOutsideClick()
@@ -23,7 +24,9 @@ export default function Modal({ isOpen, onClose, children }) {
           onClick={onClose}
           className="absolute top-3 right-3 p-1 rounded-md hover:bg-gray-100 transition"
         >
-          <HiXMark className="w-6 h-6 text-gray-500" />
+          <Tooltip text="Close">
+            <HiXMark className="w-6 h-6 text-gray-500" />
+          </Tooltip>
         </button>
 
         {/* Content */}

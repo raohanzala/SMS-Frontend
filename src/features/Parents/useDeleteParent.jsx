@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { deleteParent as deleteParentApi } from "../../api/parents";
+import { deleteParent as deleteParentApi } from "@/api/parents";
 
 export function useDeleteParent() {
   const queryClient = useQueryClient()

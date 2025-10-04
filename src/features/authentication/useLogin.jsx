@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { signin } from '../../api/auth';
+import { signin } from '@/api/auth';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCredentials } from '../../store/slices/authSlice';
+import { setCredentials } from '@/store/slices/authSlice';
 
 export function useLogin() {
   const queryClient = useQueryClient();

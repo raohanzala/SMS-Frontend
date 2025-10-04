@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import AttendanceTable from '../../../features/attendance/AttendanceTable'
-import TableOperations from '../../../components/common/TableOperations'
+import AttendanceTable from '@/features/attendance/AttendanceTable'
+import TableOperations from '@/components/common/TableOperations'
 
 function Attendance() {
   const [isShowModal, setIsShowModal] = useState(false);

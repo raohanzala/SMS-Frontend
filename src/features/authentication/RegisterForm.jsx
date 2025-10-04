@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { FormikProvider, useFormik } from 'formik';
-import FormRowVertical from '../../components/common/FormRowVerticle';
-import Input from '../../components/common/Input';
-import Button from '../../components/common/Button';
-import { registerSchema } from '../../validations/validationSchemas';
+import FormRowVertical from '@/components/common/FormRowVerticle';
+import Input from '@/components/common/Input';
+import Button from '@/components/common/Button';
+import { registerSchema } from '@/validations/validationSchemas';
 import { useSignup } from './useSignup';
 import { Link } from 'react-router-dom';
 

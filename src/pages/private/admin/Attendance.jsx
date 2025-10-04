@@ -1,6 +1,6 @@
 import React from 'react';
-import { FiClipboard, FiCheckCircle, FiUsers } from 'react-icons/fi';
-import AttendanceTable from '../../../features/attendance/AttendanceTable';
+import { FiClipboard } from 'react-icons/fi';
+import AttendanceTable from '@/features/attendance/AttendanceTable';
 
 const AdminAttendance = () => {
   return (

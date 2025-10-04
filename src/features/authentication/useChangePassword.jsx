@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { changePassword as changePasswordApi } from '../../api/auth';
+import { changePassword as changePasswordApi } from '@/api/auth';
 import { toast } from 'react-toastify';
 
 export function useChangePassword() {

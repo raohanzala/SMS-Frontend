@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { getTimetable } from "../../api/timetable";
+import { getTimetable } from "@/api/timetable";
 
 export function useTimetable(isAll = false) {
   const [searchParams] = useSearchParams();

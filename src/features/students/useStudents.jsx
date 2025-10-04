@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { getAllStudents } from "../../api/students";
+import { getAllStudents } from "@/api/students";
 
 export function useStudents(isAll = false) {
   const [searchParams] = useSearchParams();
@@ -12,7 +12,7 @@ export function useStudents(isAll = false) {
   const classId = searchParams.get("classId") || "";
   const section = searchParams.get("section") || "";
   const sortOrder = searchParams.get("sortOrder") || "";
-  const search = searchParams.get("search") || "";
+  const search = searchParams.get("student") || "";
 
   const { isPending, error, data } = useQuery({
     queryKey: ["students", page, limit, sortBy, search],

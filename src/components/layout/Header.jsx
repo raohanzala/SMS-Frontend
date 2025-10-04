@@ -1,6 +1,6 @@
 import { FiMenu, FiBell, FiLogOut } from "react-icons/fi";
 import { useDispatch } from "react-redux";
-import { logout } from "../../store/slices/authSlice";
+import { logout } from "@/store/slices/authSlice";
 
 export default function Header({ setSidebarOpen, user }) {
   const dispatch = useDispatch();

@@ -1,11 +1,13 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { FiEdit, FiEye, FiTrash2 } from 'react-icons/fi'
 import { useTeachers } from './useTeachers';
 import AddTeacher from './AddTeacher';
-import ConfirmationModal from '../../components/common/ConfirmationModal';
+import ConfirmationModal from '@/components/common/ConfirmationModal';
 import { useDeleteTeacher } from './useDeleteTeacher';
 import { useNavigate } from 'react-router-dom';
-import Pagination from '../../components/common/Pagination';
+import Pagination from '@/components/common/Pagination';
+import ErrorMessage from '@/components/common/ErrorMessage';
+import Spinner from '@/components/common/Spinner';
 
 
 function TeachersTable({ isShowModal, setIsShowModal }) {
@@ -34,6 +36,9 @@ function TeachersTable({ isShowModal, setIsShowModal }) {
       });
     }
   }
+
+  if (error) return <ErrorMessage message={error.message || "Failed to load subjects"} />;
+  if (isPending) return <Spinner />;
 
   return (
     <>

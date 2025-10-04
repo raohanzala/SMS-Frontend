@@ -1,196 +1,159 @@
 import { FormikProvider, useFormik } from 'formik';
-import React from 'react'
-import FormRowVertical from '../../components/common/FormRowVerticle';
-import Button from '../../components/common/Button';
-import { addStudentSchema } from '../../validations/validationSchemas';
-import Input from '../../components/common/Input';
+import FormRowVertical from '@/components/common/FormRowVerticle';
+import Button from '@/components/common/Button';
+import { addStudentSchema } from '@/validations/validationSchemas';
+import Input from '@/components/common/Input';
 import { useCreateStudent } from './useCreateStudent';
-import { editStudent } from '../../api/students';
-import { useClasses } from '../classes/useClasses';
+import { useEditStudent } from './useEditStudets';
+import EntitySelect from '@/components/common/EntitySelect';
+import { useState } from 'react';
+import CreateParentForm from '../Parents/CreateParentForm';
+import Modal from '@/components/common/Modal';
 
 function CreateStudentForm({ studentToEdit, onClose }) {
-  const { createStudent, isCreating } = useCreateStudent()
-  const { classes, isPending } = useClasses()
+  const { createStudent, isCreating } = useCreateStudent();
+  const { editStudent, isPending: isUpdatingStudent } = useEditStudent();
 
-  console.log(studentToEdit)
+  const [showParentModal, setShowParentModal] = useState(false);
 
-  const isEditMode = studentToEdit ? true : false
+  const isLoading = isCreating || isUpdatingStudent;
+  const isEditMode = !!studentToEdit;
 
   const formik = useFormik({
     initialValues: {
-      name: studentToEdit?.name || '',
-      email: studentToEdit?.email || '',
-      phone: studentToEdit?.phone || '',
-      address: studentToEdit?.address || '',
-      section: studentToEdit?.section || '',
-      classId: studentToEdit?.classId || '',
-      rollNumber: studentToEdit?.rollNumber || ''
+      name: studentToEdit?.name || "",
+      email: studentToEdit?.email || "",
+      phone: studentToEdit?.phone || "",
+      address: studentToEdit?.address || "",
+      class: studentToEdit?.class?._id || "",
+      rollNumber: studentToEdit?.rollNumber || "",
+      parent: studentToEdit?.parent?._id || null,
     },
-    validationSchema: addStudentSchema, // We'll update this
+    // enableReinitialize: true,
+    validationSchema: addStudentSchema,
     onSubmit: async (values) => {
-      console.log(values)
       if (!isEditMode) {
-        createStudent(values, {
-          onSuccess: (data) => {
-            // reset();
-            onClose?.();
-          },
-        })
+        createStudent(values, { onSuccess: onClose });
       } else {
-        editStudent({ id: studentToEdit?._id, values }, {
-          onSuccess: (data) => {
-            // reset();
-            onClose?.();
-
-          }
-        })
+        editStudent({ id: studentToEdit._id, values }, { onSuccess: onClose });
       }
     },
-  })
+  });
 
   return (
-    <FormikProvider value={formik}>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          formik.handleSubmit(e);
-        }}
-        className="space-y-4"
-      >
-        {/* Name */}
-        <FormRowVertical label="Full Name" name="name">
-          <Input
-            type="text"
-            id="name"
-            name="name"
-            disabled={formik.isSubmitting}
-            placeholder="Enter full name"
-            {...formik.getFieldProps("name")}
-          />
-        </FormRowVertical>
-
-        {/* Email + Phone in one row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormRowVertical label="Email Address" name="email">
-            <Input
-              type="email"
-              id="email"
-              name="email"
-              disabled={formik.isSubmitting}
-              placeholder="Enter email"
-              {...formik.getFieldProps("email")}
-            />
-          </FormRowVertical>
-
-          <FormRowVertical label="Phone" name="phone">
+    <>
+      <FormikProvider value={formik}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            formik.handleSubmit(e);
+          }}
+          className="space-y-4"
+        >
+          {/* Name */}
+          <FormRowVertical label="Full Name" name="name">
             <Input
               type="text"
-              id="phone"
-              name="phone"
-              disabled={formik.isSubmitting}
-              placeholder="Enter phone number"
-              {...formik.getFieldProps("phone")}
+              {...formik.getFieldProps("name")}
+              placeholder="Enter full name"
+              disabled={isLoading}
             />
           </FormRowVertical>
-        </div>
 
-        {/* Password + Confirm Password */}
-        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormRowVertical label="Password" name="password">
+          {/* Email + Phone */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormRowVertical label="Email Address" name="email">
+              <Input
+                type="email"
+                {...formik.getFieldProps("email")}
+                placeholder="Enter email"
+                disabled={isLoading}
+              />
+            </FormRowVertical>
+
+            <FormRowVertical label="Phone" name="phone">
+              <Input
+                type="text"
+                {...formik.getFieldProps("phone")}
+                placeholder="Enter phone number"
+                disabled={isLoading}
+              />
+            </FormRowVertical>
+          </div>
+
+          {/* Address */}
+          <FormRowVertical label="Address" name="address">
             <Input
-              type="password"
-              id="password"
-              name="password"
-              disabled={formik.isSubmitting}
-              placeholder="Enter password"
-              {...formik.getFieldProps("password")}
+              type="text"
+              {...formik.getFieldProps("address")}
+              forkim={formik}
+              placeholder="Enter address"
+              disabled={isLoading}
             />
           </FormRowVertical>
 
-          <FormRowVertical label="Confirm Password" name="confirmPassword">
-            <Input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              disabled={formik.isSubmitting}
-              placeholder="Confirm password"
-              {...formik.getFieldProps("confirmPassword")}
-            />
+          {/* Class + Roll Number */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormRowVertical label="Class" name="class">
+              <EntitySelect
+                entity="class"
+                value={formik.values.class}
+                onChange={(id) => formik.setFieldValue("class", id)}
+              />
+            </FormRowVertical>
+
+            <FormRowVertical label="Roll Number" name="rollNumber">
+              <Input
+                type="text"
+                {...formik.getFieldProps("rollNumber")}
+                placeholder="Leave empty to auto-generate"
+                disabled={isLoading}
+              />
+            </FormRowVertical>
+          </div>
+
+          <FormRowVertical label="Parent" name="parent">
+            <div className="flex items-center gap-2">
+              <div className="flex-1">
+                <EntitySelect
+                  entity="parent"
+                  value={formik.values.parent}
+                  onChange={(id) => formik.setFieldValue("parent", id)}
+                />
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setShowParentModal(true)}
+              >
+                + Add Parent
+              </Button>
+            </div>
           </FormRowVertical>
-        </div> */}
 
-        {/* Address */}
-        <FormRowVertical label="Address" name="address">
-          <Input
-            type="text"
-            id="address"
-            name="address"
-            disabled={formik.isSubmitting}
-            placeholder="Enter address"
-            {...formik.getFieldProps("address")}
-          />
-        </FormRowVertical>
-
-        {/* Class + Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormRowVertical label="Class" name="classId">
-            <select
-              id="classId"
-              name="classId"
-              className="block w-full px-4 py-2 border rounded-lg"
-              disabled={formik.isSubmitting}
-              {...formik.getFieldProps("classId")}
+          {/* Submit */}
+          <div>
+            <Button
+              fullWidth
+              type="submit"
+              disabled={isLoading}
+              loading={isLoading}
             >
-              <option value="">Select Class</option>
-              {classes?.map((cls) => (
-                <option key={cls._id} value={cls._id}>
-                  {cls.name}
-                </option>
-              ))}
-            </select>
-          </FormRowVertical>
+              {!isEditMode ? "Add Student" : "Edit Student"}
+            </Button>
+          </div>
+        </form>
+      </FormikProvider>
 
-          <FormRowVertical label="Section" name="section">
-            <Input
-              type="text"
-              id="section"
-              name="section"
-              disabled={formik.isSubmitting}
-              placeholder="A/B/C"
-              {...formik.getFieldProps("section")}
-            />
-          </FormRowVertical>
-        </div>
-
-        {/* Roll Number */}
-        <FormRowVertical label="Roll Number" name="rollNumber">
-          <Input
-            type="text"
-            id="rollNumber"
-            name="rollNumber"
-            disabled={formik.isSubmitting}
-            placeholder="Leave empty to auto-generate"
-            {...formik.getFieldProps("rollNumber")}
-          />
-        </FormRowVertical>
-
-        {!isEditMode && (
-          <p className="text-sm text-gray-500 italic">
-            A secure password will be generated and sent to the student automatically.
-          </p>
-        )}
-
-        {/* Submit */}
-        <div>
-          <Button fullWidth={true} type="submit" disabled={formik.isSubmitting} loading={isCreating}>
-            {!isEditMode ? 'Add Student' : 'Edit Student'}
-          </Button>
-        </div>
-      </form>
-    </FormikProvider>
-
-  )
-
+      <Modal isOpen={showParentModal} onClose={() => setShowParentModal(false)}>
+        <CreateParentForm
+          onClose={() => setShowParentModal(false)}
+          context="student"
+          onSuccess={(newParent) => { console.log(newParent); formik.setFieldValue("parent", newParent._id) }}
+        />
+      </Modal>
+    </>
+  );
 }
 
 export default CreateStudentForm

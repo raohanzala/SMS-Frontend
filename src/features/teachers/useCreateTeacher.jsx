@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { createTeacherApi } from "../../api/teachers";
+import { createTeacherApi } from "@/api/teachers";
 
 export function useCreateTeacher() {
   const queryClient = useQueryClient();

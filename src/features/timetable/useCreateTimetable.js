@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { createTimetable as createTimetableApi } from "../../api/timetable";
+import { createTimetable as createTimetableApi } from "@/api/timetable";
 
 export function useCreateTimetable() {
   const queryClient = useQueryClient();

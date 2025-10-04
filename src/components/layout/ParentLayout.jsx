@@ -11,7 +11,7 @@ import {
   FiLogOut,
 } from 'react-icons/fi';
 import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../../store/slices/authSlice';
+import { logout } from '@/store/slices/authSlice';
 
 const ParentLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -51,8 +51,8 @@ const ParentLayout = () => {
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
                   className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${isActive
-                      ? 'bg-orange-100 text-orange-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ? 'bg-orange-100 text-orange-900'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                     }`}
                 >
                   <item.icon className="mr-3 h-5 w-5" />
@@ -78,8 +78,8 @@ const ParentLayout = () => {
                   key={item.name}
                   to={item.href}
                   className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${isActive
-                      ? 'bg-orange-100 text-orange-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ? 'bg-orange-100 text-orange-900'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                     }`}
                 >
                   <item.icon className="mr-3 h-5 w-5" />

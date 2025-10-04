@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { getAllTeachers } from "../../api/teachers";
+import { getAllTeachers } from "@/api/teachers";
 
 export function useTeachers() {
   const [searchParams] = useSearchParams();

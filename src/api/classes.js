@@ -1,9 +1,14 @@
 import axiosInstance from "./axiosInstance";
 
 // ✅ Get all classes
-export const getAllClasses = async (page, limit) => {
-  const res = await axiosInstance.get(`/classes?page=${page}&limit=${limit}`);
+export const getAllClasses = async (params = {}) => {
+  const res = await axiosInstance.get(`/classes`, { params });
   return res.data;
+};
+
+export const getClassById = async (id) => {
+  const { data } = await axiosInstance.get(`/classes/${id}`);
+  return data;
 };
 
 // ✅ Create new class

@@ -13,7 +13,7 @@ import {
   FiBell,
 } from 'react-icons/fi';
 import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../../store/slices/authSlice';
+import { logout } from '@/store/slices/authSlice';
 
 const TeacherLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);

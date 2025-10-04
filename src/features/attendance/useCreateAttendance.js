@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createAttendance as createAttendanceApi } from '../../api/attendance';
+import { createAttendance as createAttendanceApi } from '@/api/attendance';
 
 export function useCreateAttendance() {
   const queryClient = useQueryClient();

@@ -20,12 +20,12 @@ export const registerSchema = Yup.object({
 });
 
 export const addStudentSchema = Yup.object().shape({
-  name: Yup.string().min(3).max(50).required(),
-  email: Yup.string().email().required(),
+  name: Yup.string().min(3).max(50).required('Name is required'),
+  email: Yup.string().email().required('Email is required'),
   phone: Yup.string().matches(/^[0-9]{10,15}$/, "Phone must be 10–15 digits").nullable(),
   address: Yup.string().max(100).nullable(),
-  classId: Yup.string().nullable(),
-  section: Yup.string().max(5).nullable(),
+  class: Yup.string().required('Class is required'),
   rollNumber: Yup.string().matches(/^[A-Za-z0-9-_]*$/, "Roll number can only contain letters, numbers, - or _").nullable(),
+  parent: Yup.string().required('Parent is required'),
 });
 

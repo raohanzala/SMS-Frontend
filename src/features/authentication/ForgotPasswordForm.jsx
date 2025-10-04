@@ -2,9 +2,9 @@ import React from 'react';
 import { FormikProvider, useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
-import FormRowVertical from '../../components/common/FormRowVerticle';
-import Input from '../../components/common/Input';
-import Button from '../../components/common/Button';
+import FormRowVertical from '@/components/common/FormRowVerticle';
+import Input from '@/components/common/Input';
+import Button from '@/components/common/Button';
 
 const forgotPasswordSchema = Yup.object({
   email: Yup.string().email('Invalid email address').required('Email is required'),

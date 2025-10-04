@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
-import { getClassesAttendance } from '../../api/attendance';
+import { getClassesAttendance } from '@/api/attendance';
 
 export function useClassesAttendance() {
   const [searchParams] = useSearchParams();

@@ -1,4 +1,4 @@
-import Modal from "../../components/common/Modal";
+import Modal from "@/components/common/Modal";
 import CreateStudentForm from "./CreateStudentForm";
 
 function AddStudent({ isOpen, onClose, studentToEdit }) {

@@ -1,5 +1,5 @@
 import React from "react";
-import { useTeacher } from "../../../features/teachers/useTeacher";
+import { useTeacher } from "@/features/teachers/useTeacher";
 
 function TeacherDetail() {
   const { teacher, isPending } = useTeacher();

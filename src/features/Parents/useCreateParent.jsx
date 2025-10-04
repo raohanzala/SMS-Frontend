@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { createParent as createParentApi } from "../../api/parents";
+import { createParent as createParentApi } from "@/api/parents";
 
 export function useCreateParent() {
   const queryClient = useQueryClient();
@@ -11,7 +11,7 @@ export function useCreateParent() {
       toast.success("New student successfully created");
       queryClient.invalidateQueries({ queryKey: ["parents"] });
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) => toast.error(err?.response?.data?.message || err.message || 'Failed to create parent'),
   });
 
   return { isCreating, createParent };

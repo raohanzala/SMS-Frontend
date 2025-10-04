@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getParentById } from "../../api/parents";
+import { getParentById } from "@/api/parents";
 
 export function useParent() {
   const { parentId } = useParams(); // get `id` from URL

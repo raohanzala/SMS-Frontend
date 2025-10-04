@@ -1,6 +1,6 @@
 import React from "react";
 import { FiBookOpen } from "react-icons/fi";
-import RegisterForm from "../../features/authentication/RegisterForm";
+import RegisterForm from "@/features/authentication/RegisterForm";
 
 const Register = () => {
   return (

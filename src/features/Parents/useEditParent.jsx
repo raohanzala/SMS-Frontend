@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { editParent as editParentApi } from "../../api/parents";
+import { editParent as editParentApi } from "@/api/parents";
 
 export function useEditParent() {
   const queryClient = useQueryClient();

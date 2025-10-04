@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { createStudentApi } from "../../api/students";
+import { createStudentApi } from "@/api/students";
 
 export function useCreateStudent() {
   const queryClient = useQueryClient();
@@ -11,7 +11,7 @@ export function useCreateStudent() {
       toast.success("New student successfully created");
       queryClient.invalidateQueries({ queryKey: ["students"] });
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) => toast.error(err?.response?.data?.message || err.message || 'Failed to create student'),
   });
 
   return { isCreating, createStudent };

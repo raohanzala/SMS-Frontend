@@ -1,4 +1,4 @@
-import Modal from "../../components/common/Modal";
+import Modal from "@/components/common/Modal";
 import CreateParentForm from "./CreateParentForm";
 
 function AddParent({ isOpen, onClose, studentToEdit }) {

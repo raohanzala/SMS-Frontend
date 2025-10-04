@@ -1,4 +1,4 @@
-import Modal from "../../components/common/Modal";
+import Modal from "@/components/common/Modal";
 import CreateTimetableForm from "./CreateTimetableForm";
 
 function AddTimetable({ teacherToEdit, isOpen, onClose }) {

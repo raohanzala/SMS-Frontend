@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getStudentById } from "../../api/students";
+import { getStudentById } from "@/api/students";
 
 export function useStudent() {
   const { studentId } = useParams(); // get `id` from URL
