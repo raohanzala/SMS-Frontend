@@ -1,4 +1,3 @@
-import React from 'react';
 import { FiLoader } from 'react-icons/fi';
 
 const Button = ({
@@ -18,7 +17,7 @@ const Button = ({
   ...props
 }) => {
   const baseClasses =
-    'inline-flex items-center text-nowrap justify-center font-medium rounded transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+    'inline-flex items-center h-fit text-nowrap justify-center font-medium rounded transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variants = {
     primary:

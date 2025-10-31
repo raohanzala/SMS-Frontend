@@ -1,11 +1,15 @@
-import React from 'react'
 import { useParent } from './useParent'
 
 function ParentDetails() {
 
-  const { parent, isPending } = useParent()
+  const { parent } = useParent()
   return (
-    <div>ParentDetails</div>
+    <div>
+
+      <div>ParentDetails</div>
+      {JSON?.stringify(parent)}
+    </div>
+
   )
 }
 

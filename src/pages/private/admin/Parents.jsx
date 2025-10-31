@@ -3,12 +3,12 @@ import ParentsTable from "@/features/Parents/ParentsTable";
 import ParentsToolbar from "@/features/Parents/ParentsToolbar";
 import Pagination from "@/components/common/Pagination";
 import Spinner from "@/components/common/Spinner";
-import { useParents } from "@/features/Parents/useParents";
-import { useDeleteParent } from "@/features/Parents/useDeleteParent";
 import { useSearchParams } from "react-router-dom";
 import ErrorMessage from "@/components/common/ErrorMessage";
 import AddParent from "@/features/Parents/AddParent";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
+import { useDeleteParent } from "@/features/Parents/useDeleteParent";
+import { useParents } from "@/features/Parents/useParents";
 
 const AdminParents = () => {
   const [isShowModal, setIsShowModal] = useState(false);
@@ -21,8 +21,8 @@ const AdminParents = () => {
   const { pagination, parents, error, isPending } = useParents()
   const { deleteParent, isDeleting } = useDeleteParent();
 
-  const handleEdit = (subject) => {
-    setParentToEdit(subject);
+  const handleEdit = (parent) => {
+    setParentToEdit(parent);
     setIsShowModal(true);
   }
 

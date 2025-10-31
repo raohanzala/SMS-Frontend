@@ -4,12 +4,10 @@
 
 body {
   @apply font-sans;
-
 }
 
 html {
   font-size: 90%;
-
 }
 
 *:disabled {
@@ -31,7 +29,7 @@ input:focus,
 button:focus,
 textarea:focus,
 select:focus {
-  outline: 2px solid #2C4FD8;
+  outline: 2px solid #2c4fd8;
   outline-offset: -1px;
 }
 
@@ -68,4 +66,12 @@ select:focus {
     opacity: 0;
     transform: scale(0.5);
   }
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }

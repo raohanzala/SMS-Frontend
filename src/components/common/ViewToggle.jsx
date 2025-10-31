@@ -12,7 +12,7 @@ export default function ViewToggle() {
   }, [view, setParam]);
 
   return (
-    <div className="flex rounded-md shadow-sm border">
+    <div className="flex rounded-md shadow-sm border z-0">
       {/* Table View */}
       <Tooltip text="Switch to Table View">
         <button

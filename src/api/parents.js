@@ -8,8 +8,8 @@ export const getAllParents = async (params = {}) => {
   return data;
 };
 
-export const getParentById = async (id) => {
-  const { data } = await axiosInstance.get(`/parents/${id}`);
+export const getParentById = async (parentId) => {
+  const { data } = await axiosInstance.get(`/parents/${parentId}`);
   return data;
 };
 
@@ -20,14 +20,14 @@ export const createParent = async (formData) => {
 };
 
 // ✅ Edit student
-export const editParent = async ({ id, values }) => {
-  const { data } = await axiosInstance.put(`/parents/${id}`, values);
+export const editParent = async ({ parentId, values }) => {
+  const { data } = await axiosInstance.put(`/parents/${parentId}`, values);
   return data;
 };
 
 // ✅ Delete student
-export const deleteParent = async (id) => {
-  const { data } = await axiosInstance.delete(`/parents/${id}`);
+export const deleteParent = async (parentId) => {
+  const { data } = await axiosInstance.delete(`/parents/${parentId}`);
   return data;
 };
 

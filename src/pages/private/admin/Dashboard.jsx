@@ -4,7 +4,6 @@ import {
   FiUserCheck,
   FiDollarSign,
   FiTrendingUp,
-  FiCalendar,
   FiBell,
   FiBookOpen,
   FiClipboard,
@@ -147,11 +146,10 @@ const AdminDashboard = () => {
             </div>
             <div className="mt-4">
               <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  stat.changeType === 'positive'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-red-100 text-red-800'
-                }`}
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${stat.changeType === 'positive'
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-red-100 text-red-800'
+                  }`}
               >
                 {stat.change}
               </span>

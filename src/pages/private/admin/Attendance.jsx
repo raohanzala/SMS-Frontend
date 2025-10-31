@@ -1,6 +1,4 @@
-import React from 'react';
 import { FiClipboard } from 'react-icons/fi';
-import AttendanceTable from '@/features/attendance/AttendanceTable';
 
 const AdminAttendance = () => {
   return (
@@ -25,8 +23,6 @@ const AdminAttendance = () => {
           </div>
         </div>
       </div>
-
-      <AttendanceTable />
     </div>
   );
 };

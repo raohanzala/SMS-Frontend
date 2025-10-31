@@ -6,7 +6,7 @@ export function useTeachers() {
   const [searchParams] = useSearchParams();
 
   const page = (!searchParams.get("page") ? 1 : Number(searchParams.get("page")));
-  const limit = 10; // Undefined is ignored in axios params
+  const limit = 10;
   const sortBy = searchParams.get("sortBy") || "name-asc";
   const classId = searchParams.get("classId") || "";
   const section = searchParams.get("section") || "";
@@ -21,7 +21,6 @@ export function useTeachers() {
   });
 
   const { teachers, pagination } = data?.data || {};
-  console.log(data)
 
   return { teachers, pagination, isPending, error };
 

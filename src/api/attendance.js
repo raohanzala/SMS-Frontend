@@ -1,20 +1,23 @@
-// src/api/students.js
 import axiosInstance from "./axiosInstance";
 
-// ✅ Get all students (with filters/pagination)
-export const getClassesAttendance = async (params = {}) => {
-  const { data } = await axiosInstance.get("/attendance/classes", params);
-  return data;
-};
-export const getAllAttendance = async (params = {}) => {
-  const { data } = await axiosInstance.get("/attendance", params);
+export const getAttendanceByClass = async (classId, date) => {
+  const { data } = await axiosInstance.get(`/attendance/students/${classId}?date=${date}`);
   return data;
 };
 
-// ✅ Add new student (with image upload)
-export const createAttendance = async (formData) => {
-  const { data } = await axiosInstance.post("/attendance", formData);
-  console.log(formData)
+export const getAttendanceByDate = async (date) => {
+  const { data } = await axiosInstance.get(`/attendance/employees/${date}`);
   return data;
 };
+
+export const markStudentsAttendance = async (studentsAttendance) => {
+  const res = await axiosInstance.post(`/attendance/class`, studentsAttendance);
+  return res.data;
+};
+
+export const markEmployeesAttendance = async (employeesAttendance) => {
+  const res = await axiosInstance.post(`/attendance/employees`, employeesAttendance);
+  return res.data;
+};
+
 

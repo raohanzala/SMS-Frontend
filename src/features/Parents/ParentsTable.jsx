@@ -42,7 +42,7 @@ function ParentsTable({ onEdit, onDelete, parents }) {
                       <div className="flex-shrink-0 h-10 w-10">
                         <img
                           className="h-10 w-10 rounded-full object-cover"
-                          src={parent.profileImage || "/default-avatar.png"}
+                          src={parent.profileImage || "/parents-avatar.png"}
                           alt={parent.name}
                         />
                       </div>
@@ -85,7 +85,7 @@ function ParentsTable({ onEdit, onDelete, parents }) {
                   {/* Actions */}
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
-                      <ViewButton />
+                      <ViewButton navigateTo={`/admin/parents/${parent._id}`} />
                       <EditButton onClick={() => onEdit(parent)} />
                       <DeleteButton onClick={() => onDelete(parent._id)} />
                     </div>

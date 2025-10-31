@@ -23,7 +23,17 @@ export const adminNav = [
   { name: 'Classes', href: '/admin/classes', icon: FiBookOpen },
   { name: 'Subjects', href: '/admin/subjects', icon: FiBookOpen },
   { name: 'Timetable', href: '/admin/timetable', icon: FiCalendar },
-  { name: 'Attendance', href: '/admin/attendance', icon: FiClipboard },
+  {
+    name: 'Attendance',
+    icon: FiClipboard,
+    children: [
+      { name: 'Students Attendance', href: '/admin/attendance/students-attendance' },
+      { name: 'Employees Attendance', href: '/admin/attendance/employees-attendance' },
+      { name: 'Class wise Report', href: '/admin/attendance/classwise-report' },
+      { name: 'Students Attendance Reports', href: '/admin/attendance/students-attendance-report' },
+      { name: 'Employees Attendance Reports', href: '/admin/attendance/employees-attendance-report' },
+    ],
+  },
   { name: 'Fees', href: '/admin/fees', icon: FiDollarSign },
   { name: 'Exams', href: '/admin/exams', icon: FiFileText },
   { name: 'Results', href: '/admin/results', icon: FiBarChart2 },

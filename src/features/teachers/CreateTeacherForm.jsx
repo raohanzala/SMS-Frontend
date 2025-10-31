@@ -9,6 +9,7 @@ import { useClasses } from '../classes/useClasses';
 function CreateTeacherForm({ teacherToEdit, onClose }) {
   const { createTeacher, isCreating } = useCreateTeacher();
   const { classes } = useClasses();
+
   const isEditMode = !!teacherToEdit;
 
   const formik = useFormik({
@@ -106,6 +107,38 @@ function CreateTeacherForm({ teacherToEdit, onClose }) {
           />
         </FormRowVertical>
 
+        {/* ✅ Gender Selection */}
+        <FormRowVertical label="Gender" name="gender">
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="gender"
+                value="male"
+                checked={formik.values.gender === "male"}
+                onChange={() => formik.setFieldValue("gender", "male")}
+              // disabled={isLoading}
+              />
+              Male
+            </label>
+
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="gender"
+                value="female"
+                checked={formik.values.gender === "female"}
+                onChange={() => formik.setFieldValue("gender", "female")}
+              // disabled={isLoading}
+              />
+              Female
+            </label>
+          </div>
+          {formik.touched.gender && formik.errors.gender && (
+            <div className="text-red-500 text-sm">{formik.errors.gender}</div>
+          )}
+        </FormRowVertical>
+
         {/* Subjects */}
         <FormRowVertical label="Subjects" name="subjects">
           <Input
@@ -116,20 +149,6 @@ function CreateTeacherForm({ teacherToEdit, onClose }) {
             disabled={formik.isSubmitting}
             {...formik.getFieldProps("subjects")}
           />
-        </FormRowVertical>
-        <FormRowVertical label="Gender" name="gender">
-          <select
-            id="gender"
-            name="gender"
-            className="block w-full px-4 py-2 border rounded-lg"
-            disabled={formik.isSubmitting}
-            value={formik.values.gender}
-            onChange={(e) => formik.setFieldValue("gender", e.target.value)}
-          >
-            <option value="">Select Gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-          </select>
         </FormRowVertical>
 
         {/* Assigned Classes */}

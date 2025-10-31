@@ -5,7 +5,7 @@ import { editStudent as editStudentApi } from "@/api/students";
 export function useEditStudent() {
   const queryClient = useQueryClient();
 
-  const { isPending, mutate: editStudent } = useMutation({
+  const { isPending: isUpdatingStudent, mutate: editStudentMutation } = useMutation({
     mutationFn: editStudentApi,
 
     onSuccess: (data) => {
@@ -17,5 +17,5 @@ export function useEditStudent() {
     onError: (err) => toast.error(err.message),
   });
 
-  return { isPending, editStudent };
+  return { isUpdatingStudent, editStudentMutation };
 }

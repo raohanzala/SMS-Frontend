@@ -18,13 +18,15 @@ import Register from './pages/public/Register';
 import ForgotPassword from './pages/public/ForgotPassword';
 import ChangePassword from './pages/public/ChangePassword';
 
-
 // Protected Route Component
 import ProtectedRoute from './components/common/ProtectedRoute';
-import { adminNav, ParentNav, studentNav, teacherNav } from './utils/navigationConfig';
+import { ParentNav, studentNav, teacherNav } from './utils/navigationConfig';
 import AdminParentDetails from './pages/private/admin/ParentDetail';
 import StudentDetail from './pages/private/admin/StudentDetail';
 import TeacherDetail from './pages/private/admin/TeacherDetail';
+import AdminLayout from './components/layout/AdminLayout';
+import ClassAttendance from './pages/private/admin/ClassAttendance';
+import EmployeesAttendance from './pages/private/admin/EmployeesAttendance';
 // Create a client
 const queryClient = new QueryClient();
 
@@ -48,7 +50,7 @@ function App() {
                 {/* Admin Routes */}
                 <Route path="/admin" element={
                   <ProtectedRoute allowedRoles={['admin']}>
-                    <Layout navigation={adminNav} />
+                    <AdminLayout />
                   </ProtectedRoute>
                 }>
                   <Route index element={<Navigate to="/admin/dashboard" replace />} />
@@ -62,7 +64,10 @@ function App() {
                   <Route path="classes" element={<AdminClasses />} />
                   <Route path="subjects" element={<AdminSubjects />} />
                   <Route path="timetable" element={<AdminTimetable />} />
-                  <Route path="attendance" element={<AdminAttendance />} />
+                  <Route path="attendance/class" element={<ClassAttendance />} />
+                  <Route path="attendance/employees" element={<EmployeesAttendance />} />
+                  {/* <Route path="attendance" element={<AdminAttendance />} /> */}
+
                   <Route path="fees" element={<AdminFees />} />
                   <Route path="exams" element={<AdminExams />} />
                   <Route path="results" element={<AdminResults />} />
@@ -127,13 +132,12 @@ function App() {
 
 // Lazy load all page components
 const AdminDashboard = React.lazy(() => import('./pages/private/admin/Dashboard'));
-const AdminStudents = React.lazy(() => import('./pages/private/admin/Students'));
+const AdminStudents = React.lazy(() => import('./features/students/pages/StudentsPage'));
 const AdminTeachers = React.lazy(() => import('./pages/private/admin/Teachers'));
 const AdminParents = React.lazy(() => import('./pages/private/admin/Parents'));
 const AdminClasses = React.lazy(() => import('./pages/private/admin/Classes'));
 const AdminSubjects = React.lazy(() => import('./pages/private/admin/Subjects'));
 const AdminTimetable = React.lazy(() => import('./pages/private/admin/Timetable'));
-const AdminAttendance = React.lazy(() => import('./pages/private/admin/Attendance'));
 const AdminFees = React.lazy(() => import('./pages/private/admin/Fees'));
 const AdminExams = React.lazy(() => import('./pages/private/admin/Exams'));
 const AdminResults = React.lazy(() => import('./pages/private/admin/Results'));

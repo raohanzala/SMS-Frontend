@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import {
   FiHome,
   FiUsers,
@@ -17,7 +15,7 @@ import { useSelector } from 'react-redux';
 import Layout from './Layout';
 
 const AdminLayout = () => {
-  // const { user, logout } = useAuth();
+
   const { user } = useSelector((state) => state.auth)
 
   const navigation = [
@@ -26,13 +24,26 @@ const AdminLayout = () => {
     { name: 'Teachers', href: '/admin/teachers', icon: FiUserCheck },
     { name: 'Classes', href: '/admin/classes', icon: FiBookOpen },
     { name: 'Timetable', href: '/admin/timetable', icon: FiCalendar },
-    { name: 'Attendance', href: '/admin/attendance', icon: FiClipboard },
+    {
+      name: 'Attendance',
+      icon: FiClipboard,
+      children: [
+        { name: 'Class Attendance', href: '/admin/attendance/class' },
+        { name: 'Employees Attendance', href: '/admin/attendance/employees' },
+        { name: 'Class wise Report', href: '/admin/attendance/classwise-report' },
+        { name: 'Students Attendance Reports', href: '/admin/attendance/students-attendance-report' },
+        { name: 'Employees Attendance Reports', href: '/admin/attendance/employees-attendance-report' },
+      ],
+    },
     { name: 'Fees', href: '/admin/fees', icon: FiDollarSign },
     { name: 'Exams', href: '/admin/exams', icon: FiFileText },
     { name: 'Results', href: '/admin/results', icon: FiBarChart2 },
     { name: 'Noticeboard', href: '/admin/noticeboard', icon: FiBell },
     { name: 'Settings', href: '/admin/settings', icon: FiSettings },
   ];
+
+  console.log("AdminLayout navigation:", navigation);
+
 
   return (
     <Layout user={user} navigation={navigation} />

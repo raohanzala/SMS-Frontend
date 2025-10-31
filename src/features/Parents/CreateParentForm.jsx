@@ -1,16 +1,29 @@
-import { FormikProvider, useFormik } from 'formik';
-import FormRowVertical from '@/components/common/FormRowVerticle';
-import Button from '@/components/common/Button';
-import Input from '@/components/common/Input';
-import { editParent } from '@/api/parents';
-import { useCreateParent } from './useCreateParent';
-import { useStudents } from '../students/useStudents';
+import { FormikProvider, useFormik } from "formik";
+import Select from "react-select";
+import FormRowVertical from "@/components/common/FormRowVerticle";
+import Button from "@/components/common/Button";
+import Input from "@/components/common/Input";
+import { addParentSchema } from "@/validations/validationSchemas";
+import { useEditParent } from "./useEditParent";
+import { useCreateParent } from "./useCreateParent";
+import { useStudents } from "../students/hooks/useStudents";
 
-function CreateParentForm({ parentToEdit, onClose, onSuccess, context = "parent" }) {
-  const { createParent, isCreating } = useCreateParent();
-  const { students, isPending } = useStudents();
-
+function CreateParentForm({
+  parentToEdit,
+  onClose,
+  onSuccess,
+  context = "parent",
+}) {
   const isEditMode = !!parentToEdit;
+
+  const { students, isPending } = useStudents({
+    unassigned: !isEditMode,
+    parentId: isEditMode ? parentToEdit?._id : null,
+  });
+  const { createParent, isCreating } = useCreateParent();
+  const { editParent, isPending: isUpdating } = useEditParent()
+
+  const isLoading = isCreating || isUpdating
 
   const formik = useFormik({
     initialValues: {
@@ -20,11 +33,10 @@ function CreateParentForm({ parentToEdit, onClose, onSuccess, context = "parent"
       address: parentToEdit?.address || "",
       children: parentToEdit?.children || [],
     },
-    // validationSchema: addParentSchema,
+    validationSchema: addParentSchema,
     onSubmit: async (values) => {
       const payload = { ...values };
 
-      // If creating from student modal → no children linking
       if (context === "student") delete payload.children;
 
       if (!isEditMode) {
@@ -58,7 +70,7 @@ function CreateParentForm({ parentToEdit, onClose, onSuccess, context = "parent"
             type="text"
             id="name"
             name="name"
-            disabled={formik.isSubmitting}
+            disabled={isLoading}
             placeholder="Enter full name"
             {...formik.getFieldProps("name")}
           />
@@ -71,7 +83,7 @@ function CreateParentForm({ parentToEdit, onClose, onSuccess, context = "parent"
               type="email"
               id="email"
               name="email"
-              disabled={formik.isSubmitting}
+              disabled={isLoading}
               placeholder="Enter email"
               {...formik.getFieldProps("email")}
             />
@@ -82,7 +94,7 @@ function CreateParentForm({ parentToEdit, onClose, onSuccess, context = "parent"
               type="text"
               id="phone"
               name="phone"
-              disabled={formik.isSubmitting}
+              disabled={isLoading}
               placeholder="Enter phone number"
               {...formik.getFieldProps("phone")}
             />
@@ -95,21 +107,21 @@ function CreateParentForm({ parentToEdit, onClose, onSuccess, context = "parent"
             type="text"
             id="address"
             name="address"
-            disabled={formik.isSubmitting}
+            disabled={isLoading}
             placeholder="Enter address (optional)"
             {...formik.getFieldProps("address")}
           />
         </FormRowVertical>
 
         {/* Children (only visible in Parent context) */}
-        {context === "parent" && (
+        {/* {context === "parent" && (
           <FormRowVertical label="Select Children (Students)" name="children">
             <select
               id="children"
               name="children"
               multiple
               className="block w-full px-4 py-2 border rounded-lg"
-              disabled={formik.isSubmitting || isPending}
+              disabled={isLoading || isPending}
               {...formik.getFieldProps("children")}
             >
               {students?.map((student) => (
@@ -119,11 +131,89 @@ function CreateParentForm({ parentToEdit, onClose, onSuccess, context = "parent"
               ))}
             </select>
           </FormRowVertical>
+        )} */}
+
+        {context === "parent" && (
+          <FormRowVertical label="Select Children (Students)" name="children">
+            <Select
+              isMulti
+              isLoading={isPending}
+              options={
+                students?.map((s) => ({
+                  value: s._id,
+                  label: `${s.name} (${s.rollNumber || "N/A"})`,
+                })) || []
+              }
+              // ✅ Correctly handle edit mode
+              value={
+                (formik.values.children || [])
+                  .map((childId) => {
+                    // Try to find the student from the fetched list
+                    const existing = students?.find((s) => s._id === childId);
+                    if (existing) {
+                      return {
+                        value: existing._id,
+                        label: `${existing.name} (${existing.rollNumber || "N/A"})`,
+                      };
+                    }
+
+                    // If not found, check parentToEdit.children
+                    const fallback =
+                      parentToEdit?.children?.find((c) => c._id === childId);
+                    if (fallback) {
+                      return {
+                        value: fallback._id,
+                        label: fallback.name,
+                      };
+                    }
+
+                    return null;
+                  })
+                  .filter(Boolean) // remove nulls
+              }
+              onChange={(selected) =>
+                formik.setFieldValue(
+                  "children",
+                  selected ? selected.map((s) => s.value) : []
+                )
+              }
+              placeholder="Select or search students..."
+              classNamePrefix="react-select"
+              styles={{
+                control: (base, state) => ({
+                  ...base,
+                  borderColor: state.isFocused ? "#3b82f6" : "#d1d5db",
+                  boxShadow: state.isFocused ? "0 0 0 1px #3b82f6" : "none",
+                  "&:hover": { borderColor: "#3b82f6" },
+                  borderRadius: "0.5rem",
+                  padding: "2px",
+                }),
+                multiValue: (base) => ({
+                  ...base,
+                  backgroundColor: "#e0f2fe",
+                  color: "#0369a1",
+                  borderRadius: "0.375rem",
+                  padding: "2px 6px",
+                }),
+                multiValueLabel: (base) => ({
+                  ...base,
+                  color: "#0369a1",
+                }),
+                multiValueRemove: (base) => ({
+                  ...base,
+                  color: "#0284c7",
+                  ":hover": { backgroundColor: "#bae6fd", color: "#075985" },
+                }),
+              }}
+            />
+          </FormRowVertical>
         )}
+
 
         {!isEditMode && (
           <p className="text-sm text-gray-500 italic">
-            A secure password will be generated and sent to the parent automatically.
+            A secure password will be generated and sent to the parent
+            automatically.
           </p>
         )}
 
@@ -132,7 +222,7 @@ function CreateParentForm({ parentToEdit, onClose, onSuccess, context = "parent"
           <Button
             fullWidth
             type="submit"
-            disabled={formik.isSubmitting}
+            disabled={isLoading}
             loading={isCreating}
           >
             {!isEditMode ? "Add Parent" : "Edit Parent"}

@@ -1,28 +1,22 @@
 import { FieldArray, FormikProvider, useFormik } from 'formik';
-import React from 'react'
 import FormRowVertical from '@/components/common/FormRowVerticle';
 import Button from '@/components/common/Button';
-import { addStudentSchema } from '@/validations/validationSchemas';
 import Input from '@/components/common/Input';
 import { useCreateSubject } from './useCreateSubject';
 import { useUpdateSubject } from './useUpdateSubject';
-import { useClasses } from '../classes/useClasses';
-import { useTeachers } from '../teachers/useTeachers';
 import { FiPlus, FiTrash2 } from 'react-icons/fi';
+import EntitySelect from '../../components/common/EntitySelect';
+import { addSubjectsSchema } from '../../validations/validationSchemas';
 
 function CreateSubjectForm({ subjectToEdit, onClose }) {
   const { createSubject, isCreating } = useCreateSubject();
   const { updateSubject, isUpdating } = useUpdateSubject();
 
-  const { classes } = useClasses(true);
-  const { teachers } = useTeachers(true);
-
   const isEditMode = Boolean(subjectToEdit);
 
   const formik = useFormik({
     initialValues: {
-      classId: subjectToEdit?.classId?._id || "",
-      assignedTeacher: subjectToEdit?.assignedTeacher?._id || "",
+      class: subjectToEdit?.class?._id || "",
       subjects:
         subjectToEdit?.subjects || [
           {
@@ -31,6 +25,7 @@ function CreateSubjectForm({ subjectToEdit, onClose }) {
           },
         ],
     },
+    validationSchema: addSubjectsSchema,
     onSubmit: async (values) => {
       if (!isEditMode) {
         createSubject(values, {
@@ -60,42 +55,13 @@ function CreateSubjectForm({ subjectToEdit, onClose }) {
         }}
         className="space-y-6"
       >
-        {/* Class Select */}
-        <FormRowVertical label="Class" name="classId">
-          <select
-            id="classId"
-            name="classId"
-            value={formik.values.classId}
-            onChange={(e) => formik.setFieldValue("classId", e.target.value)}
-            disabled={formik.isSubmitting}
-          >
-            <option value="">Select Class</option>
-            {classes?.map((cls) => (
-              <option key={cls._id} value={cls._id}>
-                {cls.name} ({cls.section})
-              </option>
-            ))}
-          </select>
-        </FormRowVertical>
 
-        {/* Teacher Select */}
-        <FormRowVertical label="Assigned Teacher" name="assignedTeacher">
-          <select
-            id="assignedTeacher"
-            name="assignedTeacher"
-            value={formik.values.assignedTeacher}
-            onChange={(e) =>
-              formik.setFieldValue("assignedTeacher", e.target.value)
-            }
-            disabled={formik.isSubmitting}
-          >
-            <option value="">No Teacher Assigned</option>
-            {teachers?.map((teacher) => (
-              <option key={teacher._id} value={teacher._id}>
-                {teacher.name}
-              </option>
-            ))}
-          </select>
+        <FormRowVertical label="Class" name="class">
+          <EntitySelect
+            entity="class"
+            value={formik.values.class}
+            onChange={(id) => formik.setFieldValue("class", id)}
+          />
         </FormRowVertical>
 
         {/* Dynamic Subjects */}

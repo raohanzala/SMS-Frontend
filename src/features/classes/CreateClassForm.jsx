@@ -13,8 +13,6 @@ function CreateClassForm({ classToEdit, onClose }) {
 
   const { subjectData } = useSubjects()
   const { teachers } = useTeachers()
-  console.log(subjectData)
-
 
   const isEditMode = !!classToEdit;
 

@@ -2,7 +2,7 @@ import ViewButton from '@/components/common/ViewButton';
 import EditButton from '@/components/common/EditButton';
 import DeleteButton from '@/components/common/DeleteButton';
 
-function StudentsTable({ onEdit, onDelete, students }) {
+function StudentsTable({ onEditStudent, onDeleteStudent, students }) {
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-200">
@@ -38,12 +38,13 @@ function StudentsTable({ onEdit, onDelete, students }) {
             {students?.map((student) => (
               <tr key={student._id} className="hover:bg-gray-50">
                 {/* Student Info */}
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap relative">
+
                   <div className="flex items-center">
                     <img
-                      className="h-10 w-10 rounded-full object-cover border"
-                      src={student.profileImage || "/default-avatar.png"}
+                      src={student.profileImage || student.gender === 'female' ? "/female-student-avatar.jpg" : '/male-student-avatar.jpg'}
                       alt={student.name}
+                      className="h-14 w-14 rounded-full object-cover border"
                     />
                     <div className="ml-4">
                       <div className="text-sm font-medium text-gray-900">
@@ -51,6 +52,9 @@ function StudentsTable({ onEdit, onDelete, students }) {
                       </div>
                       <div className="text-xs text-gray-500">
                         Roll No: {student.rollNumber || "N/A"}
+                        <p className={`${student.gender === 'female' ? 'text-xs text-pink-500' : 'text-xs text-blue-500'} font-bold`}>
+                          Gender: {student.gender}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -92,9 +96,9 @@ function StudentsTable({ onEdit, onDelete, students }) {
                 {/* Actions */}
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end space-x-2">
-                    <ViewButton student={student} />
-                    <EditButton onClick={() => onEdit(student)} />
-                    <DeleteButton onClick={() => onDelete(student._id)} />
+                    <ViewButton navigateTo={`/admin/students/${student._id}`} />
+                    <EditButton onClick={() => onEditStudent(student)} />
+                    <DeleteButton onClick={() => onDeleteStudent(student._id)} />
                   </div>
                 </td>
               </tr>

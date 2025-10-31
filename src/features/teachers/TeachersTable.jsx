@@ -80,9 +80,9 @@ function TeachersTable({ isShowModal, setIsShowModal }) {
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
                         <img
-                          className="h-10 w-10 rounded-full object-cover"
-                          src={teacher.profileImage || "/default-avatar.png"}
+                          src={teacher.profileImage || teacher.gender === 'female' ? "/female-teacher-avatar.jpg" : '/male-student-avatar.jpg'}
                           alt={teacher.name}
+                          className="h-14 w-14 rounded-full object-cover border"
                         />
                       </div>
                       <div className="ml-4">

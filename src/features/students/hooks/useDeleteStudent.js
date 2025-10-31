@@ -5,7 +5,7 @@ import { deleteStudent as deleteStudentApi } from "@/api/students";
 export function useDeleteStudent() {
   const queryClient = useQueryClient()
 
-  const { isPending: isDeleting, mutate: deleteStudent } = useMutation({
+  const { isPending: isStudentDeleting, mutate: deleteStudentMutation } = useMutation({
     mutationFn: deleteStudentApi,
 
     onSuccess: () => {
@@ -17,7 +17,7 @@ export function useDeleteStudent() {
     onError: (err) => toast.error(err.message)
 
   })
-  console.log('Loadig in mutate :', isDeleting)
+  console.log('Loadig in mutate :', isStudentDeleting)
 
-  return { isDeleting, deleteStudent }
+  return { isStudentDeleting, deleteStudentMutation }
 }

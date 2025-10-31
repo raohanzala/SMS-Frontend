@@ -8,8 +8,8 @@ import Modal from './Modal'
 import Button from './Button';
 
 const ConfirmationModal = ({
-  isOpen,
-  onClose,
+  isStudentDeleteModalOpen,
+  onStudentDeleteModalClose,
   title = 'Confirm Action',
   message = 'Are you sure you want to proceed?',
   confirmText = 'Confirm',
@@ -24,7 +24,7 @@ const ConfirmationModal = ({
   cancelButtonVariant = 'outline',
   className = ''
 }) => {
-  if (!isOpen) return null;
+  if (!isStudentDeleteModalOpen) return null;
 
   const getIcon = () => {
     switch (type) {
@@ -57,7 +57,7 @@ const ConfirmationModal = ({
   // };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className='p-3'>
+    <Modal isOpen={isStudentDeleteModalOpen} onClose={onStudentDeleteModalClose} className='p-3'>
       {/* <div className={`bg-white rounded-lg shadow-xl ${getSizeClasses()} w-full ${className}`}> */}
       {/* Header */}
       <div className="pb-4 border-b border-gray-200">
@@ -82,7 +82,7 @@ const ConfirmationModal = ({
           variant={cancelButtonVariant}
           onClick={() => {
             if (onCancel) onCancel();
-            onClose();
+            onStudentDeleteModalClose();
           }}
           disabled={isLoading}
           loading={isLoading}

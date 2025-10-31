@@ -32,6 +32,7 @@ export const useAddStudent = () => {
   });
 };
 
+
 // ✅ Edit student
 export const useEditStudent = () => {
   const qc = useQueryClient();

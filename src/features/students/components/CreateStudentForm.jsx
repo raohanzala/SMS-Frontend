@@ -1,18 +1,19 @@
-import { FormikProvider, useFormik } from 'formik';
-import FormRowVertical from '@/components/common/FormRowVerticle';
-import Button from '@/components/common/Button';
-import { addStudentSchema } from '@/validations/validationSchemas';
-import Input from '@/components/common/Input';
-import { useCreateStudent } from './useCreateStudent';
-import { useEditStudent } from './useEditStudets';
-import EntitySelect from '@/components/common/EntitySelect';
-import { useState } from 'react';
-import CreateParentForm from '../Parents/CreateParentForm';
-import Modal from '@/components/common/Modal';
+import { FormikProvider, useFormik } from "formik";
+import FormRowVertical from "@/components/common/FormRowVerticle";
+import Button from "@/components/common/Button";
+import { addStudentSchema } from "@/validations/validationSchemas";
+import Input from "@/components/common/Input";
+import EntitySelect from "@/components/common/EntitySelect";
+import { useState } from "react";
+import CreateParentForm from "../../Parents/CreateParentForm";
+import Modal from "@/components/common/Modal";
+// import { useCreateStudent } from "../useCreateStudent";
+import { useCreateStudent } from '../hooks/useCreateStudent'
+import { useEditStudent } from "../hooks/useEditStudets";
 
 function CreateStudentForm({ studentToEdit, onClose }) {
   const { createStudent, isCreating } = useCreateStudent();
-  const { editStudent, isPending: isUpdatingStudent } = useEditStudent();
+  const { editStudentMutation, isUpdatingStudent } = useEditStudent();
 
   const [showParentModal, setShowParentModal] = useState(false);
 
@@ -25,17 +26,17 @@ function CreateStudentForm({ studentToEdit, onClose }) {
       email: studentToEdit?.email || "",
       phone: studentToEdit?.phone || "",
       address: studentToEdit?.address || "",
+      gender: studentToEdit?.gender || "",
       class: studentToEdit?.class?._id || "",
       rollNumber: studentToEdit?.rollNumber || "",
       parent: studentToEdit?.parent?._id || null,
     },
-    // enableReinitialize: true,
     validationSchema: addStudentSchema,
     onSubmit: async (values) => {
       if (!isEditMode) {
         createStudent(values, { onSuccess: onClose });
       } else {
-        editStudent({ id: studentToEdit._id, values }, { onSuccess: onClose });
+        editStudentMutation({ id: studentToEdit._id, values }, { onSuccess: onClose });
       }
     },
   });
@@ -90,6 +91,38 @@ function CreateStudentForm({ studentToEdit, onClose }) {
               placeholder="Enter address"
               disabled={isLoading}
             />
+          </FormRowVertical>
+
+          {/* ✅ Gender Selection */}
+          <FormRowVertical label="Gender" name="gender">
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="gender"
+                  value="male"
+                  checked={formik.values.gender === "male"}
+                  onChange={() => formik.setFieldValue("gender", "male")}
+                  disabled={isLoading}
+                />
+                Male
+              </label>
+
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="gender"
+                  value="female"
+                  checked={formik.values.gender === "female"}
+                  onChange={() => formik.setFieldValue("gender", "female")}
+                  disabled={isLoading}
+                />
+                Female
+              </label>
+            </div>
+            {formik.touched.gender && formik.errors.gender && (
+              <div className="text-red-500 text-sm">{formik.errors.gender}</div>
+            )}
           </FormRowVertical>
 
           {/* Class + Roll Number */}
@@ -149,11 +182,14 @@ function CreateStudentForm({ studentToEdit, onClose }) {
         <CreateParentForm
           onClose={() => setShowParentModal(false)}
           context="student"
-          onSuccess={(newParent) => { console.log(newParent); formik.setFieldValue("parent", newParent._id) }}
+          onSuccess={(newParent) => {
+            console.log(newParent);
+            formik.setFieldValue("parent", newParent._id);
+          }}
         />
       </Modal>
     </>
   );
 }
 
-export default CreateStudentForm
+export default CreateStudentForm;
