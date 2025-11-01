@@ -10,11 +10,12 @@ import StudentsCards from "../components/StudentsCards";
 import { useStudents } from "../hooks/useStudents";
 import { useDeleteStudent } from '../hooks/useDeleteStudent'
 import ManageStudentModal from "../components/ManageStudentModal";
+import { useCallback } from "react";
 
 const StudentsPage = () => {
-  const [isShowManageStudentModal, setIsShowManageStudentModal] = useState(false);
-  const [studentToDelete, setStudentToDelete] = useState(null);
   const [studentToEdit, setStudentToEdit] = useState(null);
+  const [studentToDelete, setStudentToDelete] = useState(null);
+  const [isShowManageStudentModal, setIsShowManageStudentModal] = useState(false);
   const [isShowStudentDeleteModal, setIsShowStudentDeleteModal] = useState(false);
 
   const [searchParams] = useSearchParams();
@@ -22,21 +23,21 @@ const StudentsPage = () => {
   const { pagination, students, studentsError, isStudentsLoading } = useStudents();
   const { deleteStudentMutation, isStudentDeleting } = useDeleteStudent();
 
-  const handleEditStudent = (student) => {
+  const handleEditStudent = useCallback((student) => {
     setStudentToEdit(student);
     setIsShowManageStudentModal(true);
-  };
+  }, []);
 
-  const handleDeleteStudent = (studentId) => {
+  const handleDeleteStudent = useCallback((studentId) => {
     setStudentToDelete(studentId);
     setIsShowStudentDeleteModal(true);
-  };
+  }, []);
 
-  const handleShowManageStudentModal = () => {
-    () => setIsShowManageStudentModal(true)
-  }
+  const handleShowManageStudentModal = useCallback(() => {
+    setIsShowManageStudentModal(true)
+  }, [])
 
-  const handleConfirmDelete = () => {
+  const handleConfirmStudentDelete = useCallback(() => {
     if (studentToDelete) {
       deleteStudentMutation(studentToDelete, {
         onSuccess: () => {
@@ -45,7 +46,7 @@ const StudentsPage = () => {
         },
       });
     }
-  };
+  }, [deleteStudentMutation, studentToDelete]);
 
   return (
     <div className="space-y-6">
@@ -72,14 +73,14 @@ const StudentsPage = () => {
               students={students}
               onEditStudent={handleEditStudent}
               onDeleteStudent={handleDeleteStudent}
-            />
-          ) : (
-            <StudentsCards
+            />)
+            :
+            (<StudentsCards
               students={students}
               onEditStudent={handleEditStudent}
               onDeleteStudent={handleDeleteStudent}
             />
-          )}
+            )}
 
           <Pagination pagination={pagination} />
         </>
@@ -102,7 +103,7 @@ const StudentsPage = () => {
         confirmText="Delete"
         cancelText="Cancel"
         type="danger"
-        onConfirm={handleConfirmDelete}
+        onConfirm={handleConfirmStudentDelete}
         isLoading={isStudentDeleting}
       />
     </div>

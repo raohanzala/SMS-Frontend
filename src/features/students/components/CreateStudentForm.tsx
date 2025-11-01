@@ -4,20 +4,29 @@ import Button from "@/components/common/Button";
 import { addStudentSchema } from "@/validations/validationSchemas";
 import Input from "@/components/common/Input";
 import EntitySelect from "@/components/common/EntitySelect";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import CreateParentForm from "../../Parents/CreateParentForm";
 import Modal from "@/components/common/Modal";
-// import { useCreateStudent } from "../useCreateStudent";
-import { useCreateStudent } from '../hooks/useCreateStudent'
+import { useCreateStudent } from "../hooks/useCreateStudent";
 import { useEditStudent } from "../hooks/useEditStudets";
+import { Student } from "../types/student.types";
+import { Parent } from "@/types/user.types";
 
-function CreateStudentForm({ studentToEdit, onClose }) {
-  const { createStudent, isCreating } = useCreateStudent();
-  const { editStudentMutation, isUpdatingStudent } = useEditStudent();
+interface CreateStudentFormProps {
+  studentToEdit: Student | null;
+  onManageStudentModalClose: () => void;
+}
 
+function CreateStudentForm({
+  studentToEdit,
+  onManageStudentModalClose,
+}: CreateStudentFormProps) {
   const [showParentModal, setShowParentModal] = useState(false);
 
-  const isLoading = isCreating || isUpdatingStudent;
+  const { createStudentMutation, isCreatingStudent } = useCreateStudent();
+  const { editStudentMutation, isUpdatingStudent } = useEditStudent();
+
+  const isLoadingStudent = isCreatingStudent || isUpdatingStudent;
   const isEditMode = !!studentToEdit;
 
   const formik = useFormik({
@@ -34,12 +43,28 @@ function CreateStudentForm({ studentToEdit, onClose }) {
     validationSchema: addStudentSchema,
     onSubmit: async (values) => {
       if (!isEditMode) {
-        createStudent(values, { onSuccess: onClose });
+        createStudentMutation(values, { onSuccess: onManageStudentModalClose });
       } else {
-        editStudentMutation({ id: studentToEdit._id, values }, { onSuccess: onClose });
+        editStudentMutation(
+          { id: studentToEdit._id, values },
+          { onSuccess: onManageStudentModalClose }
+        );
       }
     },
   });
+
+  const {
+    values,
+    errors,
+    touched,
+    handleSubmit,
+    setFieldValue,
+    getFieldProps,
+  } = formik;
+
+  const handleParentModalClose = useCallback(() => {
+    setShowParentModal(false);
+  }, []);
 
   return (
     <>
@@ -47,7 +72,7 @@ function CreateStudentForm({ studentToEdit, onClose }) {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            formik.handleSubmit(e);
+            handleSubmit(e);
           }}
           className="space-y-4"
         >
@@ -55,9 +80,9 @@ function CreateStudentForm({ studentToEdit, onClose }) {
           <FormRowVertical label="Full Name" name="name">
             <Input
               type="text"
-              {...formik.getFieldProps("name")}
+              {...getFieldProps("name")}
               placeholder="Enter full name"
-              disabled={isLoading}
+              disabled={isLoadingStudent}
             />
           </FormRowVertical>
 
@@ -66,18 +91,18 @@ function CreateStudentForm({ studentToEdit, onClose }) {
             <FormRowVertical label="Email Address" name="email">
               <Input
                 type="email"
-                {...formik.getFieldProps("email")}
+                {...getFieldProps("email")}
                 placeholder="Enter email"
-                disabled={isLoading}
+                disabled={isLoadingStudent}
               />
             </FormRowVertical>
 
             <FormRowVertical label="Phone" name="phone">
               <Input
                 type="text"
-                {...formik.getFieldProps("phone")}
+                {...getFieldProps("phone")}
                 placeholder="Enter phone number"
-                disabled={isLoading}
+                disabled={isLoadingStudent}
               />
             </FormRowVertical>
           </div>
@@ -86,10 +111,9 @@ function CreateStudentForm({ studentToEdit, onClose }) {
           <FormRowVertical label="Address" name="address">
             <Input
               type="text"
-              {...formik.getFieldProps("address")}
-              forkim={formik}
+              {...getFieldProps("address")}
               placeholder="Enter address"
-              disabled={isLoading}
+              disabled={isLoadingStudent}
             />
           </FormRowVertical>
 
@@ -101,9 +125,9 @@ function CreateStudentForm({ studentToEdit, onClose }) {
                   type="radio"
                   name="gender"
                   value="male"
-                  checked={formik.values.gender === "male"}
-                  onChange={() => formik.setFieldValue("gender", "male")}
-                  disabled={isLoading}
+                  checked={values.gender === "male"}
+                  onChange={() => setFieldValue("gender", "male")}
+                  disabled={isLoadingStudent}
                 />
                 Male
               </label>
@@ -113,15 +137,15 @@ function CreateStudentForm({ studentToEdit, onClose }) {
                   type="radio"
                   name="gender"
                   value="female"
-                  checked={formik.values.gender === "female"}
-                  onChange={() => formik.setFieldValue("gender", "female")}
-                  disabled={isLoading}
+                  checked={values.gender === "female"}
+                  onChange={() => setFieldValue("gender", "female")}
+                  disabled={isLoadingStudent}
                 />
                 Female
               </label>
             </div>
-            {formik.touched.gender && formik.errors.gender && (
-              <div className="text-red-500 text-sm">{formik.errors.gender}</div>
+            {touched.gender && errors.gender && (
+              <div className="text-red-500 text-sm">{errors.gender}</div>
             )}
           </FormRowVertical>
 
@@ -130,17 +154,17 @@ function CreateStudentForm({ studentToEdit, onClose }) {
             <FormRowVertical label="Class" name="class">
               <EntitySelect
                 entity="class"
-                value={formik.values.class}
-                onChange={(id) => formik.setFieldValue("class", id)}
+                value={values.class}
+                onChange={(classId: string) => setFieldValue("class", classId)}
               />
             </FormRowVertical>
 
             <FormRowVertical label="Roll Number" name="rollNumber">
               <Input
                 type="text"
-                {...formik.getFieldProps("rollNumber")}
+                {...getFieldProps("rollNumber")}
                 placeholder="Leave empty to auto-generate"
-                disabled={isLoading}
+                disabled={isLoadingStudent}
               />
             </FormRowVertical>
           </div>
@@ -150,8 +174,10 @@ function CreateStudentForm({ studentToEdit, onClose }) {
               <div className="flex-1">
                 <EntitySelect
                   entity="parent"
-                  value={formik.values.parent}
-                  onChange={(id) => formik.setFieldValue("parent", id)}
+                  value={values.parent}
+                  onChange={(parentId: string) =>
+                    setFieldValue("parent", parentId)
+                  }
                 />
               </div>
               <Button
@@ -169,8 +195,8 @@ function CreateStudentForm({ studentToEdit, onClose }) {
             <Button
               fullWidth
               type="submit"
-              disabled={isLoading}
-              loading={isLoading}
+              disabled={isLoadingStudent}
+              loading={isLoadingStudent}
             >
               {!isEditMode ? "Add Student" : "Edit Student"}
             </Button>
@@ -178,14 +204,13 @@ function CreateStudentForm({ studentToEdit, onClose }) {
         </form>
       </FormikProvider>
 
-      <Modal isOpen={showParentModal} onClose={() => setShowParentModal(false)}>
+      <Modal isOpen={showParentModal} onClose={handleParentModalClose}>
         <CreateParentForm
-          onClose={() => setShowParentModal(false)}
+          onClose={handleParentModalClose}
           context="student"
-          onSuccess={(newParent) => {
-            console.log(newParent);
-            formik.setFieldValue("parent", newParent._id);
-          }}
+          onSuccess={(newParent: Parent) =>
+            setFieldValue("parent", newParent._id)
+          }
         />
       </Modal>
     </>
