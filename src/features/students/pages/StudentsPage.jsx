@@ -1,16 +1,18 @@
 import { useState } from "react";
 import StudentsTable from '../components/StudentsTable'
 import StudentsToolbar from '../components/StudentsToolbar'
-import ConfirmationModal from "@/components/common/ConfirmationModal";
-import Pagination from "@/components/common/Pagination";
-import ErrorMessage from "@/components/common/ErrorMessage";
-import Spinner from "@/components/common/Spinner";
+import ConfirmationModal from "../../../components/common/ConfirmationModal";
+import Pagination from "../../../components/common/Pagination";
+import ErrorMessage from "../../../components/common/ErrorMessage";
+import Spinner from "../../../components/common/Spinner";
+import EmptyState from "../../../components/common/EmptyState";
 import { useSearchParams } from "react-router-dom";
 import StudentsCards from "../components/StudentsCards";
 import { useStudents } from "../hooks/useStudents";
 import { useDeleteStudent } from '../hooks/useDeleteStudent'
 import ManageStudentModal from "../components/ManageStudentModal";
 import { useCallback } from "react";
+import { FiUsers } from "react-icons/fi";
 
 const StudentsPage = () => {
   const [studentToEdit, setStudentToEdit] = useState(null);
@@ -68,21 +70,34 @@ const StudentsPage = () => {
       )}
       {!isStudentsLoading && !studentsError && (
         <>
-          {view === "table" ? (
-            <StudentsTable
-              students={students}
-              onEditStudent={handleEditStudent}
-              onDeleteStudent={handleDeleteStudent}
-            />)
-            :
-            (<StudentsCards
-              students={students}
-              onEditStudent={handleEditStudent}
-              onDeleteStudent={handleDeleteStudent}
+          {students?.length === 0 ? (
+            <EmptyState
+              icon={FiUsers}
+              title="No Students Found"
+              description="Get started by adding your first student to the system."
+              buttonText="Add Student"
+              buttonIcon={FiUsers}
+              onButtonClick={handleShowManageStudentModal}
             />
-            )}
+          ) : (
+            <>
+              {view === "table" ? (
+                <StudentsTable
+                  students={students}
+                  onEditStudent={handleEditStudent}
+                  onDeleteStudent={handleDeleteStudent}
+                />)
+                :
+                (<StudentsCards
+                  students={students}
+                  onEditStudent={handleEditStudent}
+                  onDeleteStudent={handleDeleteStudent}
+                />
+                )}
 
-          <Pagination pagination={pagination} />
+              <Pagination pagination={pagination} />
+            </>
+          )}
         </>
       )}
 

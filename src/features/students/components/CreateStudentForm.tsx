@@ -1,16 +1,16 @@
 import { FormikProvider, useFormik } from "formik";
-import FormRowVertical from "@/components/common/FormRowVerticle";
-import Button from "@/components/common/Button";
-import { addStudentSchema } from "@/validations/validationSchemas";
-import Input from "@/components/common/Input";
-import EntitySelect from "@/components/common/EntitySelect";
+import FormRowVertical from "../../../components/common/FormRowVerticle";
+import Button from "../../../components/common/Button";
+import { addStudentSchema } from "../../../validations/validationSchemas";
+import Input from "../../../components/common/Input";
+import EntitySelect from "../../../components/common/EntitySelect";
 import { useCallback, useState } from "react";
 import CreateParentForm from "../../Parents/CreateParentForm";
-import Modal from "@/components/common/Modal";
+import Modal from "../../../components/common/Modal";
 import { useCreateStudent } from "../hooks/useCreateStudent";
 import { useEditStudent } from "../hooks/useEditStudets";
 import { Student } from "../types/student.types";
-import { Parent } from "@/types/user.types";
+import { Parent } from "../../../types/user.types";
 
 interface CreateStudentFormProps {
   studentToEdit: Student | null;
@@ -65,6 +65,8 @@ function CreateStudentForm({
   const handleParentModalClose = useCallback(() => {
     setShowParentModal(false);
   }, []);
+
+  console.log({...getFieldProps("name")})
 
   return (
     <>

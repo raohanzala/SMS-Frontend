@@ -1,4 +1,4 @@
-import Modal from "@/components/common/Modal";
+import Modal from "../../../components/common/Modal";
 import { Student } from "../types/student.types";
 import CreateStudentForm from "./CreateStudentForm";
 
