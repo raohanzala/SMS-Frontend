@@ -12,25 +12,25 @@ import StudentsTable from "../components/StudentsTable";
 import StudentsToolbar from "../components/StudentsToolbar";
 import { useDeleteStudent } from "../hooks/useDeleteStudent";
 import { useStudents } from "../hooks/useStudents";
+import { Student } from "../types/student.types";
 
 const StudentsPage = () => {
-  const [studentToEdit, setStudentToEdit] = useState(null);
-  const [studentToDelete, setStudentToDelete] = useState(null);
+  const [studentToEdit, setStudentToEdit] = useState<Student | null>(null);
+  const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
   const [isShowManageStudentModal, setIsShowManageStudentModal] = useState(false);
   const [isShowStudentDeleteModal, setIsShowStudentDeleteModal] = useState(false);
 
   const [searchParams] = useSearchParams();
   const view = searchParams.get("view") || "cards";
-  const { studentsPagination, students, studentsError, isStudentsLoading } =
-    useStudents();
+  const { pagination, students, studentsError, isStudentsLoading } = useStudents();
   const { deleteStudentMutation, isDeletingStudent } = useDeleteStudent();
 
-  const handleEditStudent = useCallback((studentToEdit) => {
+  const handleEditStudent = useCallback((studentToEdit: Student) => {
     setStudentToEdit(studentToEdit);
     setIsShowManageStudentModal(true);
   }, []);
 
-  const handleDeleteStudent = useCallback((studentId) => {
+  const handleDeleteStudent = useCallback((studentId: string) => {
     setStudentToDelete(studentId);
     setIsShowStudentDeleteModal(true);
   }, []);
@@ -103,7 +103,7 @@ const StudentsPage = () => {
                 />
               )}
 
-              <Pagination pagination={studentsPagination} />
+              <Pagination pagination={pagination} />
             </>
           )}
         </>
@@ -121,8 +121,8 @@ const StudentsPage = () => {
         confirmText="Delete"
         cancelText="Cancel"
         type="danger"
-        isStudentDeleteModalOpen={isShowStudentDeleteModal}
-        onStudentDeleteModalClose={handleCloseStudentDeleteModal}
+        isOpen={isShowStudentDeleteModal}
+        onClose={handleCloseStudentDeleteModal}
         onConfirm={handleConfirmStudentDelete}
         isLoading={isDeletingStudent}
       />

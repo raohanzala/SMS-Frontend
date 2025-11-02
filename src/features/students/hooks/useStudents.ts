@@ -33,7 +33,7 @@ export function useStudents({ unassigned = false, parentId = null } = {}) {
       }),
   });
 
-  const { students, studentsPagination } = data?.data || {};
+  const { students, pagination } = data?.data || {};
 
-  return { students, studentsPagination, isStudentsLoading, studentsError };
+  return { students, pagination, isStudentsLoading, studentsError };
 }

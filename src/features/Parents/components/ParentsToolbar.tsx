@@ -3,15 +3,16 @@ import Button from '@/components/common/Button'
 import { FiPlus } from 'react-icons/fi'
 import ViewToggle from '@/components/common/ViewToggle'
 import SearchBar from '@/components/common/SearchBar'
+import { ParentsToolbarProps } from '../types/parent-components.interface'
 
-function ParentsToolbar({ onClick }) {
+const ParentsToolbar = ({ onClickAddParent } : ParentsToolbarProps) => {
   return (
     <PageToolbar>
       <SearchBar placeholder="Search parents..." paramKey="parent" />
 
       <div className='flex sm:gap-5 items-center'>
         <ViewToggle />
-        <Button onClick={onClick} startIcon={<FiPlus className="mr-2 h-4 w-4" />}>Add Parent</Button>
+        <Button onClick={onClickAddParent} startIcon={<FiPlus className="mr-2 h-4 w-4" />}>Add Parent</Button>
       </div>
     </PageToolbar>
   )

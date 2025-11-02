@@ -134,7 +134,7 @@ function App() {
 const AdminDashboard = React.lazy(() => import('./pages/private/admin/Dashboard'));
 const AdminStudents = React.lazy(() => import('./features/students/pages/StudentsPage'));
 const AdminTeachers = React.lazy(() => import('./pages/private/admin/Teachers'));
-const AdminParents = React.lazy(() => import('./pages/private/admin/Parents'));
+const AdminParents = React.lazy(() => import('./features/parents/pages/ParentsPage'));
 const AdminClasses = React.lazy(() => import('./pages/private/admin/Classes'));
 const AdminSubjects = React.lazy(() => import('./pages/private/admin/Subjects'));
 const AdminTimetable = React.lazy(() => import('./pages/private/admin/Timetable'));

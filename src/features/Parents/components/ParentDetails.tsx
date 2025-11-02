@@ -1,6 +1,6 @@
-import { useParent } from './useParent'
+import { useParent } from "../hooks/useParent"
 
-function ParentDetails() {
+const ParentDetails = () => {
 
   const { parent } = useParent()
   return (

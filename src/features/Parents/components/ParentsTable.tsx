@@ -1,8 +1,9 @@
 import ViewButton from '@/components/common/ViewButton';
 import EditButton from '@/components/common/EditButton';
 import DeleteButton from '@/components/common/DeleteButton';
+import { ParentsTableProps } from '../types/parent-components.interface';
 
-function ParentsTable({ onEdit, onDelete, parents }) {
+const ParentsTable = ({ onEditParent, onDeleteParent, parents }: ParentsTableProps) => {
 
   return (
     <>
@@ -57,7 +58,7 @@ function ParentsTable({ onEdit, onDelete, parents }) {
 
                   {/* Children */}
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {parent.children?.length > 0 ? (
+                    {parent.children?.length && parent.children.length > 0 ? (
                       <div className="text-sm text-gray-900">
                         {parent.children.map((child) => child.name).join(", ")}
                       </div>
@@ -79,15 +80,15 @@ function ParentsTable({ onEdit, onDelete, parents }) {
 
                   {/* Joined */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(parent.createdAt).toLocaleDateString()}
+                    {parent.createdAt && new Date(parent.createdAt).toLocaleDateString()}
                   </td>
 
                   {/* Actions */}
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
                       <ViewButton navigateTo={`/admin/parents/${parent._id}`} />
-                      <EditButton onClick={() => onEdit(parent)} />
-                      <DeleteButton onClick={() => onDelete(parent._id)} />
+                      <EditButton onClick={() => onEditParent(parent)} />
+                      <DeleteButton onClick={() => onDeleteParent(parent._id)} />
                     </div>
                   </td>
                 </tr>

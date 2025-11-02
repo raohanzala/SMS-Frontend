@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { getAllParents } from "@/api/parents";
+import { getAllParentsApi } from "@/api/parents";
 
-export function useParents(searchInput, isAll = false) {
+export function useParents(searchInput?: string, isAll = false) {
   const [searchParams] = useSearchParams();
 
   const page = isAll ? 1 : (!searchParams.get("page") ? 1 : Number(searchParams.get("page")));
@@ -13,14 +13,13 @@ export function useParents(searchInput, isAll = false) {
   const sortOrder = searchParams.get("sortOrder") || "";
   const search = searchInput || searchParams.get("search") || "";
 
-  const { isPending, error, data } = useQuery({
+  const { isPending : isParentsLoading, error: parentsError, data } = useQuery({
     queryKey: ["parents", page, limit, sortBy, search],
-    queryFn: () => getAllParents({ page, limit, search, classId, section, sortBy, sortOrder }),
-    keepPreviousData: true,
+    queryFn: () => getAllParentsApi({ page, limit, search, classId, section, sortBy, sortOrder }),
   });
 
   const { parents, pagination } = data?.data || {};
 
-  return { parents, pagination, isPending, error };
+  return { parents, pagination, isParentsLoading, parentsError };
 
 }

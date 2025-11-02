@@ -1,7 +1,7 @@
 import SearchableSelect from "./SearchableSelect";
 import { getAllTeachers, getTeacherById } from "../../api/teachers";
 import { getAllClasses, getClassById } from "../../api/classes";
-import { getAllParents, getParentById } from "../../api/parents";
+import { getAllParentsApi, getParentByIdApi } from "@/api/parents";
 
 type EntityType = 'parent' | 'class' | 'teacher';
 
@@ -22,7 +22,7 @@ function EntitySelect({ entity, value, onChange, placeholder }: EntitySelectProp
   const apiMap = {
     parent: {
       fetchList: async (search: string): Promise<Option[]> => {
-        const { data } = await getAllParents({ page: 1, limit: 10, search });
+        const { data } = await getAllParentsApi({ page: 1, limit: 10, search });
         return (
           data?.parents?.map((p: any) => ({
             value: p._id,
@@ -32,7 +32,7 @@ function EntitySelect({ entity, value, onChange, placeholder }: EntitySelectProp
       },
       fetchById: async (id: string): Promise<Option | null> => {
         if (!id) return null;
-        const { data } = await getParentById(id);
+        const { data } = await getParentByIdApi(id);
         return data ? { value: data._id, label: `${data.name} (${data.email})` } : null;
       },
     },

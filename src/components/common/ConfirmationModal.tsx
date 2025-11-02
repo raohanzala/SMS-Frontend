@@ -12,8 +12,8 @@ type ModalSize = 'sm' | 'md' | 'lg';
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success' | 'warning';
 
 interface ConfirmationModalProps {
-  isStudentDeleteModalOpen: boolean;
-  onStudentDeleteModalClose: () => void;
+  isOpen: boolean;
+  onClose: () => void;
   title?: string;
   message?: string;
   confirmText?: string;
@@ -30,8 +30,8 @@ interface ConfirmationModalProps {
 }
 
 const ConfirmationModal = ({
-  isStudentDeleteModalOpen,
-  onStudentDeleteModalClose,
+  isOpen,
+  onClose,
   title = 'Confirm Action',
   message = 'Are you sure you want to proceed?',
   confirmText = 'Confirm',
@@ -46,7 +46,7 @@ const ConfirmationModal = ({
   cancelButtonVariant = 'outline',
   className = ''
 }: ConfirmationModalProps) => {
-  if (!isStudentDeleteModalOpen) return null;
+  if (!isOpen) return null;
 
   const getIcon = () => {
     switch (type) {
@@ -73,7 +73,7 @@ const ConfirmationModal = ({
   };
 
   return (
-    <Modal isOpen={isStudentDeleteModalOpen} onClose={onStudentDeleteModalClose} className='p-3'>
+    <Modal isOpen={isOpen} onClose={onClose} >
       {/* Header */}
       <div className="pb-4 border-b border-gray-200">
         <div className="flex items-center gap-3">
@@ -97,7 +97,7 @@ const ConfirmationModal = ({
           variant={cancelButtonVariant}
           onClick={() => {
             if (onCancel) onCancel();
-            onStudentDeleteModalClose();
+            onClose();
           }}
           disabled={isLoading}
           loading={isLoading}

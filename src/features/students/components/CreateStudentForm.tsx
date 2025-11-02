@@ -5,7 +5,7 @@ import EntitySelect from "../../../components/common/EntitySelect";
 import FormRowVertical from "../../../components/common/FormRowVerticle";
 import Input from "../../../components/common/Input";
 import Modal from "../../../components/common/Modal";
-import CreateParentForm from "../../Parents/CreateParentForm";
+import CreateParentForm from "../../parents/components/CreateParentForm";
 import { useAddStudent } from "../hooks/useAddStudent";
 import { useUpdateStudent } from "../hooks/useUpdateStudent";
 import { Parent } from "../../../types/user.types";

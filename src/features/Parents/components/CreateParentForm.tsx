@@ -3,27 +3,28 @@ import Select from "react-select";
 import FormRowVertical from "@/components/common/FormRowVerticle";
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
-import { addParentSchema } from "@/validations/validationSchemas";
-import { useEditParent } from "./useEditParent";
-import { useCreateParent } from "./useCreateParent";
-import { useStudents } from "../students/hooks/useStudents";
+import { useUpdateParent } from "../hooks/useUpdateParent";
+import { useAddParent } from "../hooks/useAddParent";
+import { useStudents } from "../../students/hooks/useStudents";
+import { addParentSchema } from "../validations/parent.validation";
+import { CreateParentFormProps } from "../types/parent-components.interface";
 
-function CreateParentForm({
+const CreateParentForm = ({
   parentToEdit,
   onClose,
   onSuccess,
   context = "parent",
-}) {
+}: CreateParentFormProps) => {
   const isEditMode = !!parentToEdit;
 
   const { students, isStudentsLoading } = useStudents({
     unassigned: !isEditMode,
     parentId: isEditMode ? parentToEdit?._id : null,
   });
-  const { createParent, isCreating } = useCreateParent();
-  const { editParent, isPending: isUpdating } = useEditParent()
+  const { addParentMutation, isAddingParent } = useAddParent();
+  const { updateParentMutation, isUpdatingParent } = useUpdateParent();
 
-  const isLoading = isCreating || isUpdating
+  const isParentLoading = isAddingParent || isUpdatingParent
 
   const formik = useFormik({
     initialValues: {
@@ -37,18 +38,18 @@ function CreateParentForm({
     onSubmit: async (values) => {
       const payload = { ...values };
 
-      if (context === "student") delete payload.children;
+      if (context === "student") delete payload?.children;
 
       if (!isEditMode) {
-        createParent(payload, {
+        addParentMutation(payload, {
           onSuccess: ({ data }) => {
             onSuccess?.(data?.parent); // Return new parent if needed
             onClose?.();
           },
         });
       } else {
-        editParent(
-          { id: parentToEdit?._id, values },
+        updateParentMutation(
+          { parentId: parentToEdit?._id, updateParentInput: values },
           { onSuccess: () => onClose?.() }
         );
       }
@@ -68,9 +69,7 @@ function CreateParentForm({
         <FormRowVertical label="Full Name" name="name">
           <Input
             type="text"
-            id="name"
-            name="name"
-            disabled={isLoading}
+            disabled={isParentLoading}
             placeholder="Enter full name"
             {...formik.getFieldProps("name")}
           />
@@ -81,9 +80,7 @@ function CreateParentForm({
           <FormRowVertical label="Email Address" name="email">
             <Input
               type="email"
-              id="email"
-              name="email"
-              disabled={isLoading}
+              disabled={isParentLoading}
               placeholder="Enter email"
               {...formik.getFieldProps("email")}
             />
@@ -92,9 +89,7 @@ function CreateParentForm({
           <FormRowVertical label="Phone" name="phone">
             <Input
               type="text"
-              id="phone"
-              name="phone"
-              disabled={isLoading}
+              disabled={isParentLoading}
               placeholder="Enter phone number"
               {...formik.getFieldProps("phone")}
             />
@@ -105,9 +100,7 @@ function CreateParentForm({
         <FormRowVertical label="Address" name="address">
           <Input
             type="text"
-            id="address"
-            name="address"
-            disabled={isLoading}
+            disabled={isParentLoading}
             placeholder="Enter address (optional)"
             {...formik.getFieldProps("address")}
           />
@@ -222,8 +215,8 @@ function CreateParentForm({
           <Button
             fullWidth
             type="submit"
-            disabled={isLoading}
-            loading={isCreating}
+            disabled={isParentLoading}
+            loading={isAddingParent || isUpdatingParent}
           >
             {!isEditMode ? "Add Parent" : "Edit Parent"}
           </Button>
