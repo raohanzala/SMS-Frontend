@@ -1,12 +1,12 @@
+import { updateStudentApi } from "@/api/students";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { editStudent as editStudentApi } from "@/api/students";
 
-export function useEditStudent() {
+export function useUpdateStudent() {
   const queryClient = useQueryClient();
 
-  const { isPending: isUpdatingStudent, mutate: editStudentMutation } = useMutation({
-    mutationFn: editStudentApi,
+  const { isPending: isUpdatingStudent, mutate: updateStudentMutation } = useMutation({
+    mutationFn: updateStudentApi,
 
     onSuccess: (data) => {
       toast.success(data.message || "Student successfully updated");
@@ -17,5 +17,5 @@ export function useEditStudent() {
     onError: (err) => toast.error(err.message),
   });
 
-  return { isUpdatingStudent, editStudentMutation };
+  return { isUpdatingStudent, updateStudentMutation };
 }

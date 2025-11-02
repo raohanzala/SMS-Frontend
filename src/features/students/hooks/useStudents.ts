@@ -1,6 +1,6 @@
+import { getAllStudentsApi } from "@/api/students";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { getAllStudents } from "@/api/students";
 
 export function useStudents({ unassigned = false, parentId = null } = {}) {
   const [searchParams] = useSearchParams();
@@ -20,7 +20,7 @@ export function useStudents({ unassigned = false, parentId = null } = {}) {
   } = useQuery({
     queryKey: ["students", page, limit, sortBy, search, unassigned, parentId],
     queryFn: () =>
-      getAllStudents({
+      getAllStudentsApi({
         page,
         limit,
         search,
@@ -31,10 +31,9 @@ export function useStudents({ unassigned = false, parentId = null } = {}) {
         unassigned,
         parentId,
       }),
-    keepPreviousData: true,
   });
 
-  const { students, pagination } = data?.data || {};
+  const { students, studentsPagination } = data?.data || {};
 
-  return { students, pagination, isStudentsLoading, studentsError };
+  return { students, studentsPagination, isStudentsLoading, studentsError };
 }

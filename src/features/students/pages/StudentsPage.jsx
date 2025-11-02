@@ -1,18 +1,17 @@
-import { useState } from "react";
-import StudentsTable from '../components/StudentsTable'
-import StudentsToolbar from '../components/StudentsToolbar'
-import ConfirmationModal from "../../../components/common/ConfirmationModal";
-import Pagination from "../../../components/common/Pagination";
-import ErrorMessage from "../../../components/common/ErrorMessage";
-import Spinner from "../../../components/common/Spinner";
-import EmptyState from "../../../components/common/EmptyState";
+import { useCallback, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import StudentsCards from "../components/StudentsCards";
-import { useStudents } from "../hooks/useStudents";
-import { useDeleteStudent } from '../hooks/useDeleteStudent'
-import ManageStudentModal from "../components/ManageStudentModal";
-import { useCallback } from "react";
 import { FiUsers } from "react-icons/fi";
+import ConfirmationModal from "../../../components/common/ConfirmationModal";
+import EmptyState from "../../../components/common/EmptyState";
+import ErrorMessage from "../../../components/common/ErrorMessage";
+import Pagination from "../../../components/common/Pagination";
+import Spinner from "../../../components/common/Spinner";
+import ManageStudentModal from "../components/ManageStudentModal";
+import StudentsCards from "../components/StudentsCards";
+import StudentsTable from "../components/StudentsTable";
+import StudentsToolbar from "../components/StudentsToolbar";
+import { useDeleteStudent } from "../hooks/useDeleteStudent";
+import { useStudents } from "../hooks/useStudents";
 
 const StudentsPage = () => {
   const [studentToEdit, setStudentToEdit] = useState(null);
@@ -22,11 +21,12 @@ const StudentsPage = () => {
 
   const [searchParams] = useSearchParams();
   const view = searchParams.get("view") || "cards";
-  const { pagination, students, studentsError, isStudentsLoading } = useStudents();
-  const { deleteStudentMutation, isStudentDeleting } = useDeleteStudent();
+  const { studentsPagination, students, studentsError, isStudentsLoading } =
+    useStudents();
+  const { deleteStudentMutation, isDeletingStudent } = useDeleteStudent();
 
-  const handleEditStudent = useCallback((student) => {
-    setStudentToEdit(student);
+  const handleEditStudent = useCallback((studentToEdit) => {
+    setStudentToEdit(studentToEdit);
     setIsShowManageStudentModal(true);
   }, []);
 
@@ -36,8 +36,18 @@ const StudentsPage = () => {
   }, []);
 
   const handleShowManageStudentModal = useCallback(() => {
-    setIsShowManageStudentModal(true)
-  }, [])
+    setIsShowManageStudentModal(true);
+  }, []);
+
+  const handleCloseManageStudentModal = useCallback(() => {
+    setStudentToEdit(null);
+    setIsShowManageStudentModal(false);
+  }, []);
+
+  const handleCloseStudentDeleteModal = useCallback(() => {
+    setStudentToDelete(null);
+    setIsShowStudentDeleteModal(false);
+  }, []);
 
   const handleConfirmStudentDelete = useCallback(() => {
     if (studentToDelete) {
@@ -52,10 +62,8 @@ const StudentsPage = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <StudentsToolbar onClickAddStudent={handleShowManageStudentModal} />
 
-      {/* Filters and Search */}
       {isStudentsLoading && (
         <div className="flex justify-center py-6">
           <Spinner />
@@ -64,7 +72,7 @@ const StudentsPage = () => {
 
       {studentsError && (
         <ErrorMessage
-          message={studentsError.message || "Failed to load subjects"}
+          message={studentsError.message || "Failed to load students"}
           onRetry={() => window.location.reload()}
         />
       )}
@@ -86,16 +94,16 @@ const StudentsPage = () => {
                   students={students}
                   onEditStudent={handleEditStudent}
                   onDeleteStudent={handleDeleteStudent}
-                />)
-                :
-                (<StudentsCards
+                />
+              ) : (
+                <StudentsCards
                   students={students}
                   onEditStudent={handleEditStudent}
                   onDeleteStudent={handleDeleteStudent}
                 />
-                )}
+              )}
 
-              <Pagination pagination={pagination} />
+              <Pagination pagination={studentsPagination} />
             </>
           )}
         </>
@@ -103,23 +111,20 @@ const StudentsPage = () => {
 
       <ManageStudentModal
         isManageStudentModalOpen={isShowManageStudentModal}
-        onManageStudentModalClose={() => {
-          setStudentToEdit(null);
-          setIsShowManageStudentModal(false);
-        }}
+        onManageStudentModalClose={handleCloseManageStudentModal}
         studentToEdit={studentToEdit}
       />
 
       <ConfirmationModal
-        isStudentDeleteModalOpen={isShowStudentDeleteModal}
-        onStudentDeleteModalClose={() => setIsShowStudentDeleteModal(false)}
         title="Delete Student"
         message="Are you sure you want to delete parent? This action cannot be undone."
         confirmText="Delete"
         cancelText="Cancel"
         type="danger"
+        isStudentDeleteModalOpen={isShowStudentDeleteModal}
+        onStudentDeleteModalClose={handleCloseStudentDeleteModal}
         onConfirm={handleConfirmStudentDelete}
-        isLoading={isStudentDeleting}
+        isLoading={isDeletingStudent}
       />
     </div>
   );

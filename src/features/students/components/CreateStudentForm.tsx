@@ -1,16 +1,17 @@
-import { FormikProvider, useFormik } from "formik";
-import FormRowVertical from "../../../components/common/FormRowVerticle";
-import Button from "../../../components/common/Button";
-import { addStudentSchema } from "../../../validations/validationSchemas";
-import Input from "../../../components/common/Input";
-import EntitySelect from "../../../components/common/EntitySelect";
 import { useCallback, useState } from "react";
-import CreateParentForm from "../../Parents/CreateParentForm";
+import { FormikProvider, useFormik } from "formik";
+import Button from "../../../components/common/Button";
+import EntitySelect from "../../../components/common/EntitySelect";
+import FormRowVertical from "../../../components/common/FormRowVerticle";
+import Input from "../../../components/common/Input";
 import Modal from "../../../components/common/Modal";
-import { useCreateStudent } from "../hooks/useCreateStudent";
-import { useEditStudent } from "../hooks/useEditStudets";
+import CreateParentForm from "../../Parents/CreateParentForm";
+import { useAddStudent } from "../hooks/useAddStudent";
+import { useUpdateStudent } from "../hooks/useUpdateStudent";
 import { Student } from "../types/student.types";
 import { Parent } from "../../../types/user.types";
+import { addStudentSchema } from "../validations/student.validation";
+
 
 interface CreateStudentFormProps {
   studentToEdit: Student | null;
@@ -23,10 +24,10 @@ function CreateStudentForm({
 }: CreateStudentFormProps) {
   const [showParentModal, setShowParentModal] = useState(false);
 
-  const { createStudentMutation, isCreatingStudent } = useCreateStudent();
-  const { editStudentMutation, isUpdatingStudent } = useEditStudent();
+  const { addStudentMutation, isAddingStudent } = useAddStudent();
+  const { updateStudentMutation, isUpdatingStudent } = useUpdateStudent();
 
-  const isLoadingStudent = isCreatingStudent || isUpdatingStudent;
+  const isLoadingStudent = isAddingStudent || isUpdatingStudent;
   const isEditMode = !!studentToEdit;
 
   const formik = useFormik({
@@ -35,18 +36,18 @@ function CreateStudentForm({
       email: studentToEdit?.email || "",
       phone: studentToEdit?.phone || "",
       address: studentToEdit?.address || "",
-      gender: studentToEdit?.gender || "",
+      gender: studentToEdit?.gender || "male",
       class: studentToEdit?.class?._id || "",
       rollNumber: studentToEdit?.rollNumber || "",
       parent: studentToEdit?.parent?._id || null,
     },
     validationSchema: addStudentSchema,
-    onSubmit: async (values) => {
+    onSubmit: async (formValues) => {
       if (!isEditMode) {
-        createStudentMutation(values, { onSuccess: onManageStudentModalClose });
+        addStudentMutation(formValues, { onSuccess: onManageStudentModalClose });
       } else {
-        editStudentMutation(
-          { id: studentToEdit._id, values },
+        updateStudentMutation(
+          { studentId: studentToEdit._id, updateStudentInput: formValues },
           { onSuccess: onManageStudentModalClose }
         );
       }
@@ -66,8 +67,6 @@ function CreateStudentForm({
     setShowParentModal(false);
   }, []);
 
-  console.log({...getFieldProps("name")})
-
   return (
     <>
       <FormikProvider value={formik}>
@@ -78,7 +77,6 @@ function CreateStudentForm({
           }}
           className="space-y-4"
         >
-          {/* Name */}
           <FormRowVertical label="Full Name" name="name">
             <Input
               type="text"
@@ -88,7 +86,6 @@ function CreateStudentForm({
             />
           </FormRowVertical>
 
-          {/* Email + Phone */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormRowVertical label="Email Address" name="email">
               <Input
@@ -109,7 +106,6 @@ function CreateStudentForm({
             </FormRowVertical>
           </div>
 
-          {/* Address */}
           <FormRowVertical label="Address" name="address">
             <Input
               type="text"
@@ -119,7 +115,6 @@ function CreateStudentForm({
             />
           </FormRowVertical>
 
-          {/* ✅ Gender Selection */}
           <FormRowVertical label="Gender" name="gender">
             <div className="flex items-center gap-4">
               <label className="flex items-center gap-2">
@@ -151,7 +146,6 @@ function CreateStudentForm({
             )}
           </FormRowVertical>
 
-          {/* Class + Roll Number */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormRowVertical label="Class" name="class">
               <EntitySelect
@@ -192,7 +186,6 @@ function CreateStudentForm({
             </div>
           </FormRowVertical>
 
-          {/* Submit */}
           <div>
             <Button
               fullWidth

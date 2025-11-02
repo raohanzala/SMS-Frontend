@@ -3,7 +3,7 @@ import { signup as signupApi } from "@/api/auth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
-import { setCredentials } from "@/store/slices/authSlice";
+import { setCredentials } from "../../store/slices/authSlice";
 
 export function useSignup() {
     const { user } = useSelector((state) => state.auth)

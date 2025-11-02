@@ -1,11 +1,11 @@
+import { deleteStudentApi } from "@/api/students";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { deleteStudent as deleteStudentApi } from "@/api/students";
 
 export function useDeleteStudent() {
   const queryClient = useQueryClient()
 
-  const { isPending: isStudentDeleting, mutate: deleteStudentMutation } = useMutation({
+  const { isPending: isDeletingStudent, mutate: deleteStudentMutation } = useMutation({
     mutationFn: deleteStudentApi,
 
     onSuccess: () => {
@@ -17,7 +17,6 @@ export function useDeleteStudent() {
     onError: (err) => toast.error(err.message)
 
   })
-  console.log('Loadig in mutate :', isStudentDeleting)
 
-  return { isStudentDeleting, deleteStudentMutation }
+  return { isDeletingStudent, deleteStudentMutation }
 }

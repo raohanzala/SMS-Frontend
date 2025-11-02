@@ -4,9 +4,9 @@ import { useStudent } from '../../../features/students/hooks/useStudent'
 
 
 function StudentDetail() {
-  const { student, isPending } = useStudent();
+  const { student, isLoadingStudent } = useStudent();
 
-  if (isPending) {
+  if (isLoadingStudent) {
     return <p className="text-center py-6 text-gray-500">Loading student details...</p>;
   }
 

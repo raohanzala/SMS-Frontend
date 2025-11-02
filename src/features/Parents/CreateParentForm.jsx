@@ -16,7 +16,7 @@ function CreateParentForm({
 }) {
   const isEditMode = !!parentToEdit;
 
-  const { students, isPending } = useStudents({
+  const { students, isStudentsLoading } = useStudents({
     unassigned: !isEditMode,
     parentId: isEditMode ? parentToEdit?._id : null,
   });
@@ -121,7 +121,7 @@ function CreateParentForm({
               name="children"
               multiple
               className="block w-full px-4 py-2 border rounded-lg"
-              disabled={isLoading || isPending}
+              disabled={isLoading || isStudentsLoading}
               {...formik.getFieldProps("children")}
             >
               {students?.map((student) => (
@@ -137,7 +137,7 @@ function CreateParentForm({
           <FormRowVertical label="Select Children (Students)" name="children">
             <Select
               isMulti
-              isLoading={isPending}
+              isLoading={isStudentsLoading}
               options={
                 students?.map((s) => ({
                   value: s._id,
