@@ -2,13 +2,7 @@ import ViewButton from "@/components/common/ViewButton";
 import EditButton from "@/components/common/EditButton";
 import DeleteButton from "@/components/common/DeleteButton";
 import React from "react";
-import { Student } from "../types/student.types";
-
-export interface StudentsTableProps {
-  students: Student[];
-  onEditStudent: (student: Student) => void;
-  onDeleteStudent: (studentId: string) => void;
-}
+import { StudentsTableProps } from "../types/student-components.types";
 
 const StudentsTable = React.memo(
   ({ onEditStudent, onDeleteStudent, students }: StudentsTableProps) => {

@@ -1,18 +1,12 @@
 import Modal from "../../../components/common/Modal";
-import { Student } from "../types/student.types";
 import CreateStudentForm from "./CreateStudentForm";
+import { ManageStudentModalProps } from "../types/student-components.types";
 
-interface ManageStudentModalProps {
-  isManageStudentModalOpen: boolean;
-  onManageStudentModalClose: () => void;
-  studentToEdit: Student | null;
-}
-
-function ManageStudentModal({
+const ManageStudentModal = ({
   isManageStudentModalOpen,
   onManageStudentModalClose,
   studentToEdit,
-}: ManageStudentModalProps) {
+}: ManageStudentModalProps) => {
   return (
     <Modal
       isOpen={isManageStudentModalOpen}

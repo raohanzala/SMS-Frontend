@@ -11,28 +11,27 @@ export interface Student extends User {
 }
 
 export interface AddStudentInput {
-  name: string;
-  email: string;
-  phone?: string;
-  address?: string;
-  gender?: Gender;
-  rollNumber?: string;
-  class?: string;
-  parent?: string | null;
-  profileImage?: File;
+  studentName: string;
+  studentEmail: string;
+  studentPhone?: string;
+  studentAddress?: string;
+  studentGender?: Gender;
+  studentRollNumber?: string;
+  studentClassId: string; 
+  studentParentId?: string | null;
+  studentProfileImage?: File;
 }
-
 
 export interface UpdateStudentInput {
   name?: string;
-  phone?: string;
-  address?: string;
-  gender?: Gender;
-  rollNumber?: string;
-  class?: string;
-  parent?: string | null;
-  password?: string;
-  profileImage?: File;
+  studentPhone?: string;
+  studentAddress?: string;
+  studentGender?: Gender;
+  studentRollNumber?: string;
+  studentClass?: string;
+  studentParent?: string | null;
+  studentPassword?: string;
+  studentProfileImage?: File;
 }
 
 export interface AssignClassToStudentRequest {
@@ -40,18 +39,17 @@ export interface AssignClassToStudentRequest {
 }
 
 export interface BulkStudentData {
-  name: string;
-  email: string;
-  password: string;
-  phone?: string;
-  address?: string;
-  gender?: Gender;
-  rollNumber?: string;
+  studentName: string;
+  studentEmail: string;
+  studentPassword: string;
+  studentPhone?: string;
+  studentAddress?: string;
+  studentGender?: Gender;
+  studentRollNumber?: string;
   classId?: string;
-  section?: string;
-  parentId?: string;
+  studentSection?: string;
+  studentParent?: string;
   attendance?: Attendance[];
-  // feesPaid?: any[];
 }
 
 export interface BulkAddStudentsRequest {

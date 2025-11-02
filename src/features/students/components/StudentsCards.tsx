@@ -2,13 +2,7 @@ import DeleteButton from "@/components/common/DeleteButton";
 import EditButton from "@/components/common/EditButton";
 import ViewButton from "@/components/common/ViewButton";
 import React from "react";
-import { Student } from "../types/student.types";
-
-export interface StudentsCardsProps {
-  students: Student[];
-  onEditStudent: (student: Student) => void;
-  onDeleteStudent: (studentId: string) => void;
-}
+import { StudentsCardsProps } from "../types/student-components.types";
 
 const StudentsCards = React.memo(
   ({ students, onEditStudent, onDeleteStudent }: StudentsCardsProps) => {

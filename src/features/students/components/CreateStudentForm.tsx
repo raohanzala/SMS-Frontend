@@ -8,20 +8,14 @@ import Modal from "../../../components/common/Modal";
 import CreateParentForm from "../../Parents/CreateParentForm";
 import { useAddStudent } from "../hooks/useAddStudent";
 import { useUpdateStudent } from "../hooks/useUpdateStudent";
-import { Student } from "../types/student.types";
 import { Parent } from "../../../types/user.types";
 import { addStudentSchema } from "../validations/student.validation";
+import { CreateStudentFormProps } from "../types/student-components.types";
 
-
-interface CreateStudentFormProps {
-  studentToEdit: Student | null;
-  onManageStudentModalClose: () => void;
-}
-
-function CreateStudentForm({
+const CreateStudentForm = ({
   studentToEdit,
   onManageStudentModalClose,
-}: CreateStudentFormProps) {
+}: CreateStudentFormProps) => {
   const [showParentModal, setShowParentModal] = useState(false);
 
   const { addStudentMutation, isAddingStudent } = useAddStudent();
@@ -32,14 +26,14 @@ function CreateStudentForm({
 
   const formik = useFormik({
     initialValues: {
-      name: studentToEdit?.name || "",
-      email: studentToEdit?.email || "",
-      phone: studentToEdit?.phone || "",
-      address: studentToEdit?.address || "",
-      gender: studentToEdit?.gender || "male",
-      class: studentToEdit?.class?._id || "",
-      rollNumber: studentToEdit?.rollNumber || "",
-      parent: studentToEdit?.parent?._id || null,
+      studentName: studentToEdit?.name || "",
+      studentEmail: studentToEdit?.email || "",
+      studentPhone: studentToEdit?.phone || "",
+      studentAddress: studentToEdit?.address || "",
+      studentGender: studentToEdit?.gender || "male",
+      studentRollNumber: studentToEdit?.rollNumber || "",
+      studentClassId: studentToEdit?.class?._id || "",
+      studentParentId: studentToEdit?.parent?._id || null,
     },
     validationSchema: addStudentSchema,
     onSubmit: async (formValues) => {
@@ -57,11 +51,13 @@ function CreateStudentForm({
   const {
     values,
     errors,
-    touched,
     handleSubmit,
     setFieldValue,
     getFieldProps,
   } = formik;
+
+  console.log(getFieldProps("studentName"));
+  console.log(errors);
 
   const handleParentModalClose = useCallback(() => {
     setShowParentModal(false);
@@ -77,53 +73,53 @@ function CreateStudentForm({
           }}
           className="space-y-4"
         >
-          <FormRowVertical label="Full Name" name="name">
+          <FormRowVertical label="Full Name" name="studentName" error={errors.studentName}>
             <Input
               type="text"
-              {...getFieldProps("name")}
+              {...getFieldProps("studentName")}
               placeholder="Enter full name"
               disabled={isLoadingStudent}
             />
           </FormRowVertical>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormRowVertical label="Email Address" name="email">
+            <FormRowVertical label="Email Address" name="studentEmail" error={errors.studentEmail}>
               <Input
                 type="email"
-                {...getFieldProps("email")}
+                {...getFieldProps("studentEmail")}
                 placeholder="Enter email"
                 disabled={isLoadingStudent}
               />
             </FormRowVertical>
 
-            <FormRowVertical label="Phone" name="phone">
+            <FormRowVertical label="Phone" name="studentPhone" error={errors.studentPhone}>
               <Input
                 type="text"
-                {...getFieldProps("phone")}
+                {...getFieldProps("studentPhone")}
                 placeholder="Enter phone number"
                 disabled={isLoadingStudent}
               />
             </FormRowVertical>
           </div>
 
-          <FormRowVertical label="Address" name="address">
+          <FormRowVertical label="Address" name="studentAddress" error={errors.studentAddress}>
             <Input
               type="text"
-              {...getFieldProps("address")}
+              {...getFieldProps("studentAddress")}
               placeholder="Enter address"
               disabled={isLoadingStudent}
             />
           </FormRowVertical>
 
-          <FormRowVertical label="Gender" name="gender">
+          <FormRowVertical label="Gender" name="studentGender" error={errors.studentGender} >
             <div className="flex items-center gap-4">
               <label className="flex items-center gap-2">
                 <input
                   type="radio"
-                  name="gender"
+                  name="studentGender"
                   value="male"
-                  checked={values.gender === "male"}
-                  onChange={() => setFieldValue("gender", "male")}
+                  checked={values.studentGender === "male"}
+                  onChange={() => setFieldValue("studentGender", "male")}
                   disabled={isLoadingStudent}
                 />
                 Male
@@ -132,47 +128,44 @@ function CreateStudentForm({
               <label className="flex items-center gap-2">
                 <input
                   type="radio"
-                  name="gender"
+                  name="studentGender"
                   value="female"
-                  checked={values.gender === "female"}
-                  onChange={() => setFieldValue("gender", "female")}
+                  checked={values.studentGender === "female"}
+                  onChange={() => setFieldValue("studentGender", "female")}
                   disabled={isLoadingStudent}
                 />
                 Female
               </label>
             </div>
-            {touched.gender && errors.gender && (
-              <div className="text-red-500 text-sm">{errors.gender}</div>
-            )}
           </FormRowVertical>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormRowVertical label="Class" name="class">
+            <FormRowVertical label="Class" name="studentClassId" error={errors.studentClassId}>
               <EntitySelect
                 entity="class"
-                value={values.class}
-                onChange={(classId: string) => setFieldValue("class", classId)}
+                value={values.studentClassId}
+                onChange={(classId: string) => setFieldValue("studentClassId", classId)}
               />
             </FormRowVertical>
 
-            <FormRowVertical label="Roll Number" name="rollNumber">
+            <FormRowVertical label="Roll Number" name="studentRollNumber" error={errors.studentRollNumber}>
               <Input
                 type="text"
-                {...getFieldProps("rollNumber")}
+                {...getFieldProps("studentRollNumber")}
                 placeholder="Leave empty to auto-generate"
                 disabled={isLoadingStudent}
               />
             </FormRowVertical>
           </div>
 
-          <FormRowVertical label="Parent" name="parent">
+          <FormRowVertical label="Parent" name="studentParentId" error={errors.studentParentId}>
             <div className="flex items-center gap-2">
               <div className="flex-1">
                 <EntitySelect
                   entity="parent"
-                  value={values.parent}
+                  value={values.studentParentId}
                   onChange={(parentId: string) =>
-                    setFieldValue("parent", parentId)
+                    setFieldValue("studentParentId", parentId)
                   }
                 />
               </div>

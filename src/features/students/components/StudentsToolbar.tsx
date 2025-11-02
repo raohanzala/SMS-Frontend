@@ -3,10 +3,7 @@ import Button from "@/components/common/Button";
 import { FiPlus } from "react-icons/fi";
 import ViewToggle from "@/components/common/ViewToggle";
 import SearchBar from "@/components/common/SearchBar";
-
-interface StudentsToolbarProps {
-  onClickAddStudent: () => void;
-}
+import { StudentsToolbarProps } from "../types/student-components.types";
 
 const StudentsToolbar = ({ onClickAddStudent }: StudentsToolbarProps) => {
   return (
