@@ -1,9 +1,17 @@
+import { useState } from "react";
 import { FiMenu, FiBell, FiLogOut } from "react-icons/fi";
 import { useDispatch } from "react-redux";
 import { logout } from "../../store/slices/authSlice";
+import ConfirmationModal from "../common/ConfirmationModal";
 
 export default function Header({ setSidebarOpen, user }) {
   const dispatch = useDispatch();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    setShowLogoutModal(false);
+  };
 
   return (
     <div className="sticky top-0 z-40 flex h-16 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
@@ -36,7 +44,7 @@ export default function Header({ setSidebarOpen, user }) {
               <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
             </div>
             <button
-              onClick={() => dispatch(logout())}
+              onClick={() => setShowLogoutModal(true)}
               className="flex items-center text-gray-400 hover:text-gray-600"
             >
               <FiLogOut className="h-5 w-5" />
@@ -44,6 +52,18 @@ export default function Header({ setSidebarOpen, user }) {
           </div>
         </div>
       </div>
+
+      <ConfirmationModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        title="Logout"
+        message="Are you sure you want to logout?"
+        confirmText="Logout"
+        cancelText="Cancel"
+        onConfirm={handleLogout}
+        type="warning"
+        confirmButtonVariant="danger"
+      />
     </div>
   );
 }

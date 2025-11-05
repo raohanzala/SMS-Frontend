@@ -38,7 +38,6 @@ function SearchableSelect({
         return;
       }
 
-      // otherwise fetch by id
       const option = await fetchById(value as string);
       if (option) setSelectedOption(option);
     };

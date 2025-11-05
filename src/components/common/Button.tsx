@@ -81,20 +81,14 @@ const Button = ({
       onClick={onClick}
       {...props}
     >
-      {/* Start icon (new API) */}
       {startIcon && <span className="">{startIcon}</span>}
 
-      {/* Legacy icon (if startIcon not provided) */}
       {!startIcon && iconPosition === 'left' && renderLoaderOrIcon() && (
         <span className="mr-2">{renderLoaderOrIcon()}</span>
       )}
-
       {children}
-
-      {/* End icon (new API) */}
       {endIcon && <span className="ml-2">{endIcon}</span>}
 
-      {/* Legacy icon (if endIcon not provided) */}
       {!endIcon && iconPosition === 'right' && renderLoaderOrIcon() && (
         <span className="ml-2">{renderLoaderOrIcon()}</span>
       )}

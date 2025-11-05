@@ -6,7 +6,7 @@ type UserRole = 'admin' | 'teacher' | 'student' | 'parent';
 
 interface User {
   role: UserRole;
-  [key: string]: any;
+  [key: string]: string | number | boolean | null | undefined;
 }
 
 interface AuthState {

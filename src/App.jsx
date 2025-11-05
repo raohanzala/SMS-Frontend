@@ -13,10 +13,10 @@ import PublicLayout from './components/layout/PublicLayout';
 import Layout from './components/layout/Layout';
 
 // Public Pages
-import Login from './pages/public/Login';
-import Register from './pages/public/Register';
-import ForgotPassword from './pages/public/ForgotPassword';
-import ChangePassword from './pages/public/ChangePassword';
+import Login from './features/authentication/pages/LoginPage';
+import Register from './features/authentication/pages/SignupPage';
+import ForgotPassword from './features/authentication/pages/ForgotPasswordPage';
+import ChangePassword from './features/authentication/pages/ChangePasswordPage';
 
 // Protected Route Component
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -135,7 +135,7 @@ const AdminDashboard = React.lazy(() => import('./pages/private/admin/Dashboard'
 const AdminStudents = React.lazy(() => import('./features/students/pages/StudentsPage'));
 const AdminTeachers = React.lazy(() => import('./pages/private/admin/Teachers'));
 const AdminParents = React.lazy(() => import('./features/parents/pages/ParentsPage'));
-const AdminClasses = React.lazy(() => import('./pages/private/admin/Classes'));
+const AdminClasses = React.lazy(() => import('./features/classes/pages/ClassesPage'));
 const AdminSubjects = React.lazy(() => import('./pages/private/admin/Subjects'));
 const AdminTimetable = React.lazy(() => import('./pages/private/admin/Timetable'));
 const AdminFees = React.lazy(() => import('./pages/private/admin/Fees'));

@@ -84,14 +84,12 @@ const ConfirmationModal = ({
         </div>
       </div>
 
-      {/* Body */}
       <div>
         <p className="py-4 text-gray-600">
           {message}
         </p>
       </div>
 
-      {/* Footer */}
       <div className="pt-3 rounded-b-lg flex items-center justify-between gap-3">
         <Button
           variant={cancelButtonVariant}

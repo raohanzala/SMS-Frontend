@@ -1,7 +1,7 @@
+import { useDebounce } from "@/hooks/useDebounce";
+import { useQueryParams } from "@/hooks/useQueryParams";
 import { useEffect, useState, InputHTMLAttributes } from "react";
 import { FiSearch, FiX } from "react-icons/fi";
-import { useDebounce } from "../../hooks/useDebounce";
-import { useQueryParams } from "../../hooks/useQueryParams";
 
 interface SearchBarProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'placeholder'> {
   placeholder?: string;
@@ -20,7 +20,7 @@ const SearchBar = ({
   ...props
 }: SearchBarProps) => {
   const { getParam, setParam, removeParam } = useQueryParams();
-  const initialValue = getParam(paramKey, "");
+  const initialValue = getParam(paramKey, null);
 
   const [searchValue, setSearchValue] = useState(initialValue);
   const debouncedValue = useDebounce(searchValue, debounceDelay);
@@ -42,7 +42,7 @@ const SearchBar = ({
 
       <input
         type="text"
-        value={searchValue}
+        value={searchValue || ""}
         onChange={(e) => setSearchValue(e.target.value)}
         placeholder={placeholder}
         className="flex-1 outline-none border-none focus:outline-none text-sm text-gray-700 placeholder-gray-400 bg-transparent"

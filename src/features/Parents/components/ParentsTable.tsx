@@ -5,6 +5,8 @@ import { ParentsTableProps } from '../types/parent-components.interface';
 
 const ParentsTable = ({ onEditParent, onDeleteParent, parents }: ParentsTableProps) => {
 
+  console.log("parents", parents); 
+
   return (
     <>
       <div className="bg-white rounded-lg shadow overflow-hidden">

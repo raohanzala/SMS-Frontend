@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { FiGrid, FiList } from "react-icons/fi";
 import Tooltip from "./Tooltip";
-import { useQueryParams } from "../../hooks/useQueryParams";
+import { useQueryParams } from "@/hooks/useQueryParams";
 
 export default function ViewToggle() {
   const { getParam, setParam } = useQueryParams();
-  const view = getParam("view", "card");
+  const view = getParam("view");
 
   useEffect(() => {
     if (!view) setParam("view", "card");
@@ -13,7 +13,6 @@ export default function ViewToggle() {
 
   return (
     <div className="flex rounded-md shadow-sm border z-0">
-      {/* Table View */}
       <Tooltip text="Switch to Table View">
         <button
           onClick={() => setParam("view", "table")}
@@ -37,7 +36,6 @@ export default function ViewToggle() {
             }`}
         >
           <FiGrid className="w-4 h-4" />
-          {/* Card */}
         </button>
       </Tooltip>
     </div>

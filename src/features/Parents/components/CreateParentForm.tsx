@@ -37,15 +37,14 @@ const CreateParentForm = ({
       parentChildrenIds: parentToEdit?.children?.map((child) => child._id) || [],
     },
     validationSchema: addParentSchema,
-    onSubmit: async (values) => {
-      const payload = { ...values };
+    onSubmit: async (formValues) => {
 
       if (parentFormContext === "student") {
-        delete (payload as AddParentInput).parentChildrenIds;
+        delete (formValues as AddParentInput).parentChildrenIds;
       }
 
       if (!isEditMode) {
-        addParentMutation(payload, {
+        addParentMutation(formValues, {
           onSuccess: ({ data }) => {
             onParentFormSuccess?.(data?.parent);
             onManageParentModalClose?.();
@@ -53,60 +52,62 @@ const CreateParentForm = ({
         });
       } else {
         updateParentMutation(
-          { parentId: parentToEdit?._id, updateParentInput: values },
+          { parentId: parentToEdit?._id, updateParentInput: formValues },
           { onSuccess: () => onManageParentModalClose?.() }
         );
       }
     },
   });
 
+  const { values,errors, handleSubmit, setFieldValue, getFieldProps } = formik;
+
+  console.log("errors", errors);
+  console.log("values", values);
+
   return (
     <FormikProvider value={formik}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          formik.handleSubmit(e);
+          handleSubmit(e);
         }}
         className="space-y-4"
       >
-        {/* Name */}
-        <FormRowVertical label="Full Name" name="parentName">
+        <FormRowVertical label="Full Name" name="parentName" error={errors.parentName}>
           <Input
             type="text"
             disabled={isParentLoading}
             placeholder="Enter full name"
-            {...formik.getFieldProps("parentName")}
+            {...getFieldProps("parentName")}
           />
         </FormRowVertical>
 
-        {/* Email + Phone */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormRowVertical label="Email Address" name="parentEmail">
+          <FormRowVertical label="Email Address" name="parentEmail" error={errors.parentEmail}>
             <Input
               type="email"
               disabled={isParentLoading}
               placeholder="Enter email"
-              {...formik.getFieldProps("parentEmail")}
+              {...getFieldProps("parentEmail")}
             />
           </FormRowVertical>
 
-          <FormRowVertical label="Phone" name="parentPhone">
+          <FormRowVertical label="Phone" name="parentPhone" error={errors.parentPhone}>
             <Input
               type="text"
               disabled={isParentLoading}
               placeholder="Enter phone number"
-              {...formik.getFieldProps("parentPhone")}
+              {...getFieldProps("parentPhone")}
             />
           </FormRowVertical>
         </div>
 
-        {/* Address (optional) */}
-        <FormRowVertical label="Address" name="parentAddress">
+        <FormRowVertical label="Address" name="parentAddress" error={errors.parentAddress}>
           <Input
             type="text"
             disabled={isParentLoading}
             placeholder="Enter address (optional)"
-            {...formik.getFieldProps("parentAddress")}
+            {...getFieldProps("parentAddress")}
           />
         </FormRowVertical>
 
@@ -119,7 +120,7 @@ const CreateParentForm = ({
               multiple
               className="block w-full px-4 py-2 border rounded-lg"
               disabled={isLoading || isStudentsLoading}
-              {...formik.getFieldProps("children")}
+              {...getFieldProps("children")}
             >
               {students?.map((student) => (
                 <option key={student._id} value={student._id}>
@@ -131,7 +132,7 @@ const CreateParentForm = ({
         )} */}
 
         {parentFormContext === "parent" && (
-          <FormRowVertical label="Select Children (Students)" name="children">
+          <FormRowVertical label="Select Children (Students)" name="parentChildrenIds" error={errors.parentChildrenIds as string}>
             <Select
               isMulti
               isLoading={isStudentsLoading}
@@ -141,9 +142,8 @@ const CreateParentForm = ({
                   label: `${student.name} (${student.rollNumber || "N/A"})`,
                 })) || []
               }
-              // ✅ Correctly handle edit mode
               value={
-                (formik.values.parentChildrenIds || [])
+                (values.parentChildrenIds || [])
                   .map((childId) => {
                     // Try to find the student from the fetched list
                     const existingStudent = students?.find((student: Student) => student._id === childId);
@@ -169,7 +169,7 @@ const CreateParentForm = ({
                   .filter(Boolean) // remove nulls
               }
               onChange={(selected) =>
-                formik.setFieldValue(
+                setFieldValue(
                   "parentChildrenIds",
                   selected ? selected.map((child) => child?.value) : []
                 )
@@ -214,13 +214,12 @@ const CreateParentForm = ({
           </p>
         )}
 
-        {/* Submit */}
         <div>
           <Button
             fullWidth
             type="submit"
             disabled={isParentLoading}
-            loading={isAddingParent || isUpdatingParent}
+            loading={isParentLoading}
           >
             {!isEditMode ? "Add Parent" : "Edit Parent"}
           </Button>

@@ -1,8 +1,8 @@
 import { ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { HiXMark } from "react-icons/hi2";
-import { useOutsideClick } from "../../hooks/useOutsideClick";
 import Tooltip from "./Tooltip";
+import { useOutsideClick } from "@/hooks/useOutsideClick";
 
 type ModalSize = "sm" | "md" | "lg" | "xl";
 
@@ -15,7 +15,7 @@ interface ModalProps {
 }
 
 export default function Modal({ isOpen, onClose, children, footer, size = "md" }: ModalProps) {
-  const ref = useOutsideClick()
+  const ref = useOutsideClick(onClose)
 
   if (!isOpen) return null;
 
@@ -28,16 +28,18 @@ export default function Modal({ isOpen, onClose, children, footer, size = "md" }
 
   return createPortal(
     <>
-      {/* Overlay */}
-      <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-50 transition-all duration-300" />
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-50 transition-all duration-300"
+        data-modal="backdrop"
+      />
 
-      {/* Modal Box */}
       <div
         ref={ref}
+        data-modal="container"
+        onClick={(e) => e.stopPropagation()} // prevents click from reaching outer listener
         className={`fixed top-1/2 left-1/2 z-50 transform -translate-x-1/2 -translate-y-1/2 
-        bg-white rounded-lg shadow-2xl max-h-[90%] w-[90%] ${sizeClasses[size]} transition-all duration-300`}
+        bg-white rounded-lg shadow-2xl max-h-[90%] w-[90%] ${sizeClasses[size]} transition-all duration-300 modal-container`}
       >
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-3 right-3 p-1 rounded-md hover:bg-gray-100 transition"
@@ -47,7 +49,6 @@ export default function Modal({ isOpen, onClose, children, footer, size = "md" }
           </Tooltip>
         </button>
 
-        {/* Content */}
         <div className="overflow-y-auto flex-1 px-6 py-8 scrollbar-hide min-h-[60vh]">
           {children}
         </div>

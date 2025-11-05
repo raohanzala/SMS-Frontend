@@ -1,7 +1,8 @@
-import SearchableSelect from "./SearchableSelect";
-import { getAllTeachers, getTeacherById } from "../../api/teachers";
-import { getAllClasses, getClassById } from "../../api/classes";
 import { getAllParentsApi, getParentByIdApi } from "@/api/parents";
+import SearchableSelect from "./SearchableSelect";
+import { getClassByIdApi, getClassesApi } from "@/api/classes";
+import { getAllTeachers, getTeacherById } from "../../api/teachers";
+
 
 type EntityType = 'parent' | 'class' | 'teacher';
 
@@ -39,7 +40,7 @@ function EntitySelect({ entity, value, onChange, placeholder }: EntitySelectProp
 
     class: {
       fetchList: async (search: string): Promise<Option[]> => {
-        const { data } = await getAllClasses({ page: 1, limit: 10, search });
+        const { data } = await getClassesApi({ page: 1, limit: 10, search });
         return (
           data?.classes?.map((c: any) => ({
             value: c._id,
@@ -49,7 +50,7 @@ function EntitySelect({ entity, value, onChange, placeholder }: EntitySelectProp
       },
       fetchById: async (id: string): Promise<Option | null> => {
         if (!id) return null;
-        const { data } = await getClassById(id);
+        const { data } = await getClassByIdApi(id);
         return data ? { value: data._id, label: data.name } : null;
       },
     },

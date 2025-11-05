@@ -4,8 +4,7 @@ import Button from "../../../components/common/Button";
 import EntitySelect from "../../../components/common/EntitySelect";
 import FormRowVertical from "../../../components/common/FormRowVerticle";
 import Input from "../../../components/common/Input";
-import Modal from "../../../components/common/Modal";
-import CreateParentForm from "../../parents/components/CreateParentForm";
+import ManageParentModal from "@/features/parents/components/ManageParentModal";
 import { useAddStudent } from "../hooks/useAddStudent";
 import { useUpdateStudent } from "../hooks/useUpdateStudent";
 import { addStudentSchema } from "../validations/student.validation";
@@ -38,7 +37,9 @@ const CreateStudentForm = ({
     validationSchema: addStudentSchema,
     onSubmit: async (formValues) => {
       if (!isEditMode) {
-        addStudentMutation(formValues, { onSuccess: onManageStudentModalClose });
+        addStudentMutation(formValues, {
+          onSuccess: onManageStudentModalClose,
+        });
       } else {
         updateStudentMutation(
           { studentId: studentToEdit._id, updateStudentInput: formValues },
@@ -48,13 +49,7 @@ const CreateStudentForm = ({
     },
   });
 
-  const {
-    values,
-    errors,
-    handleSubmit,
-    setFieldValue,
-    getFieldProps,
-  } = formik;
+  const { values, errors, handleSubmit, setFieldValue, getFieldProps } = formik;
 
   console.log(getFieldProps("studentName"));
   console.log(errors);
@@ -73,7 +68,11 @@ const CreateStudentForm = ({
           }}
           className="space-y-4"
         >
-          <FormRowVertical label="Full Name" name="studentName" error={errors.studentName}>
+          <FormRowVertical
+            label="Full Name"
+            name="studentName"
+            error={errors.studentName}
+          >
             <Input
               type="text"
               {...getFieldProps("studentName")}
@@ -83,7 +82,11 @@ const CreateStudentForm = ({
           </FormRowVertical>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormRowVertical label="Email Address" name="studentEmail" error={errors.studentEmail}>
+            <FormRowVertical
+              label="Email Address"
+              name="studentEmail"
+              error={errors.studentEmail}
+            >
               <Input
                 type="email"
                 {...getFieldProps("studentEmail")}
@@ -92,7 +95,11 @@ const CreateStudentForm = ({
               />
             </FormRowVertical>
 
-            <FormRowVertical label="Phone" name="studentPhone" error={errors.studentPhone}>
+            <FormRowVertical
+              label="Phone"
+              name="studentPhone"
+              error={errors.studentPhone}
+            >
               <Input
                 type="text"
                 {...getFieldProps("studentPhone")}
@@ -102,7 +109,11 @@ const CreateStudentForm = ({
             </FormRowVertical>
           </div>
 
-          <FormRowVertical label="Address" name="studentAddress" error={errors.studentAddress}>
+          <FormRowVertical
+            label="Address"
+            name="studentAddress"
+            error={errors.studentAddress}
+          >
             <Input
               type="text"
               {...getFieldProps("studentAddress")}
@@ -111,7 +122,11 @@ const CreateStudentForm = ({
             />
           </FormRowVertical>
 
-          <FormRowVertical label="Gender" name="studentGender" error={errors.studentGender} >
+          <FormRowVertical
+            label="Gender"
+            name="studentGender"
+            error={errors.studentGender}
+          >
             <div className="flex items-center gap-4">
               <label className="flex items-center gap-2">
                 <input
@@ -140,15 +155,25 @@ const CreateStudentForm = ({
           </FormRowVertical>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormRowVertical label="Class" name="studentClassId" error={errors.studentClassId}>
+            <FormRowVertical
+              label="Class"
+              name="studentClassId"
+              error={errors.studentClassId}
+            >
               <EntitySelect
                 entity="class"
                 value={values.studentClassId}
-                onChange={(classId: string) => setFieldValue("studentClassId", classId)}
+                onChange={(classId: string) =>
+                  setFieldValue("studentClassId", classId)
+                }
               />
             </FormRowVertical>
 
-            <FormRowVertical label="Roll Number" name="studentRollNumber" error={errors.studentRollNumber}>
+            <FormRowVertical
+              label="Roll Number"
+              name="studentRollNumber"
+              error={errors.studentRollNumber}
+            >
               <Input
                 type="text"
                 {...getFieldProps("studentRollNumber")}
@@ -158,7 +183,11 @@ const CreateStudentForm = ({
             </FormRowVertical>
           </div>
 
-          <FormRowVertical label="Parent" name="studentParentId" error={errors.studentParentId}>
+          <FormRowVertical
+            label="Parent"
+            name="studentParentId"
+            error={errors.studentParentId}
+          >
             <div className="flex items-center gap-2">
               <div className="flex-1">
                 <EntitySelect
@@ -192,17 +221,16 @@ const CreateStudentForm = ({
         </form>
       </FormikProvider>
 
-      <Modal isOpen={showParentModal} onClose={handleParentModalClose}>
-        <CreateParentForm
-          onManageParentModalClose={handleParentModalClose}
-          parentFormContext="student"
-          onParentFormSuccess={(newParent: Parent) =>
-            setFieldValue("studentParentId", newParent._id)
-          }
-        />
-      </Modal>
+      <ManageParentModal
+        isManageParentModalOpen={showParentModal}
+        onManageParentModalClose={handleParentModalClose}
+        parentFormContext="student"
+        onParentFormSuccess={(newParent: Parent) =>
+          setFieldValue("studentParentId", newParent._id)
+        }
+      />
     </>
   );
-}
+};
 
 export default CreateStudentForm;

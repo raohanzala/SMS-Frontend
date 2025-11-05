@@ -1,6 +1,6 @@
 import PageToolbar from "@/components/common/PageToolbar";
 import Button from "@/components/common/Button";
-import { FiPlus } from "react-icons/fi";
+import { FiUsers } from "react-icons/fi";
 import ViewToggle from "@/components/common/ViewToggle";
 import SearchBar from "@/components/common/SearchBar";
 import { StudentsToolbarProps } from "../types/student-components.types";
@@ -14,7 +14,7 @@ const StudentsToolbar = ({ onClickAddStudent }: StudentsToolbarProps) => {
         <ViewToggle />
         <Button
           onClick={onClickAddStudent}
-          startIcon={<FiPlus className="mr-2 h-4 w-4" />}
+          startIcon={<FiUsers className="mr-2 h-4 w-4" />}
         >
           Add Student
         </Button>

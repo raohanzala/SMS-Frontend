@@ -11,6 +11,8 @@ export interface ManageParentModalProps {
   isManageParentModalOpen: boolean;
   onManageParentModalClose: () => void;
   parentToEdit?: Parent | null;
+  parentFormContext?: "parent" | "student";
+  onParentFormSuccess?: (parent: Parent) => void;
 }
 
 // ParentDetailsProps is intentionally empty as the component doesn't accept props

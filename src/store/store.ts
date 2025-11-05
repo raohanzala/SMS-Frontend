@@ -22,3 +22,4 @@ const store = configureStore({
 const persistor = persistStore(store);
 
 export { store, persistor };
+export type RootState = ReturnType<typeof store.getState>;
