@@ -2,14 +2,14 @@ import { Parent } from "./parent.types";
 
 export interface CreateParentFormProps {
   parentToEdit?: Parent | null;
-  onClose?: () => void;
-  onSuccess?: (parent: Parent) => void;
-  context?: "parent" | "student";
+  onManageParentModalClose?: () => void;
+  onParentFormSuccess?: (parent: Parent) => void;
+  parentFormContext?: "parent" | "student";
 }
 
 export interface ManageParentModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isManageParentModalOpen: boolean;
+  onManageParentModalClose: () => void;
   parentToEdit?: Parent | null;
 }
 

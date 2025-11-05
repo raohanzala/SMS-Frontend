@@ -2,7 +2,8 @@ import { getAllStudentsApi } from "@/api/students";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 
-export function useStudents({ unassigned = false, parentId = null } = {}) {
+export function useStudents(params?: { unassigned?: boolean, parentId?: string | null }) {
+  const { unassigned = false, parentId = null } = params || {};
   const [searchParams] = useSearchParams();
 
   const page = Number(searchParams.get("page")) || 1;

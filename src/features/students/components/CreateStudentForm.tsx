@@ -8,9 +8,9 @@ import Modal from "../../../components/common/Modal";
 import CreateParentForm from "../../parents/components/CreateParentForm";
 import { useAddStudent } from "../hooks/useAddStudent";
 import { useUpdateStudent } from "../hooks/useUpdateStudent";
-import { Parent } from "../../../types/user.types";
 import { addStudentSchema } from "../validations/student.validation";
 import { CreateStudentFormProps } from "../types/student-components.types";
+import { Parent } from "@/features/parents/types/parent.types";
 
 const CreateStudentForm = ({
   studentToEdit,
@@ -194,10 +194,10 @@ const CreateStudentForm = ({
 
       <Modal isOpen={showParentModal} onClose={handleParentModalClose}>
         <CreateParentForm
-          onClose={handleParentModalClose}
-          context="student"
-          onSuccess={(newParent: Parent) =>
-            setFieldValue("parent", newParent._id)
+          onManageParentModalClose={handleParentModalClose}
+          parentFormContext="student"
+          onParentFormSuccess={(newParent: Parent) =>
+            setFieldValue("studentParentId", newParent._id)
           }
         />
       </Modal>

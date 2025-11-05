@@ -96,8 +96,8 @@ const ParentsPage = () => {
       )}
 
       <ManageParentModal
-        isOpen={isShowManageParentModal}
-        onClose={handleCloseManageParentModal}
+        isManageParentModalOpen={isShowManageParentModal}
+        onManageParentModalClose={handleCloseManageParentModal}
         parentToEdit={parentToEdit}
       />
 

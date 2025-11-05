@@ -2,10 +2,10 @@ import Modal from "@/components/common/Modal";
 import CreateParentForm from "./CreateParentForm";
 import { ManageParentModalProps } from "../types/parent-components.interface";
 
-const ManageParentModal = ({ isOpen, onClose, parentToEdit }: ManageParentModalProps) => {
+const ManageParentModal = ({ isManageParentModalOpen, onManageParentModalClose, parentToEdit }: ManageParentModalProps) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <CreateParentForm onClose={onClose} parentToEdit={parentToEdit} />
+    <Modal isOpen={isManageParentModalOpen} onClose={onManageParentModalClose}>
+      <CreateParentForm onManageParentModalClose={onManageParentModalClose} parentToEdit={parentToEdit} />
     </Modal>
   );
 }
