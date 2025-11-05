@@ -1,7 +1,7 @@
 import { getAllParentsApi, getParentByIdApi } from "@/api/parents";
 import SearchableSelect from "./SearchableSelect";
 import { getClassByIdApi, getClassesApi } from "@/api/classes";
-import { getAllTeachers, getTeacherById } from "../../api/teachers";
+import { getAllTeachersApi, getTeacherByIdApi } from "@/api/teachers";
 
 
 type EntityType = 'parent' | 'class' | 'teacher';
@@ -14,7 +14,7 @@ interface Option {
 interface EntitySelectProps {
   entity: EntityType;
   value: string | null;
-  onChange: (value: string) => void;
+  onChange: (value: string | null) => void;
   placeholder?: string;
 }
 
@@ -57,7 +57,7 @@ function EntitySelect({ entity, value, onChange, placeholder }: EntitySelectProp
 
     teacher: {
       fetchList: async (search: string): Promise<Option[]> => {
-        const { data } = await getAllTeachers({ page: 1, limit: 10, search });
+        const { data } = await getAllTeachersApi({ page: 1, limit: 10, search });
         return (
           data?.teachers?.map((t: any) => ({
             value: t._id,
@@ -67,7 +67,7 @@ function EntitySelect({ entity, value, onChange, placeholder }: EntitySelectProp
       },
       fetchById: async (id: string): Promise<Option | null> => {
         if (!id) return null;
-        const { data } = await getTeacherById(id);
+        const { data } = await getTeacherByIdApi(id);
         return data ? { value: data._id, label: `${data.name} (${data.email})` } : null;
       },
     },

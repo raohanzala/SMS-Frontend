@@ -4,8 +4,8 @@ import { useCreateTimetable } from "./useCreateTimetable";
 import FormRowVertical from "@/components/common/FormRowVerticle";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
-import { useTeachers } from "../teachers/useTeachers";
-import { useSubjects } from "../subjects/useSubjects";
+import { useTeachers } from "../teachers/hooks/useTeachers";
+import { useSubjects } from "../subjects/hooks/useSubjects";
 import { useClasses } from "../classes/useClasses";
 
 

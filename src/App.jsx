@@ -133,7 +133,7 @@ function App() {
 // Lazy load all page components
 const AdminDashboard = React.lazy(() => import('./pages/private/admin/Dashboard'));
 const AdminStudents = React.lazy(() => import('./features/students/pages/StudentsPage'));
-const AdminTeachers = React.lazy(() => import('./pages/private/admin/Teachers'));
+const AdminTeachers = React.lazy(() => import('./features/teachers/pages/TeachersPage'));
 const AdminParents = React.lazy(() => import('./features/parents/pages/ParentsPage'));
 const AdminClasses = React.lazy(() => import('./features/classes/pages/ClassesPage'));
 const AdminSubjects = React.lazy(() => import('./pages/private/admin/Subjects'));

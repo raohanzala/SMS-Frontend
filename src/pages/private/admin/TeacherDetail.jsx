@@ -1,11 +1,13 @@
 import React from "react";
-import { useTeacher } from "@/features/teachers/useTeacher";
+import { useParams } from "react-router-dom";
+import { useTeacher } from "@/features/teachers/hooks/useTeacher";
 
 function TeacherDetail() {
-  const { teacher, isPending } = useTeacher();
+  const { teacherId } = useParams();
+  const { teacher, isTeacherLoading } = useTeacher(teacherId);
 
-  if (isPending) {
-    return <p className="text-center py-6 text-gray-500">Loading student details...</p>;
+  if (isTeacherLoading) {
+    return <p className="text-center py-6 text-gray-500">Loading teacher details...</p>;
   }
 
   if (!teacher) {

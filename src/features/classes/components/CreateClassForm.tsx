@@ -4,10 +4,8 @@ import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import { useAddClass } from '../hooks/useAddClass';
 import { useUpdateClass } from '../hooks/useUpdateClass';
-// @ts-expect-error - JavaScript files without type definitions
-import { useTeachers } from '../../teachers/useTeachers';
-// @ts-expect-error - JavaScript files without type definitions
-import { useSubjects } from '../../subjects/useSubjects';
+import { useTeachers } from '../../teachers/hooks/useTeachers';
+import { useSubjects } from '../../subjects/hooks/useSubjects';
 import { CreateClassFormProps } from '../types/class-components.interface';
 
 const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
