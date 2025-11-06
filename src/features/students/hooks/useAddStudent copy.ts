@@ -14,7 +14,8 @@ export function useAddStudent() {
       },
       onError: (err) =>
         toast.error(
-          err.message || "Failed to create student in addtudent hook"
+            err.message ||
+            "Failed to create student"
         ),
     });
 
