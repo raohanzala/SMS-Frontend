@@ -9,7 +9,7 @@ import { useAddStudent } from "../hooks/useAddStudent";
 import { useUpdateStudent } from "../hooks/useUpdateStudent";
 import { addStudentSchema } from "../validations/student.validation";
 import { CreateStudentFormProps } from "../types/student-components.types";
-import { Parent } from "@/features/parents/types/parent.types";
+import { Parent } from "@/features/Parents/types/parent.types";
 
 const CreateStudentForm = ({
   studentToEdit,
