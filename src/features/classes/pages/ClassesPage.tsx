@@ -8,6 +8,7 @@ import Pagination from "../../../components/common/Pagination";
 import Spinner from "../../../components/common/Spinner";
 import ManageClassModal from "../components/ManageClassModal";
 import ClassesTable from "../components/ClassesTable";
+import ClassesCards from "../components/ClassesCards";
 import ClassesToolbar from "../components/ClassesToolbar";
 import { useDeleteClass } from "../hooks/useDeleteClass";
 import { useClasses } from "../hooks/useClasses";
@@ -95,8 +96,7 @@ const ClassesPage = () => {
                   onDeleteClass={handleDeleteClass}
                 />
               ) : (
-                // ClassesCards component can be added here later if needed
-                <ClassesTable
+                <ClassesCards
                   classes={classes}
                   onEditClass={handleEditClass}
                   onDeleteClass={handleDeleteClass}

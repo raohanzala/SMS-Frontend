@@ -1,29 +1,30 @@
 export interface SubjectItem {
+  _id: string;
   name: string;
   totalMarks: number;
 }
 
 export interface Subject {
   _id: string;
-  class?: string | { _id: string; name: string; section: string }; // class ID or populated class
-  subjects: SubjectItem[];
-  assignedTeacher?: {
+  name: string;
+  monthlyFee?: number;
+  classTeacher?: {
     _id: string;
     name: string;
-    email: string;
+    email?: string;
     profileImage?: string;
   };
-  code?: string;
+  subjects: SubjectItem[];
   createdAt?: string;
   updatedAt?: string;
 }
 
 export interface AddSubjectInput {
-  class: string;
+  classId: string;
   subjects: SubjectItem[];
 }
 
 export interface UpdateSubjectInput {
-  class?: string;
+  classId?: string;
   subjects?: SubjectItem[];
 }

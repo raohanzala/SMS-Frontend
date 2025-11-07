@@ -1,22 +1,21 @@
 import { useCallback, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { FiUser } from "react-icons/fi";
 import ConfirmationModal from "../../../components/common/ConfirmationModal";
 import EmptyState from "../../../components/common/EmptyState";
 import ErrorMessage from "../../../components/common/ErrorMessage";
 import Pagination from "../../../components/common/Pagination";
 import Spinner from "../../../components/common/Spinner";
-import ManageTeacherModal from "../components/ManageTeacherModal";
 import TeachersTable from "../components/TeachersTable";
+import TeachersCards from "../components/TeachersCards";
 import TeachersToolbar from "../components/TeachersToolbar";
 import { useDeleteTeacher } from "../hooks/useDeleteTeacher";
 import { useTeachers } from "../hooks/useTeachers";
 import { Teacher } from "../types/teacher.types";
 
 const TeachersPage = () => {
-  const [teacherToEdit, setTeacherToEdit] = useState<Teacher | null>(null);
+  const navigate = useNavigate();
   const [teacherToDelete, setTeacherToDelete] = useState<string | null>(null);
-  const [isShowManageTeacherModal, setIsShowManageTeacherModal] = useState(false);
   const [isShowTeacherDeleteModal, setIsShowTeacherDeleteModal] = useState(false);
 
   const [searchParams] = useSearchParams();
@@ -24,24 +23,18 @@ const TeachersPage = () => {
   const { pagination, teachers, teachersError, isTeachersLoading } = useTeachers();
   const { deleteTeacherMutation, isDeletingTeacher } = useDeleteTeacher();
 
-  const handleEditTeacher = useCallback((teacherToEdit: Teacher) => {
-    setTeacherToEdit(teacherToEdit);
-    setIsShowManageTeacherModal(true);
-  }, []);
+  const handleEditTeacher = useCallback((teacher: Teacher) => {
+    navigate(`/admin/teachers/${teacher._id}/edit`);
+  }, [navigate]);
 
   const handleDeleteTeacher = useCallback((teacherId: string) => {
     setTeacherToDelete(teacherId);
     setIsShowTeacherDeleteModal(true);
   }, []);
 
-  const handleShowManageTeacherModal = useCallback(() => {
-    setIsShowManageTeacherModal(true);
-  }, []);
-
-  const handleCloseManageTeacherModal = useCallback(() => {
-    setTeacherToEdit(null);
-    setIsShowManageTeacherModal(false);
-  }, []);
+  const handleShowAddTeacher = useCallback(() => {
+    navigate("/admin/teachers/new");
+  }, [navigate]);
 
   const handleCloseTeacherDeleteModal = useCallback(() => {
     setTeacherToDelete(null);
@@ -61,7 +54,7 @@ const TeachersPage = () => {
 
   return (
     <div className="space-y-6">
-      <TeachersToolbar onClickAddTeacher={handleShowManageTeacherModal} />
+      <TeachersToolbar onClickAddTeacher={handleShowAddTeacher} />
 
       {isTeachersLoading && (
         <div className="flex justify-center py-6">
@@ -84,7 +77,7 @@ const TeachersPage = () => {
               description="Get started by adding your first teacher to the system."
               buttonText="Add Teacher"
               buttonIcon={FiUser}
-              onButtonClick={handleShowManageTeacherModal}
+              onButtonClick={handleShowAddTeacher}
             />
           ) : (
             <>
@@ -95,8 +88,7 @@ const TeachersPage = () => {
                   onDeleteTeacher={handleDeleteTeacher}
                 />
               ) : (
-                // TeachersCards component can be added here later if needed
-                <TeachersTable
+                <TeachersCards
                   teachers={teachers}
                   onEditTeacher={handleEditTeacher}
                   onDeleteTeacher={handleDeleteTeacher}
@@ -108,12 +100,6 @@ const TeachersPage = () => {
           )}
         </>
       )}
-
-      <ManageTeacherModal
-        isManageTeacherModalOpen={isShowManageTeacherModal}
-        onManageTeacherModalClose={handleCloseManageTeacherModal}
-        teacherToEdit={teacherToEdit}
-      />
 
       <ConfirmationModal
         title="Delete Teacher"

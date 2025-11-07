@@ -11,10 +11,10 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>
 const Input = ({ name, type = "text", size = "medium", value, onChange, onBlur, ...props }: InputProps) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-  const sizes: Record<InputSize, string> = {
-    medium: "py-2",
-    large: "py-3",
-  };
+    const sizes: Record<InputSize, string> = {
+      medium: "py-[10px]",
+      large: "py-[12px]",
+    };
 
   return (
     <div className="relative w-full">
@@ -22,7 +22,7 @@ const Input = ({ name, type = "text", size = "medium", value, onChange, onBlur, 
         id={name}
         name={name}
         type={type === "password" && isPasswordVisible ? "text" : type}
-        className={`w-full mt-1 text-sm p-2 border rounded ${sizes[size]}`}
+        className={`w-full mt-1 text-sm px-4 py-3 border rounded-md ${sizes[size]}`}
         value={value}
         onChange={onChange}
         onBlur={onBlur}

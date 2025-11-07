@@ -3,6 +3,7 @@ import ViewButton from "@/components/common/ViewButton";
 import EditButton from "@/components/common/EditButton";
 import DeleteButton from "@/components/common/DeleteButton";
 import { ClassesTableProps } from '../types/class-components.interface';
+import { formatShortDate } from '@/utils/helpers';
 
 const ClassesTable = React.memo(
   ({ classes, onEditClass, onDeleteClass }: ClassesTableProps) => {
@@ -21,13 +22,10 @@ const ClassesTable = React.memo(
                   Class Name
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Section
+                  Monthly Fee
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Subjects
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Assigned Teachers
+                  Class Teacher
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Created At
@@ -46,57 +44,23 @@ const ClassesTable = React.memo(
                     {classItem.name}
                   </td>
 
-                  {/* Section */}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {classItem.section}
-                  </td>
-
-                  {/* Subjects */}
+                  {/* Monthly Fee */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {classItem.subjects && classItem.subjects.length > 0
-                      ? (Array.isArray(classItem.subjects) && classItem.subjects.length > 0 && typeof classItem.subjects[0] === 'object'
-                          ? (classItem.subjects as Array<{ _id: string; name: string }>).map((sub) => sub.name).join(', ')
-                          : (classItem.subjects as string[]).join(', '))
+                    {classItem.monthlyTuitionFee 
+                      ? `${classItem.monthlyTuitionFee.toLocaleString()} PKR`
                       : '—'}
                   </td>
 
-                  {/* Assigned Teachers */}
+                  {/* Class Teacher */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {classItem.assignedTeachers && classItem.assignedTeachers.length > 0 ? (
-                      <div className="flex flex-col space-y-1">
-                        {classItem.assignedTeachers.map((teacher: { _id: string; name: string; email?: string; profileImage?: string } | string) => {
-                          const teacherObj = typeof teacher === 'object' ? teacher : { _id: teacher, name: 'N/A' };
-                          return (
-                            <div key={teacherObj._id} className="flex items-center space-x-2">
-                              {teacherObj.profileImage ? (
-                                <img
-                                  src={teacherObj.profileImage}
-                                  alt={teacherObj.name}
-                                  className="w-6 h-6 rounded-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-700">
-                                  {teacherObj.name?.charAt(0)?.toUpperCase() || 'N'}
-                                </div>
-                              )}
-                              <div className="flex flex-col leading-tight">
-                                <span className="text-gray-900">{teacherObj.name}</span>
-                                {teacherObj.email && (
-                                  <span className="text-gray-400 text-xs">{teacherObj.email}</span>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      '—'
-                    )}
+                    {typeof classItem.classTeacher === "object" 
+                      ? classItem.classTeacher?.name || '—'
+                      : classItem.classTeacher || '—'}
                   </td>
 
                   {/* Created At */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {classItem.createdAt ? new Date(classItem.createdAt).toLocaleDateString() : '—'}
+                    {formatShortDate(classItem.createdAt || "")}
                   </td>
 
                   {/* Actions */}

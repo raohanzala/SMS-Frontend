@@ -3,6 +3,7 @@ import EditButton from "@/components/common/EditButton";
 import DeleteButton from "@/components/common/DeleteButton";
 import React from "react";
 import { StudentsTableProps } from "../types/student-components.types";
+import { formatShortDate } from "@/utils/helpers";
 
 const StudentsTable = React.memo(
   ({ onEditStudent, onDeleteStudent, students }: StudentsTableProps) => {
@@ -75,9 +76,6 @@ const StudentsTable = React.memo(
                   {/* Class & Section */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {student.class?.name || "N/A"}{" "}
-                    <span className="text-gray-500">
-                      ({student.class?.section || "-"})
-                    </span>
                   </td>
 
                   {/* Parent Info */}
@@ -102,7 +100,7 @@ const StudentsTable = React.memo(
 
                   {/* Admission Date */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {student.createdAt}
+                    {formatShortDate(student.createdAt || "") }
                   </td>
 
                   {/* Actions */}

@@ -12,7 +12,7 @@ export function useTeacher(teacherId: string | undefined) {
     enabled: !!teacherId,
   });
 
-  const teacher = data?.data;
+  const teacher = data?.data?.teacher;
 
   return { teacher, isTeacherLoading, teacherError };
 }

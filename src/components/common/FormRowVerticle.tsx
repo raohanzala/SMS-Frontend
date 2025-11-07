@@ -10,10 +10,10 @@ interface FormRowVerticalProps {
 const FormRowVertical = ({ label, name, children, error }: FormRowVerticalProps) => {
 
   return (
-    <div className="mb-2">
+    <div>
       {label && <label htmlFor={name} className="mb-1 capitalize text-dark-3">{label}</label>}
       {children}
-      {error && <div className="text-red-500 text-xs mt-1">{error as string}</div>}
+      <div className={`text-red-500 text-xs mt-1 ${error ? 'opacity-100': 'opacity-0'}`}>{error || "none"}</div>
     </div>
   );
 };

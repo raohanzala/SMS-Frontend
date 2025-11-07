@@ -32,7 +32,6 @@ function SearchableSelect({
         return;
       }
 
-      // if value is already a full option object
       if (typeof value === "object" && value.value && value.label) {
         setSelectedOption(value);
         return;
@@ -51,17 +50,18 @@ function SearchableSelect({
   };
 
   return (
-    <AsyncSelect
-      cacheOptions
-      defaultOptions
-      isClearable={isClearable}
-      loadOptions={(inputValue) => fetchOptions(inputValue || "")}
-      value={selectedOption}
-      onChange={handleChange}
-      placeholder={placeholder}
-    />
+    <div className="mt-1">
+      <AsyncSelect
+        cacheOptions
+        defaultOptions
+        isClearable={isClearable}
+        loadOptions={(inputValue) => fetchOptions(inputValue || "")}
+        value={selectedOption}
+        onChange={handleChange}
+        placeholder={placeholder}
+      />
+    </div>
   );
 }
 
 export default SearchableSelect;
-

@@ -10,6 +10,7 @@ import { SettingsProvider } from './contexts/SettingsContext';
 
 // Layout Components
 import PublicLayout from './components/layout/PublicLayout';
+import AdminLayout from './components/layout/AdminLayout';
 import Layout from './components/layout/Layout';
 
 // Public Pages
@@ -24,7 +25,6 @@ import { ParentNav, studentNav, teacherNav } from './utils/navigationConfig';
 import AdminParentDetails from './pages/private/admin/ParentDetail';
 import StudentDetail from './pages/private/admin/StudentDetail';
 import TeacherDetail from './pages/private/admin/TeacherDetail';
-import AdminLayout from './components/layout/AdminLayout';
 import ClassAttendance from './pages/private/admin/ClassAttendance';
 import EmployeesAttendance from './pages/private/admin/EmployeesAttendance';
 // Create a client
@@ -56,11 +56,19 @@ function App() {
                   <Route index element={<Navigate to="/admin/dashboard" replace />} />
                   <Route path="dashboard" element={<AdminDashboard />} />
                   <Route path="students" element={<AdminStudents />} />
+                  <Route path="students/new" element={<AdminStudentForm />} />
                   <Route path="students/:studentId" element={<StudentDetail />} />
+                  <Route path="students/:studentId/edit" element={<AdminStudentForm />} />
                   <Route path="parents" element={<AdminParents />} />
                   <Route path="parents/:parentId" element={<AdminParentDetails />} />
+                  <Route path="employees" element={<AdminEmployees />} />
+                  <Route path="employees/new" element={<AdminEmployeeForm />} />
+                  <Route path="employees/:employeeId" element={<EmployeeDetail />} />
+                  <Route path="employees/:employeeId/edit" element={<AdminEmployeeForm />} />
                   <Route path="teachers" element={<AdminTeachers />} />
+                  <Route path="teachers/new" element={<AdminTeacherForm />} />
                   <Route path="teachers/:teacherId" element={<TeacherDetail />} />
+                  <Route path="teachers/:teacherId/edit" element={<AdminTeacherForm />} />
                   <Route path="classes" element={<AdminClasses />} />
                   <Route path="subjects" element={<AdminSubjects />} />
                   <Route path="timetable" element={<AdminTimetable />} />
@@ -133,7 +141,12 @@ function App() {
 // Lazy load all page components
 const AdminDashboard = React.lazy(() => import('./pages/private/admin/Dashboard'));
 const AdminStudents = React.lazy(() => import('./features/students/pages/StudentsPage'));
+const AdminStudentForm = React.lazy(() => import('./features/students/pages/StudentFormPage'));
+const AdminEmployees = React.lazy(() => import('./features/employees/pages/EmployeesPage'));
+const AdminEmployeeForm = React.lazy(() => import('./features/employees/pages/EmployeeFormPage'));
+const EmployeeDetail = React.lazy(() => import('./pages/private/admin/EmployeeDetail'));
 const AdminTeachers = React.lazy(() => import('./features/teachers/pages/TeachersPage'));
+const AdminTeacherForm = React.lazy(() => import('./features/teachers/pages/TeacherFormPage'));
 const AdminParents = React.lazy(() => import('./features/parents/pages/ParentsPage'));
 const AdminClasses = React.lazy(() => import('./features/classes/pages/ClassesPage'));
 const AdminSubjects = React.lazy(() => import('./pages/private/admin/Subjects'));

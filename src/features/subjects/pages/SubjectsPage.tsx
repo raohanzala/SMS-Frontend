@@ -1,5 +1,4 @@
 import { useCallback, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import { FiBookOpen } from "react-icons/fi";
 import ConfirmationModal from "../../../components/common/ConfirmationModal";
 import EmptyState from "../../../components/common/EmptyState";
@@ -8,7 +7,6 @@ import Pagination from "../../../components/common/Pagination";
 import Spinner from "../../../components/common/Spinner";
 import ManageSubjectModal from "../components/ManageSubjectModal";
 import SubjectsCards from "../components/SubjectsCards";
-import SubjectsTable from "../components/SubjectsTable";
 import SubjectsToolbar from "../components/SubjectsToolbar";
 import { useDeleteSubject } from "../hooks/useDeleteSubject";
 import { useSubjects } from "../hooks/useSubjects";
@@ -20,9 +18,7 @@ const SubjectsPage = () => {
   const [isShowManageSubjectModal, setIsShowManageSubjectModal] = useState(false);
   const [isShowSubjectDeleteModal, setIsShowSubjectDeleteModal] = useState(false);
 
-  const [searchParams] = useSearchParams();
-  const view = searchParams.get("view") || "table";
-  const { pagination, subjects, subjectsError, isSubjectsLoading } = useSubjects();
+  const { pagination, subjectsWithClass, subjectsError, isSubjectsLoading } = useSubjects();
   const { deleteSubjectMutation, isDeletingSubject } = useDeleteSubject();
 
   const handleEditSubject = useCallback((subjectToEdit: Subject) => {
@@ -78,7 +74,7 @@ const SubjectsPage = () => {
       )}
       {!isSubjectsLoading && !subjectsError && (
         <>
-          {subjects?.length === 0 ? (
+          {subjectsWithClass?.length === 0 ? (
             <EmptyState
               icon={FiBookOpen}
               title="No Subjects Found"
@@ -89,19 +85,11 @@ const SubjectsPage = () => {
             />
           ) : (
             <>
-              {view === "table" ? (
-                <SubjectsTable
-                  subjects={subjects}
-                  onEditSubject={handleEditSubject}
-                  onDeleteSubject={handleDeleteSubject}
-                />
-              ) : (
                 <SubjectsCards
-                  subjects={subjects}
+                  subjects={subjectsWithClass}
                   onEditSubject={handleEditSubject}
                   onDeleteSubject={handleDeleteSubject}
                 />
-              )}
 
               <Pagination pagination={pagination} />
             </>

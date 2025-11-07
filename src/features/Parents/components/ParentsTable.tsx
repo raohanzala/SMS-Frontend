@@ -2,6 +2,7 @@ import ViewButton from '@/components/common/ViewButton';
 import EditButton from '@/components/common/EditButton';
 import DeleteButton from '@/components/common/DeleteButton';
 import { ParentsTableProps } from '../types/parent-components.interface';
+import { formatShortDate } from '@/utils/helpers';
 
 const ParentsTable = ({ onEditParent, onDeleteParent, parents }: ParentsTableProps) => {
 
@@ -82,7 +83,7 @@ const ParentsTable = ({ onEditParent, onDeleteParent, parents }: ParentsTablePro
 
                   {/* Joined */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {parent.createdAt && new Date(parent.createdAt).toLocaleDateString()}
+                    {formatShortDate(parent.createdAt || "")}
                   </td>
 
                   {/* Actions */}

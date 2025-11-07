@@ -29,3 +29,9 @@ export interface ParentsToolbarProps {
   onClickAddParent: () => void;
 }
 
+export interface ParentsCardsProps {
+  parents: Parent[];
+  onEditParent: (parent: Parent) => void;
+  onDeleteParent: (parentId: string) => void;
+}
+

@@ -3,6 +3,7 @@ import ViewButton from "@/components/common/ViewButton";
 import EditButton from "@/components/common/EditButton";
 import DeleteButton from "@/components/common/DeleteButton";
 import { TeachersTableProps } from "../types/teacher-components.types";
+import { formatShortDate } from "@/utils/helpers";
 
 const TeachersTable = React.memo(
   ({ teachers, onEditTeacher, onDeleteTeacher }: TeachersTableProps) => {
@@ -19,9 +20,6 @@ const TeachersTable = React.memo(
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Teacher
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Subjects
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Contact
@@ -62,27 +60,6 @@ const TeachersTable = React.memo(
                         <div className="text-sm text-gray-500">{teacher.email}</div>
                       </div>
                     </div>
-                  </td>
-
-                  {/* Subjects */}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {teacher.subjects && teacher.subjects.length > 0 ? (
-                      <div className="flex flex-wrap gap-1">
-                        {teacher.subjects.map((subj: string | { _id: string; name: string }, idx: number) => {
-                          const subjectName = typeof subj === "string" ? subj : subj.name;
-                          return (
-                            <span
-                              key={idx}
-                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                            >
-                              {subjectName}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <span className="text-sm text-gray-400 italic">No subjects assigned</span>
-                    )}
                   </td>
 
                   {/* Contact */}
@@ -126,9 +103,7 @@ const TeachersTable = React.memo(
 
                   {/* Joined */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {teacher.createdAt
-                      ? new Date(teacher.createdAt).toLocaleDateString()
-                      : "—"}
+                    {formatShortDate(teacher.createdAt || "")}
                   </td>
 
                   {/* Actions */}

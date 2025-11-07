@@ -20,6 +20,10 @@ export interface AddStudentInput {
   studentClassId: string; 
   studentParentId?: string | null;
   studentProfileImage?: File;
+  studentReligion?: string;
+  studentDOB?: string;
+  studentNationalId?: string;
+  studentPassword?: string;
 }
 
 export interface UpdateStudentInput {
@@ -32,6 +36,9 @@ export interface UpdateStudentInput {
   studentParent?: string | null;
   studentPassword?: string;
   studentProfileImage?: File;
+  studentReligion?: string;
+  studentDOB?: string;
+  studentNationalId?: string;
 }
 
 export interface AssignClassToStudentRequest {

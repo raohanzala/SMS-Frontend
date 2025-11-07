@@ -6,9 +6,9 @@ import { useAddSubject } from "../hooks/useAddSubject";
 import { useUpdateSubject } from "../hooks/useUpdateSubject";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import EntitySelect from "@/components/common/EntitySelect";
-import { addSubjectsSchema } from "@/validations/validationSchemas";
 import { CreateSubjectFormProps } from "../types/subject-components.types";
 import { SubjectItem } from "../types/subject.types";
+import { addSubjectSchema } from "../validation/subject.validation";
 
 const CreateSubjectForm = ({
   subjectToEdit,
@@ -20,31 +20,29 @@ const CreateSubjectForm = ({
   const isLoadingSubject = isAddingSubject || isUpdatingSubject;
   const isEditMode = !!subjectToEdit;
 
-  const getClassId = () => {
-    if (typeof subjectToEdit?.class === "object" && subjectToEdit.class) {
-      return subjectToEdit.class._id;
-    }
-    return subjectToEdit?.class || "";
-  };
-
   const formik = useFormik<{
-    class: string;
+    classId: string;
     subjects: SubjectItem[];
   }>({
     initialValues: {
-      class: getClassId(),
+      classId: subjectToEdit?._id || "", // Use _id as classId since subject represents a class
       subjects:
-        subjectToEdit?.subjects || [
+        subjectToEdit?.subjects?.map(subj => ({
+          _id: subj._id || "",
+          name: subj.name,
+          totalMarks: subj.totalMarks,
+        })) || [
           {
+            _id: "",
             name: "",
             totalMarks: 100,
           },
         ],
     },
-    validationSchema: addSubjectsSchema,
+    validationSchema: addSubjectSchema,
     onSubmit: async (values) => {
       if (!isEditMode) {
-        addSubjectMutation(values, {
+        addSubjectMutation({ classId: values.classId, subjects: values.subjects }, {
           onSuccess: onManageSubjectModalClose,
         });
       } else {
@@ -63,6 +61,7 @@ const CreateSubjectForm = ({
     },
   });
 
+
   return (
     <FormikProvider value={formik}>
       <form
@@ -72,11 +71,11 @@ const CreateSubjectForm = ({
         }}
         className="space-y-6"
       >
-        <FormRowVertical label="Class" name="class">
+        <FormRowVertical label="Class" name="classId">
           <EntitySelect
             entity="class"
-            value={formik.values.class}
-            onChange={(id) => formik.setFieldValue("class", id || "")}
+            value={formik.values.classId}
+            onChange={(classId: string | null) => formik.setFieldValue("classId", classId)}
           />
         </FormRowVertical>
 
@@ -131,7 +130,7 @@ const CreateSubjectForm = ({
               {/* Add new subject button */}
               <button
                 type="button"
-                onClick={() => arrayHelpers.push({ name: "", totalMarks: 100 })}
+                onClick={() => arrayHelpers.push({ _id: "", name: "", totalMarks: 100 })}
                 className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium"
                 disabled={isLoadingSubject}
               >

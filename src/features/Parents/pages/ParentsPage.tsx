@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import ParentsTable from "../components/ParentsTable";
+import ParentsCards from "../components/ParentsCards";
 import ParentsToolbar from "../components/ParentsToolbar";
 import Pagination from "@/components/common/Pagination";
 import Spinner from "@/components/common/Spinner";
@@ -10,6 +11,8 @@ import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { useDeleteParent } from "../hooks/useDeleteParent";
 import { useParents } from "../hooks/useParents";
 import { Parent } from "../types/parent.types";
+import EmptyState from "@/components/common/EmptyState";
+import { FiUser } from "react-icons/fi";
 
 const ParentsPage = () => {
   const [parentToEdit, setParentToEdit] = useState<Parent | null>(null);
@@ -57,7 +60,6 @@ const ParentsPage = () => {
     }
   }, [deleteParentMutation, parentToDelete]);
 
-
   return (
     <div className="space-y-6">
       <ParentsToolbar onClickAddParent={handleShowManageParentModal} />
@@ -76,22 +78,34 @@ const ParentsPage = () => {
       )}
       {!isParentsLoading && !parentsError && (
         <>
-          {view === "table" ? (
-            <ParentsTable
-              parents={parents}
-              onEditParent={handleEditParent}
-              onDeleteParent={handleDeleteParent}
+          {parents?.length === 0 ? (
+            <EmptyState
+              icon={FiUser}
+              title="No Parents Found"
+              description="Get started by adding your first parent to the system."
+              buttonText="Add Parent"
+              buttonIcon={FiUser}
+              onButtonClick={handleShowManageParentModal}
             />
           ) : (
-            // <ParentsCards
-            //   parents={parents}
-            //   onEdit={handleEditParent}
-            //   onDelete={handleDeleteParent}
-            // />
-            null
-          )}
+            <>
+              {view === "table" ? (
+                <ParentsTable
+                  parents={parents}
+                  onEditParent={handleEditParent}
+                  onDeleteParent={handleDeleteParent}
+                />
+              ) : (
+                <ParentsCards
+                  parents={parents}
+                  onEditParent={handleEditParent}
+                  onDeleteParent={handleDeleteParent}
+                />
+              )}
 
-          <Pagination pagination={pagination} />
+              <Pagination pagination={pagination} />
+            </>
+          )}
         </>
       )}
 

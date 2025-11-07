@@ -8,13 +8,14 @@ type ModalSize = "sm" | "md" | "lg" | "xl";
 
 interface ModalProps {
   isOpen: boolean;
+  title?: string;
   onClose: () => void;
   children: ReactNode;
   footer?: ReactNode;
   size?: ModalSize;
 }
 
-export default function Modal({ isOpen, onClose, children, footer, size = "md" }: ModalProps) {
+export default function Modal({ isOpen, title, onClose, children, footer, size = "md" }: ModalProps) {
   const ref = useOutsideClick(onClose)
 
   if (!isOpen) return null;
@@ -40,6 +41,12 @@ export default function Modal({ isOpen, onClose, children, footer, size = "md" }
         className={`fixed top-1/2 left-1/2 z-50 transform -translate-x-1/2 -translate-y-1/2 
         bg-white rounded-lg shadow-2xl max-h-[90%] w-[90%] ${sizeClasses[size]} transition-all duration-300 modal-container`}
       >
+        {/* Header */}
+        {title && <div className="pt-4 px-6">
+          <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
+        </div>}
+
+        {/* Content */}
         <button
           onClick={onClose}
           className="absolute top-3 right-3 p-1 rounded-md hover:bg-gray-100 transition"
@@ -49,7 +56,7 @@ export default function Modal({ isOpen, onClose, children, footer, size = "md" }
           </Tooltip>
         </button>
 
-        <div className="overflow-y-auto flex-1 px-6 py-8 scrollbar-hide min-h-[60vh]">
+        <div className="overflow-y-auto flex-1 px-6 py-8 scrollbar-hide">
           {children}
         </div>
         {footer && (

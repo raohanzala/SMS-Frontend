@@ -3,6 +3,7 @@ import EditButton from "@/components/common/EditButton";
 import ViewButton from "@/components/common/ViewButton";
 import React from "react";
 import { StudentsCardsProps } from "../types/student-components.types";
+import { formatShortDate } from "@/utils/helpers";
 
 const StudentsCards = React.memo(
   ({ students, onEditStudent, onDeleteStudent }: StudentsCardsProps) => {
@@ -57,10 +58,7 @@ const StudentsCards = React.memo(
             {/* Class & Section */}
             <div className="mt-3">
               <p className="text-sm text-gray-700 font-medium">
-                {student.class?.name || "N/A"}{" "}
-                <span className="text-gray-500">
-                  ({student.class?.section || "-"})
-                </span>
+                {student.class?.name || "N/A"}
               </p>
             </div>
 
@@ -86,7 +84,7 @@ const StudentsCards = React.memo(
 
             {/* Admission Date */}
             <div className="mt-2 text-xs text-gray-400">
-              Admitted: {student.createdAt}
+              Admitted: {formatShortDate(student.createdAt || "")}
             </div>
 
             {/* Actions */}

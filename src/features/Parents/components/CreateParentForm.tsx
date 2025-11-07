@@ -34,6 +34,8 @@ const CreateParentForm = ({
       parentEmail: parentToEdit?.email || "",
       parentPhone: parentToEdit?.phone || "",
       parentAddress: parentToEdit?.address || "",
+      parentGender: parentToEdit?.gender || "male",
+      occupation: parentToEdit?.occupation || "",
       parentChildrenIds: parentToEdit?.children?.map((child) => child._id) || [],
     },
     validationSchema: addParentSchema,
@@ -61,9 +63,6 @@ const CreateParentForm = ({
 
   const { values,errors, handleSubmit, setFieldValue, getFieldProps } = formik;
 
-  console.log("errors", errors);
-  console.log("values", values);
-
   return (
     <FormikProvider value={formik}>
       <form
@@ -87,7 +86,7 @@ const CreateParentForm = ({
             <Input
               type="email"
               disabled={isParentLoading}
-              placeholder="Enter email"
+              placeholder="Enter email (optional)"
               {...getFieldProps("parentEmail")}
             />
           </FormRowVertical>
@@ -102,13 +101,52 @@ const CreateParentForm = ({
           </FormRowVertical>
         </div>
 
-        <FormRowVertical label="Address" name="parentAddress" error={errors.parentAddress}>
-          <Input
-            type="text"
-            disabled={isParentLoading}
-            placeholder="Enter address (optional)"
-            {...getFieldProps("parentAddress")}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormRowVertical label="Address" name="parentAddress" error={errors.parentAddress}>
+            <Input
+              type="text"
+              disabled={isParentLoading}
+              placeholder="Enter address (optional)"
+              {...getFieldProps("parentAddress")}
+            />
+          </FormRowVertical>
+
+          <FormRowVertical label="Occupation" name="occupation" error={errors.occupation as string}>
+            <Input
+              type="text"
+              disabled={isParentLoading}
+              placeholder="Enter occupation (optional)"
+              {...getFieldProps("occupation")}
+            />
+          </FormRowVertical>
+        </div>
+
+        <FormRowVertical label="Gender" name="parentGender" error={errors.parentGender}>
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="parentGender"
+                value="male"
+                checked={values.parentGender === "male"}
+                onChange={() => setFieldValue("parentGender", "male")}
+                disabled={isParentLoading}
+              />
+              Male
+            </label>
+
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="parentGender"
+                value="female"
+                checked={values.parentGender === "female"}
+                onChange={() => setFieldValue("parentGender", "female")}
+                disabled={isParentLoading}
+              />
+              Female
+            </label>
+          </div>
         </FormRowVertical>
 
         {/* Children (only visible in Parent parentFormContext) */}

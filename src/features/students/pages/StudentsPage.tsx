@@ -1,12 +1,12 @@
 import { useCallback, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { FiUsers } from "react-icons/fi";
 import ConfirmationModal from "../../../components/common/ConfirmationModal";
 import EmptyState from "../../../components/common/EmptyState";
 import ErrorMessage from "../../../components/common/ErrorMessage";
 import Pagination from "../../../components/common/Pagination";
 import Spinner from "../../../components/common/Spinner";
-import ManageStudentModal from "../components/ManageStudentModal";
+// import ManageStudentModal from "../components/ManageStudentModal";
 import StudentsCards from "../components/StudentsCards";
 import StudentsTable from "../components/StudentsTable";
 import StudentsToolbar from "../components/StudentsToolbar";
@@ -15,20 +15,20 @@ import { useStudents } from "../hooks/useStudents";
 import { Student } from "../types/student.types";
 
 const StudentsPage = () => {
-  const [studentToEdit, setStudentToEdit] = useState<Student | null>(null);
+  // const [studentToEdit, setStudentToEdit] = useState<Student | null>(null);
   const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
-  const [isShowManageStudentModal, setIsShowManageStudentModal] = useState(false);
+  // const [isShowManageStudentModal, setIsShowManageStudentModal] = useState(false);
   const [isShowStudentDeleteModal, setIsShowStudentDeleteModal] = useState(false);
 
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const view = searchParams.get("view") || "cards";
   const { pagination, students, studentsError, isStudentsLoading } = useStudents();
   const { deleteStudentMutation, isDeletingStudent } = useDeleteStudent();
 
   const handleEditStudent = useCallback((studentToEdit: Student) => {
-    setStudentToEdit(studentToEdit);
-    setIsShowManageStudentModal(true);
-  }, []);
+    navigate(`/admin/students/${studentToEdit._id}/edit`);
+  }, [navigate]);
 
   const handleDeleteStudent = useCallback((studentId: string) => {
     setStudentToDelete(studentId);
@@ -36,13 +36,13 @@ const StudentsPage = () => {
   }, []);
 
   const handleShowManageStudentModal = useCallback(() => {
-    setIsShowManageStudentModal(true);
-  }, []);
+    navigate('/admin/students/new');
+  }, [navigate]);
 
-  const handleCloseManageStudentModal = useCallback(() => {
-    setStudentToEdit(null);
-    setIsShowManageStudentModal(false);
-  }, []);
+  // const handleCloseManageStudentModal = useCallback(() => {
+  //   setStudentToEdit(null);
+  //   setIsShowManageStudentModal(false);
+  // }, []);
 
   const handleCloseStudentDeleteModal = useCallback(() => {
     setStudentToDelete(null);
@@ -109,11 +109,7 @@ const StudentsPage = () => {
         </>
       )}
 
-      <ManageStudentModal
-        isManageStudentModalOpen={isShowManageStudentModal}
-        onManageStudentModalClose={handleCloseManageStudentModal}
-        studentToEdit={studentToEdit}
-      />
+      {/* ManageStudentModal removed in favor of dedicated create/edit pages */}
 
       <ConfirmationModal
         title="Delete Student"

@@ -2,8 +2,12 @@ import { User } from "../../../types/user.types";
 import { Class } from "@/features/classes/types/class.types";
 
 export interface Teacher extends User {
-  subjects?: string[] | Array<{ _id: string; name: string }>;
+  experience?: string;
+  education?: string;
+  husband?: string;
+  dateOfJoining?: string;
   assignedClasses?: Class[] | string[];
+  timetable?: unknown[];
   salary?: {
     amount: number;
     currency: string;
@@ -15,22 +19,36 @@ export interface AddTeacherInput {
   teacherEmail: string;
   teacherPhone?: string;
   teacherAddress?: string;
-  teacherGender?: "male" | "female";
-  teacherSubjects?: string[];
-  teacherAssignedClasses?: string[];
-  teacherSalaryAmount?: number;
-  teacherSalaryCurrency?: string;
+  teacherGender: "male" | "female";
+  teacherExperience?: string;
+  teacherEducation?: string;
+  teacherHusband?: string;
+  teacherDateOfJoining?: string;
+  assignedClasses?: string[];
+  teacherTimetable?: unknown[];
+  teacherSalary?: {
+    amount: number;
+    currency: string;
+  };
   teacherProfileImage?: File;
 }
 
 export interface UpdateTeacherInput {
-  name?: string;
+  teacherName?: string;
+  teacherEmail?: string;
   teacherPhone?: string;
   teacherAddress?: string;
   teacherGender?: "male" | "female";
-  teacherSubjects?: string[];
-  teacherAssignedClasses?: string[];
-  teacherSalaryAmount?: number;
-  teacherSalaryCurrency?: string;
+  teacherExperience?: string;
+  teacherEducation?: string;
+  teacherHusband?: string;
+  teacherDateOfJoining?: string;
+  assignedClasses?: string[];
+  teacherTimetable?: unknown[];
+  teacherSalary?: {
+    amount: number;
+    currency: string;
+  };
+  teacherProfileImage?: File;
 }
 

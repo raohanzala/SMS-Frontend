@@ -5,32 +5,32 @@ import Input from '@/components/common/Input';
 import { useAddClass } from '../hooks/useAddClass';
 import { useUpdateClass } from '../hooks/useUpdateClass';
 import { useTeachers } from '../../teachers/hooks/useTeachers';
-import { useSubjects } from '../../subjects/hooks/useSubjects';
 import { CreateClassFormProps } from '../types/class-components.interface';
+import { addClassSchema } from '../validation/class.validation';
+import EntitySelect from '@/components/common/EntitySelect';
 
 const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
   const { addClassMutation, isAddingClass } = useAddClass();
   const { updateClassMutation, isUpdatingClass } = useUpdateClass();
 
-  const { subjectData } = useSubjects()
   const { teachers } = useTeachers()
 
   const isEditMode = !!classToEdit;
 
   const formik = useFormik({
     initialValues: {
-      name: classToEdit?.name || "",
-      section: classToEdit?.section || "",
-      subjects: classToEdit?.subjects || [""],
-      assignedTeachers: classToEdit?.assignedTeachers || [""],
+      className: classToEdit?.name || "",
+      classMonthlyTuitionFee: classToEdit?.monthlyTuitionFee ?? 0,
+      classTeacherId:
+        (typeof classToEdit?.classTeacher === 'object' && classToEdit?.classTeacher?._id) ||
+        (typeof classToEdit?.classTeacher === 'string' ? classToEdit?.classTeacher : ""),
     },
+    validationSchema: addClassSchema,
     onSubmit: async (values) => {
-      console.log(values)
       const payload = {
-        name: values.name,
-        section: values.section,
-        subjects: values.subjects,
-        assignedTeachers: values.assignedTeachers,
+        className: values.className,
+        classMonthlyTuitionFee: Number(values.classMonthlyTuitionFee),
+        classTeacherId: values.classTeacherId,
       };
 
       if (!isEditMode) {
@@ -47,66 +47,48 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
     },
   });
 
+  const { errors, getFieldProps, handleSubmit, values } = formik;
+  console.log("values", values);
+
   return (
     <FormikProvider value={formik}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          formik.handleSubmit(e);
+          handleSubmit(e);
         }}
       >
         {/* Class Name */}
-        <FormRowVertical label="Class Name" name="name">
+        <FormRowVertical label="Class Name" name="className" error={errors.className}>
           <Input
             type="text"
             placeholder="Enter class name"
-            disabled={formik.isSubmitting}
-            {...formik.getFieldProps("name")}
+            // disabled={.isSubmitting}
+            {...getFieldProps("className")}
           />
         </FormRowVertical>
 
-        {/* Section */}
-        <FormRowVertical label="Section" name="section">
+        {/* Monthly Tuition Fee */}
+        <FormRowVertical label="Monthly Tuition Fee" name="classMonthlyTuitionFee" error={errors.classMonthlyTuitionFee}>
           <Input
-            type="text"
-            placeholder="A/B/C"
-            disabled={formik.isSubmitting}
-            {...formik.getFieldProps("section")}
+            type="number"
+            placeholder="e.g. 5000"
+            // disabled={.isSubmitting}
+            {...getFieldProps("classMonthlyTuitionFee")}
           />
         </FormRowVertical>
 
-        {/* Subjects */}
-        <FormRowVertical label="Subjects" name="subjects">
-          <select
-            className={`block w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed ${formik.touched.subjects && formik.errors.subjects ? 'border-red-300' : 'border-gray-300'}`}
-            disabled={formik.isSubmitting}
-            {...formik.getFieldProps('subjects')}
-          >
-            <option value="admin">Subject</option>
-            {subjectData?.map((subject: { _id: string; name: string }) => (
-              <option key={subject?._id} value={subject?._id}>{subject?.name}</option>
-            ))
-            }
-          </select>
-        </FormRowVertical>
-
-        <FormRowVertical label="Assigned Teachers" name="assignedTeachers">
-          <select
-            className={`block w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed ${formik.touched.assignedTeachers && formik.errors.assignedTeachers ? 'border-red-300' : 'border-gray-300'}`}
-            disabled={formik.isSubmitting}
-            {...formik.getFieldProps('assignedTeachers')}
-          >
-            <option value="admin">Teacher</option>
-            {teachers?.map((teacher: { _id: string; name: string }) => (
-              <option key={teacher?._id} value={teacher?._id}>{teacher?.name}</option>
-            ))
-            }
-          </select>
+        <FormRowVertical label="Class Teacher" name="classTeacherId">
+          <EntitySelect
+            entity="teacher"
+            value={formik.values.classTeacherId}
+            onChange={(teacherId: string | null) => formik.setFieldValue("classTeacherId", teacherId || "")}
+          />
         </FormRowVertical>
 
         {/* Submit Button */}
         <div>
-          <Button fullWidth={true} type="submit" disabled={formik.isSubmitting} loading={isAddingClass || isUpdatingClass}>
+          <Button fullWidth={true} type="submit" loading={isAddingClass || isUpdatingClass}>
             {!isEditMode ? "Add Class" : "Update Class"}
           </Button>
         </div>

@@ -20,3 +20,9 @@ export interface ClassesTableProps {
 export interface ClassesToolbarProps {
   onClickAddClass: () => void;
 }
+
+export interface ClassesCardsProps {
+  classes: Class[];
+  onEditClass: (classToEdit: Class) => void;
+  onDeleteClass: (classId: string) => void;
+}

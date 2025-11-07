@@ -12,16 +12,21 @@ import {
   FiBell,
   FiSettings,
   FiUser,
+  FiUserPlus,
+  FiBriefcase,
+  FiBook,
+  FiLayers,
 } from 'react-icons/fi';
 
 
 export const adminNav = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: FiHome },
   { name: 'Students', href: '/admin/students', icon: FiUsers },
-  { name: 'Parents', href: '/admin/parents', icon: FiUsers },
+  { name: 'Parents', href: '/admin/parents', icon: FiUserPlus },
+  { name: 'Employees', href: '/admin/employees', icon: FiBriefcase },
   { name: 'Teachers', href: '/admin/teachers', icon: FiUserCheck },
-  { name: 'Classes', href: '/admin/classes', icon: FiBookOpen },
-  { name: 'Subjects', href: '/admin/subjects', icon: FiBookOpen },
+  { name: 'Classes', href: '/admin/classes', icon: FiLayers },
+  { name: 'Subjects', href: '/admin/subjects', icon: FiBook },
   { name: 'Timetable', href: '/admin/timetable', icon: FiCalendar },
   {
     name: 'Attendance',
@@ -29,9 +34,7 @@ export const adminNav = [
     children: [
       { name: 'Students Attendance', href: '/admin/attendance/students-attendance' },
       { name: 'Employees Attendance', href: '/admin/attendance/employees-attendance' },
-      { name: 'Class wise Report', href: '/admin/attendance/classwise-report' },
-      { name: 'Students Attendance Reports', href: '/admin/attendance/students-attendance-report' },
-      { name: 'Employees Attendance Reports', href: '/admin/attendance/employees-attendance-report' },
+      // { name: 'Class wise Report', href: '/admin/attendance/classwise-report' },
     ],
   },
   { name: 'Fees', href: '/admin/fees', icon: FiDollarSign },

@@ -35,23 +35,23 @@ const Button = ({
   ...props
 }: ButtonProps) => {
   const baseClasses =
-    'inline-flex items-center h-fit text-nowrap justify-center font-medium rounded transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+    'inline-flex items-center h-fit text-nowrap justify-center font-medium rounded transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variants: Record<ButtonVariant, string> = {
     primary:
-      'bg-primary text-white hover:bg-primary/90 focus:ring-primary/50 shadow-sm hover:shadow-md',
+      'bg-primary text-white hover:bg-primary/90 shadow-sm hover:shadow-md',
     secondary:
-      'bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500/50 border border-gray-300',
+      'bg-gray-100 text-gray-900 hover:bg-gray-200 border border-gray-300',
     outline:
-      'bg-transparent text-primary border border-primary hover:bg-primary hover:text-white focus:ring-primary/50',
+      'bg-transparent text-primary border border-primary hover:bg-primary hover:text-white',
     ghost:
-      'bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-500/50',
+      'bg-transparent text-gray-700 hover:bg-gray-100',
     danger:
-      'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500/50 shadow-sm hover:shadow-md',
+      'bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow-md',
     success:
-      'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500/50 shadow-sm hover:shadow-md',
+      'bg-green-600 text-white hover:bg-green-700 shadow-sm hover:shadow-md',
     warning:
-      'bg-yellow-500 text-white hover:bg-yellow-600 focus:ring-yellow-500/50 shadow-sm hover:shadow-md',
+      'bg-yellow-500 text-white hover:bg-yellow-600 shadow-sm hover:shadow-md',
   };
 
   const sizes: Record<ButtonSize, string> = {

@@ -7,8 +7,11 @@ const ManageSubjectModal = ({
   onManageSubjectModalClose,
   subjectToEdit,
 }: ManageSubjectModalProps) => {
+
+  const title = subjectToEdit ? "Edit Subject" : "Add Subject";
   return (
     <Modal
+      title={title}
       isOpen={isManageSubjectModalOpen}
       onClose={onManageSubjectModalClose}
     >

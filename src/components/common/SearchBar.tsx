@@ -35,7 +35,7 @@ const SearchBar = ({
 
   return (
     <div
-      className={`relative flex items-center border rounded-lg px-3 py-[10px] bg-white shadow-sm  focus-within:ring-primary/70 focus-within:ring-2 duration-150
+      className={`relative flex items-center border rounded-lg px-3 py-[10px] bg-white shadow-sm
         ${fullWidth ? "w-full" : "w-64"} ${className}`}
     >
       <FiSearch className="text-gray-400 mr-2" />
