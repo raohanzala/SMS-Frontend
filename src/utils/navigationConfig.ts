@@ -32,8 +32,8 @@ export const adminNav = [
     name: 'Attendance',
     icon: FiClipboard,
     children: [
-      { name: 'Students Attendance', href: '/admin/attendance/students-attendance' },
-      { name: 'Employees Attendance', href: '/admin/attendance/employees-attendance' },
+      { name: 'Class Attendance', href: '/admin/attendance/class' },
+      { name: 'Employees Attendance', href: '/admin/attendance/employees' },
       // { name: 'Class wise Report', href: '/admin/attendance/classwise-report' },
     ],
   },
