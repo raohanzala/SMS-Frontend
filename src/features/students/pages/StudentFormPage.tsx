@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FormikProvider, useFormik } from "formik";
 import { useNavigate, useParams } from "react-router-dom";
 import Button from "@/components/common/Button";
@@ -12,8 +12,12 @@ import { useUpdateStudent } from "@/features/students/hooks/useUpdateStudent";
 import { useStudent } from "@/features/students/hooks/useStudent";
 import { addStudentSchema } from "@/features/students/validations/student.validation";
 import { AddStudentInput, UpdateStudentInput, Gender } from "@/features/students/types/student.types";
+import ManageParentModal from "@/features/parents/components/ManageParentModal";
 
 const StudentFormPage = () => {
+
+  const [isParentModalOpen, setIsParentModalOpen] = useState(false)
+
   const navigate = useNavigate();
   const { studentId } = useParams();
   const isEditMode = Boolean(studentId);
@@ -23,6 +27,12 @@ const StudentFormPage = () => {
   const { updateStudentMutation, isUpdatingStudent } = useUpdateStudent();
 
   const isBusy = isAddingStudent || isUpdatingStudent;
+  const currentYear = new Date().getFullYear();
+
+  const sessionOptions = [];
+  for (let year = 2020; year <= currentYear + 1; year++) {
+    sessionOptions.push(`${year}-${year + 1}`);
+  }
 
   const initialValues = useMemo(
     () => ({
@@ -36,6 +46,7 @@ const StudentFormPage = () => {
       studentClassId: student?.class?._id || "",
       studentParentId: student?.parent?._id || null,
       studentReligion: student?.religion || "",
+      studentSession: student?.session || "",
       studentDOB: student?.DOB || "",
       studentNationalId: student?.nationalId || "",
       studentProfileImage: undefined as File | undefined,
@@ -100,6 +111,10 @@ const StudentFormPage = () => {
   const handleCancel = useCallback(() => {
     navigate(-1);
   }, [navigate]);
+
+  const handlePrentModalClose = useCallback(()=> {
+    setIsParentModalOpen(false)
+  }, [])
 
   if (isEditMode && isStudentLoading) {
     return (
@@ -181,6 +196,9 @@ const StudentFormPage = () => {
               </FormRowVertical>
             </div>
 
+            <div>
+
+
             <FormRowVertical label="Address" name="studentAddress" error={toErr(errors.studentAddress)}>
               <Input
                 type="text"
@@ -189,6 +207,22 @@ const StudentFormPage = () => {
                 disabled={isBusy}
               />
             </FormRowVertical>
+
+            <FormRowVertical label="Session" name="studentSession">
+          <select
+            className="w-full mt-1 text-sm px-4 py-3 border rounded-md"
+           
+            {...getFieldProps("studentSession")}
+          >
+            <option value="">Select session</option>
+            {sessionOptions.map((session) => (
+              <option key={session} value={session}>
+                {session}
+              </option>
+            ))}
+          </select>
+        </FormRowVertical>
+                </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <FormRowVertical label="Gender" name="studentGender" error={toErr(errors.studentGender)}>
@@ -257,13 +291,20 @@ const StudentFormPage = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-[3fr_1fr] items-center gap-5">
+
               <FormRowVertical label="Parent" name="studentParentId" error={toErr(errors.studentParentId)}>
                 <EntitySelect
                   entity="parent"
                   value={values.studentParentId}
                   onChange={(parentId) => setFieldValue("studentParentId", parentId)}
-                />
+                  />
               </FormRowVertical>
+
+              <Button onClick={()=> setIsParentModalOpen(true)}>
+                Add Parent
+              </Button>
+                  </div>
 
               <FormRowVertical label="Religion" name="studentReligion" error={undefined}>
                 <Input
@@ -296,6 +337,8 @@ const StudentFormPage = () => {
           </form>
         </FormikProvider>
       </div>
+
+      <ManageParentModal parentFormContext="student" isManageParentModalOpen={isParentModalOpen} onManageParentModalClose={handlePrentModalClose}/>
     </div>
   );
 };

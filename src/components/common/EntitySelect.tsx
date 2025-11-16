@@ -2,9 +2,10 @@ import { getAllParentsApi, getParentByIdApi } from "@/api/parents";
 import SearchableSelect from "./SearchableSelect";
 import { getClassByIdApi, getClassesApi } from "@/api/classes";
 import { getAllTeachersApi, getTeacherByIdApi } from "@/api/teachers";
+import { getAllStudentsApi, getStudentByIdApi } from "@/api/students";
 
 
-type EntityType = 'parent' | 'class' | 'teacher';
+type EntityType = 'parent' | 'class' | 'teacher' | 'student';
 
 interface Option {
   value: string;
@@ -69,6 +70,25 @@ function EntitySelect({ entity, value, onChange, placeholder }: EntitySelectProp
         if (!id) return null;
         const { data } = await getTeacherByIdApi(id);
         return data ? { value: data._id, label: `${data.name} (${data.email})` } : null;
+      },
+    },
+    student: {
+      fetchList: async (search: string): Promise<Option[]> => {
+        const { data } = await getAllStudentsApi({ page: 1, limit: 10, search });
+        return (
+          data?.students?.map((s: any) => ({
+            value: s._id,
+            label: `${s.name}${s.rollNumber ? ` (${s.rollNumber})` : ''}${s.email ? ` - ${s.email}` : ''}`,
+          })) || []
+        );
+      },
+      fetchById: async (id: string): Promise<Option | null> => {
+        if (!id) return null;
+        const { data } = await getStudentByIdApi(id);
+        return data ? { 
+          value: data._id, 
+          label: `${data.name}${data.rollNumber ? ` (${data.rollNumber})` : ''}${data.email ? ` - ${data.email}` : ''}` 
+        } : null;
       },
     },
   };

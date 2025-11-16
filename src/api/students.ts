@@ -45,3 +45,19 @@ export const bulkAddStudentsApi = async (studentsArray: BulkStudentData[]) => {
   const { data } = await axiosInstance.post("/students/bulk-add", studentsArray);
   return data;
 };
+
+export const getStudentsByClassAndSessionApi = async (params: { classId: string; session: string }) => {
+  const { data } = await axiosInstance.get("/students/by-class-session", { params });
+  return data;
+};
+
+export const promoteStudentsApi = async (promotionData: {
+  studentIds: string[];
+  fromClass: string;
+  toClass: string;
+  fromSession: string;
+  toSession: string;
+}) => {
+  const { data } = await axiosInstance.post("/students/promote", promotionData);
+  return data;
+};
