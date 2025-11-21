@@ -1,12 +1,14 @@
-export interface SubjectItem {
+export interface Subject {
   _id: string;
-  name: string;
+  classId: string;
+  subjectTeacherId: string;
   totalMarks: number;
+  subjectName: string;
 }
 
 export interface Subject {
   _id: string;
-  name: string;
+  subjectName: string;
   monthlyFee?: number;
   classTeacher?: {
     _id: string;
@@ -14,7 +16,7 @@ export interface Subject {
     email?: string;
     profileImage?: string;
   };
-  subjects: SubjectItem[];
+  subjects: Subject[];
   createdAt?: string;
   updatedAt?: string;
 }

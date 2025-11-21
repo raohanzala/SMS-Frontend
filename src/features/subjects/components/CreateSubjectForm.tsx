@@ -7,7 +7,6 @@ import { useUpdateSubject } from "../hooks/useUpdateSubject";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import EntitySelect from "@/components/common/EntitySelect";
 import { CreateSubjectFormProps } from "../types/subject-components.types";
-import { SubjectItem } from "../types/subject.types";
 import { addSubjectSchema } from "../validation/subject.validation";
 
 const CreateSubjectForm = ({
@@ -20,29 +19,24 @@ const CreateSubjectForm = ({
   const isLoadingSubject = isAddingSubject || isUpdatingSubject;
   const isEditMode = !!subjectToEdit;
 
-  const formik = useFormik<{
-    classId: string;
-    subjects: SubjectItem[];
-  }>({
+  const formik = useFormik({
     initialValues: {
-      classId: subjectToEdit?._id || "", // Use _id as classId since subject represents a class
-      subjects:
-        subjectToEdit?.subjects?.map(subj => ({
-          _id: subj._id || "",
-          name: subj.name,
-          totalMarks: subj.totalMarks,
-        })) || [
-          {
-            _id: "",
-            name: "",
-            totalMarks: 100,
-          },
-        ],
+      classId: subjectToEdit?.class?._id || "", // class reference
+      subjectTeacherId: subjectToEdit?.teacher?._id || "", // teacher reference
+      subjectName: subjectToEdit?.name || "",
+      examMarks: subjectToEdit?.examMarks || "", // number field
     },
     validationSchema: addSubjectSchema,
     onSubmit: async (values) => {
+      const payload = {
+        name: values.subjectName,
+        classId: values.classId,
+        teacherId: values.subjectTeacherId,
+        examMarks: Number(values.examMarks),
+      };
+
       if (!isEditMode) {
-        addSubjectMutation({ classId: values.classId, subjects: values.subjects }, {
+        addSubjectMutation(payload, {
           onSuccess: onManageSubjectModalClose,
         });
       } else {
@@ -50,7 +44,7 @@ const CreateSubjectForm = ({
           updateSubjectMutation(
             {
               subjectId: subjectToEdit._id,
-              updateSubjectInput: values,
+              updateSubjectInput: payload,
             },
             {
               onSuccess: onManageSubjectModalClose,
@@ -61,7 +55,6 @@ const CreateSubjectForm = ({
     },
   });
 
-
   return (
     <FormikProvider value={formik}>
       <form
@@ -71,74 +64,50 @@ const CreateSubjectForm = ({
         }}
         className="space-y-6"
       >
+        {/* Class Select */}
         <FormRowVertical label="Class" name="classId">
           <EntitySelect
             entity="class"
             value={formik.values.classId}
-            onChange={(classId: string | null) => formik.setFieldValue("classId", classId)}
+            onChange={(classId: string | null) =>
+              formik.setFieldValue("classId", classId || "")
+            }
           />
         </FormRowVertical>
 
-        {/* Dynamic Subjects */}
-        <FieldArray
-          name="subjects"
-          render={(arrayHelpers) => (
-            <div className="space-y-4">
-              {formik.values.subjects.map((subject, index) => (
-                <div
-                  key={index}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end border p-3 rounded-md bg-gray-50 relative"
-                >
-                  <FormRowVertical
-                    label="Subject Name"
-                    name={`subjects[${index}].name`}
-                  >
-                    <Input
-                      type="text"
-                      placeholder="Enter subject name"
-                      disabled={isLoadingSubject}
-                      {...formik.getFieldProps(`subjects[${index}].name`)}
-                    />
-                  </FormRowVertical>
+        {/* Teacher Select */}
+        <FormRowVertical label="Subject Teacher" name="subjectTeacherId">
+          <EntitySelect
+            entity="teacher"
+            value={formik.values.subjectTeacherId}
+            onChange={(teacherId: string | null) =>
+              formik.setFieldValue("subjectTeacherId", teacherId || "")
+            }
+          />
+        </FormRowVertical>
 
-                  <FormRowVertical
-                    label="Total Marks"
-                    name={`subjects[${index}].totalMarks`}
-                  >
-                    <Input
-                      type="number"
-                      placeholder="Enter total marks"
-                      min={1}
-                      disabled={isLoadingSubject}
-                      {...formik.getFieldProps(`subjects[${index}].totalMarks`)}
-                    />
-                  </FormRowVertical>
+        {/* Subject Name */}
+        <FormRowVertical label="Subject Name" name="subjectName">
+          <Input
+            name="subjectName"
+            value={formik.values.subjectName}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            placeholder="Enter Subject Name"
+          />
+        </FormRowVertical>
 
-                  {formik.values.subjects.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => arrayHelpers.remove(index)}
-                      className="absolute top-2 right-2 text-red-600 hover:text-red-800"
-                      disabled={isLoadingSubject}
-                    >
-                      <FiTrash2 />
-                    </button>
-                  )}
-                </div>
-              ))}
-
-              {/* Add new subject button */}
-              <button
-                type="button"
-                onClick={() => arrayHelpers.push({ _id: "", name: "", totalMarks: 100 })}
-                className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium"
-                disabled={isLoadingSubject}
-              >
-                <FiPlus /> Add Another Subject
-              </button>
-            </div>
-          )}
-        />
+        {/* Exam Marks */}
+        <FormRowVertical label="Exam Marks" name="examMarks">
+          <Input
+            name="examMarks"
+            type="number"
+            value={formik.values.examMarks}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            placeholder="Enter Exam Marks"
+          />
+        </FormRowVertical>
 
         {/* Submit */}
         <div>
@@ -148,7 +117,7 @@ const CreateSubjectForm = ({
             disabled={isLoadingSubject}
             loading={isLoadingSubject}
           >
-            {isEditMode ? "Update Subjects" : "Add Subjects"}
+            {isEditMode ? "Update Subject" : "Add Subject"}
           </Button>
         </div>
       </form>
@@ -157,4 +126,3 @@ const CreateSubjectForm = ({
 };
 
 export default CreateSubjectForm;
-

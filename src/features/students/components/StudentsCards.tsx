@@ -29,7 +29,9 @@ const StudentsCards = React.memo(
             <div className="flex items-center space-x-4">
               <img
                 src={
-                  student.profileImage || student.gender === "female"
+                  student.profileImage
+                    ? student.profileImage
+                    : student.gender === "female"
                     ? "/female-student-avatar.jpg"
                     : "/male-student-avatar.jpg"
                 }

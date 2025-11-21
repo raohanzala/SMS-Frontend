@@ -12,7 +12,7 @@ import { CreateStudentFormProps } from "../types/student-components.types";
 import { Parent } from "@/features/parents/types/parent.types";
 
 const CreateStudentForm = ({
-  studentToEdit,
+  studentToEdit, 
   onManageStudentModalClose,
 }: CreateStudentFormProps) => {
   const [showParentModal, setShowParentModal] = useState(false);

@@ -1,14 +1,23 @@
 import * as Yup from "yup";
 
 export const addStudentSchema = Yup.object().shape({
-  studentName: Yup.string().min(3).max(50).required('Name is required'),
-  studentEmail: Yup.string().email().required('Email is required'),
-  studentPhone: Yup.string().matches(/^[0-9]{10,15}$/, "Phone must be 10–15 digits").nullable(),
-  studentAddress: Yup.string().max(100).nullable(),
-  studentGender: Yup.string()
-    .oneOf(["male", "female"], "Gender is required")
-    .required("Gender is required"),
-  studentClassId: Yup.string().required('Class is required'),
-  studentRollNumber: Yup.string().matches(/^[A-Za-z0-9-_]*$/, "Roll number can only contain letters, numbers, - or _").nullable(),
-  studentParentId: Yup.string().required('Parent is required'),
+  name: Yup.string().min(3).max(50).required("Name is required"),
+  email: Yup.string().email().required("Email is required"),
+  phone: Yup.string()
+    .matches(/^[0-9]{10,15}$/, "Phone must be 10–15 digits")
+    .nullable(),
+  address: Yup.string().max(100).nullable(),
+  gender: Yup.string().oneOf(["male", "female"]).required("Gender is required"),
+  classId: Yup.string().required("Class is required"),
+  rollNumber: Yup.string()
+    .matches(
+      /^[A-Za-z0-9-_]*$/,
+      "Roll number can only contain letters, numbers, - or _"
+    )
+    .nullable(),
+  parentId: Yup.string().required("Parent is required"),
+  session: Yup.string().required("Session is required"),
+  dob: Yup.string().nullable(),
+  religion: Yup.string().nullable(),
+  nationalId: Yup.string().nullable(),
 });

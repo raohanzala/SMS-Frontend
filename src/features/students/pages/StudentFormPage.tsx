@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { FormikProvider, useFormik } from "formik";
 import { useNavigate, useParams } from "react-router-dom";
 import Button from "@/components/common/Button";
@@ -11,12 +11,10 @@ import { useAddStudent } from "@/features/students/hooks/useAddStudent";
 import { useUpdateStudent } from "@/features/students/hooks/useUpdateStudent";
 import { useStudent } from "@/features/students/hooks/useStudent";
 import { addStudentSchema } from "@/features/students/validations/student.validation";
-import { AddStudentInput, UpdateStudentInput, Gender } from "@/features/students/types/student.types";
 import ManageParentModal from "@/features/parents/components/ManageParentModal";
 
 const StudentFormPage = () => {
-
-  const [isParentModalOpen, setIsParentModalOpen] = useState(false)
+  const [isParentModalOpen, setIsParentModalOpen] = useState(false);
 
   const navigate = useNavigate();
   const { studentId } = useParams();
@@ -26,7 +24,7 @@ const StudentFormPage = () => {
   const { addStudentMutation, isAddingStudent } = useAddStudent();
   const { updateStudentMutation, isUpdatingStudent } = useUpdateStudent();
 
-  const isBusy = isAddingStudent || isUpdatingStudent;
+  const isStudentPending = isAddingStudent || isUpdatingStudent;
   const currentYear = new Date().getFullYear();
 
   const sessionOptions = [];
@@ -34,72 +32,34 @@ const StudentFormPage = () => {
     sessionOptions.push(`${year}-${year + 1}`);
   }
 
-  const initialValues = useMemo(
-    () => ({
-      studentName: student?.name || "",
-      studentEmail: student?.email || "",
-      studentPassword: "", // only used on create; ignored on update
-      studentPhone: student?.phone || "",
-      studentAddress: student?.address || "",
-      studentGender: student?.gender || "male",
-      studentRollNumber: student?.rollNumber || "",
-      studentClassId: student?.class?._id || "",
-      studentParentId: student?.parent?._id || null,
-      studentReligion: student?.religion || "",
-      studentSession: student?.session || "",
-      studentDOB: student?.DOB || "",
-      studentNationalId: student?.nationalId || "",
-      studentProfileImage: undefined as File | undefined,
-    }),
-    [student]
-  );
-
-  type FormValues = {
-    studentName: string;
-    studentEmail: string;
-    studentPassword: string;
-    studentPhone?: string;
-    studentAddress?: string;
-    studentGender: Gender;
-    studentRollNumber?: string;
-    studentClassId: string;
-    studentParentId: string | null;
-    studentReligion?: string;
-    studentDOB?: string;
-    studentNationalId?: string;
-    studentProfileImage?: File | undefined;
-  };
-
-  const toErr = (e: unknown): string | undefined =>
-    typeof e === "string" ? e : undefined;
-
-  const formik = useFormik<FormValues>({
+  const formik = useFormik({
+    initialValues: {
+      name: student?.name || "",
+      email: student?.email || "",
+      password: "",
+      phone: student?.phone || "",
+      address: student?.address || "",
+      gender: student?.gender || "male",
+      rollNumber: student?.rollNumber || "",
+      classId: student?.class?._id || "",
+      parentId: student?.parent?._id || null,
+      religion: student?.religion || "",
+      session: student?.session || "",
+      dob: student?.DOB || "",
+      nationalId: student?.nationalId || "",
+      profileImage: undefined as File | undefined,
+    },
     enableReinitialize: true,
-    initialValues,
     validationSchema: addStudentSchema,
     onSubmit: async (formValues) => {
-      const payload = { ...formValues };
       if (!isEditMode) {
-        addStudentMutation(payload as unknown as AddStudentInput, {
+        addStudentMutation(formValues, {
           onSuccess: () => navigate("/admin/students"),
         });
-      } else if (studentId) {
-        const rest: UpdateStudentInput = {
-          name: payload.studentName,
-          studentPhone: payload.studentPhone,
-          studentAddress: payload.studentAddress,
-          studentGender: payload.studentGender,
-          studentRollNumber: payload.studentRollNumber,
-          studentClass: undefined,
-          studentParent: payload.studentParentId ?? null,
-          studentPassword: undefined,
-          studentProfileImage: payload.studentProfileImage,
-          studentReligion: payload.studentReligion,
-          studentDOB: payload.studentDOB,
-          studentNationalId: payload.studentNationalId,
-        };
+      }
+      if (studentId) {
         updateStudentMutation(
-          { studentId, updateStudentInput: rest },
+          { studentId, updateStudentInput: formValues },
           { onSuccess: () => navigate("/admin/students") }
         );
       }
@@ -108,13 +68,11 @@ const StudentFormPage = () => {
 
   const { values, errors, handleSubmit, setFieldValue, getFieldProps } = formik;
 
-  const handleCancel = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
-
-  const handlePrentModalClose = useCallback(()=> {
-    setIsParentModalOpen(false)
-  }, [])
+  const handleCancel = useCallback(() => navigate(-1), [navigate]);
+  const handleParentModalClose = useCallback(
+    () => setIsParentModalOpen(false),
+    []
+  );
 
   if (isEditMode && isStudentLoading) {
     return (
@@ -134,215 +92,282 @@ const StudentFormPage = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">
+        <h2 className="text-2xl font-bold text-gray-900">
           {isEditMode ? "Edit Student" : "Add New Student"}
         </h2>
         <div className="flex gap-2">
-          <Button variant="ghost" onClick={handleCancel}>Cancel</Button>
-          <Button onClick={() => handleSubmit()} loading={isBusy}>
+          <Button variant="ghost" onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button onClick={() => handleSubmit()} loading={isStudentPending}>
             {isEditMode ? "Update Student" : "Create Student"}
           </Button>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow p-5">
-        <FormikProvider value={formik}>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSubmit(e);
-            }}
-            className="space-y-1"
-          >
+      {/* Form Wrapper */}
+      <FormikProvider value={formik}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+          className="space-y-6"
+        >
+          {/* --- Section: Student Information --- */}
+          <div className="bg-white rounded-xl shadow p-6 space-y-4">
+            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">
+              Student Information
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormRowVertical label="Full Name" name="studentName" error={toErr(errors.studentName)}>
+              <FormRowVertical
+                label="Full Name"
+                name="name"
+                error={errors.name}
+              >
                 <Input
                   type="text"
-                  {...getFieldProps("studentName")}
+                  {...getFieldProps("name")}
                   placeholder="Enter full name"
-                  disabled={isBusy}
                 />
               </FormRowVertical>
 
-              <FormRowVertical label="Email Address" name="studentEmail" error={toErr(errors.studentEmail)}>
+              <FormRowVertical label="Email" name="email" error={errors.email}>
                 <Input
                   type="email"
-                  {...getFieldProps("studentEmail")}
+                  {...getFieldProps("email")}
                   placeholder="Enter email"
-                  disabled={isBusy}
                 />
               </FormRowVertical>
 
               {!isEditMode && (
-                <FormRowVertical label="Password" name="studentPassword" error={undefined}>
+                <FormRowVertical label="Password" name="password">
                   <Input
                     type="password"
-                    {...getFieldProps("studentPassword")}
-                    placeholder="Set initial password"
-                    disabled={isBusy}
+                    {...getFieldProps("password")}
+                    placeholder="Set password"
                   />
                 </FormRowVertical>
               )}
 
-              <FormRowVertical label="Phone" name="studentPhone" error={toErr(errors.studentPhone)}>
+              <FormRowVertical label="Phone" name="phone" error={errors.phone}>
                 <Input
                   type="text"
-                  {...getFieldProps("studentPhone")}
-                  placeholder="Enter phone number"
-                  disabled={isBusy}
+                  {...getFieldProps("phone")}
+                  placeholder="Phone number"
                 />
               </FormRowVertical>
-            </div>
 
-            <div>
+              <FormRowVertical
+                label="Date of Birth"
+                name="dob"
+                error={errors.dob}
+              >
+                <Input
+                  type="date"
+                  value={values.dob || ""}
+                  onChange={(e) => setFieldValue("dob", e.target.value)}
+                />
+              </FormRowVertical>
 
-
-            <FormRowVertical label="Address" name="studentAddress" error={toErr(errors.studentAddress)}>
-              <Input
-                type="text"
-                {...getFieldProps("studentAddress")}
-                placeholder="Enter address"
-                disabled={isBusy}
-              />
-            </FormRowVertical>
-
-            <FormRowVertical label="Session" name="studentSession">
-          <select
-            className="w-full mt-1 text-sm px-4 py-3 border rounded-md"
-           
-            {...getFieldProps("studentSession")}
-          >
-            <option value="">Select session</option>
-            {sessionOptions.map((session) => (
-              <option key={session} value={session}>
-                {session}
-              </option>
-            ))}
-          </select>
-        </FormRowVertical>
-                </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormRowVertical label="Gender" name="studentGender" error={toErr(errors.studentGender)}>
+              <FormRowVertical
+                label="Gender"
+                name="gender"
+                error={errors.gender}
+              >
                 <div className="flex items-center gap-4">
                   <label className="flex items-center gap-2">
                     <input
                       type="radio"
-                      name="studentGender"
+                      name="gender"
                       value="male"
-                      checked={values.studentGender === "male"}
-                      onChange={() => setFieldValue("studentGender", "male")}
-                      disabled={isBusy}
+                      checked={values.gender === "male"}
+                      onChange={() => setFieldValue("gender", "male")}
                     />
                     Male
                   </label>
                   <label className="flex items-center gap-2">
                     <input
                       type="radio"
-                      name="studentGender"
+                      name="gender"
                       value="female"
-                      checked={values.studentGender === "female"}
-                      onChange={() => setFieldValue("studentGender", "female")}
-                      disabled={isBusy}
+                      checked={values.gender === "female"}
+                      onChange={() => setFieldValue("gender", "female")}
                     />
                     Female
                   </label>
                 </div>
               </FormRowVertical>
-
-              <FormRowVertical label="Date of Birth" name="studentDOB" error={undefined}>
-                <Input
-                  type="date"
-                  value={values.studentDOB || ""}
-                  onChange={(e) => setFieldValue("studentDOB", e.target.value)}
-                  disabled={isBusy}
-                />
-              </FormRowVertical>
-
-              <FormRowVertical label="National ID" name="studentNationalId" error={undefined}>
-                <Input
-                  type="text"
-                  {...getFieldProps("studentNationalId")}
-                  placeholder="e.g., CNIC"
-                  disabled={isBusy}
-                />
-              </FormRowVertical>
             </div>
+          </div>
 
+          {/* --- Section: Academic Information --- */}
+          <div className="bg-white rounded-xl shadow p-6 space-y-4">
+            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">
+              Academic Information
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormRowVertical label="Class" name="studentClassId" error={toErr(errors.studentClassId)}>
+              <FormRowVertical
+                label="Class"
+                name="classId"
+                error={errors.classId}
+              >
                 <EntitySelect
                   entity="class"
-                  value={values.studentClassId}
-                  onChange={(classId) => setFieldValue("studentClassId", classId)}
+                  value={values.classId}
+                  onChange={(classId) => setFieldValue("classId", classId)}
                 />
               </FormRowVertical>
 
-              <FormRowVertical label="Roll Number" name="studentRollNumber" error={toErr(errors.studentRollNumber)}>
+              <FormRowVertical
+                label="Roll Number"
+                name="rollNumber"
+                error={errors.rollNumber}
+              >
                 <Input
                   type="text"
-                  {...getFieldProps("studentRollNumber")}
+                  {...getFieldProps("rollNumber")}
                   placeholder="Leave empty to auto-generate"
-                  disabled={isBusy}
                 />
               </FormRowVertical>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="grid grid-cols-[3fr_1fr] items-center gap-5">
-
-              <FormRowVertical label="Parent" name="studentParentId" error={toErr(errors.studentParentId)}>
-                <EntitySelect
-                  entity="parent"
-                  value={values.studentParentId}
-                  onChange={(parentId) => setFieldValue("studentParentId", parentId)}
-                  />
+              <FormRowVertical
+                label="Session"
+                name="session"
+                error={errors.session}
+              >
+                <select
+                  className="w-full mt-1 px-4 py-3 border rounded-md"
+                  {...getFieldProps("session")}
+                >
+                  <option value="">Select session</option>
+                  {sessionOptions.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
               </FormRowVertical>
 
-              <Button onClick={()=> setIsParentModalOpen(true)}>
-                Add Parent
-              </Button>
-                  </div>
-
-              <FormRowVertical label="Religion" name="studentReligion" error={undefined}>
+              <FormRowVertical label="Religion" name="religion">
                 <Input
                   type="text"
-                  {...getFieldProps("studentReligion")}
+                  {...getFieldProps("religion")}
                   placeholder="Enter religion"
-                  disabled={isBusy}
                 />
               </FormRowVertical>
             </div>
+          </div>
 
-            <FormRowVertical label="Profile Image" name="studentProfileImage" error={undefined}>
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) setFieldValue("studentProfileImage", file);
-                }}
-                disabled={isBusy}
-              />
-            </FormRowVertical>
-
-            <div className="flex justify-end gap-2">
-              <Button variant="ghost" type="button" onClick={handleCancel}>Cancel</Button>
-              <Button type="submit" loading={isBusy}>
-                {isEditMode ? "Update Student" : "Create Student"}
-              </Button>
+          {/* --- Section: Parent Information --- */}
+          <div className="bg-white rounded-xl shadow p-6 space-y-4">
+            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">
+              Parent Information
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-[3fr_1fr] gap-4 items-center">
+                <FormRowVertical
+                  label="Parent"
+                  name="parentId"
+                  error={errors.parentId}
+                >
+                  <EntitySelect
+                    entity="parent"
+                    value={values.parentId}
+                    onChange={(parentId) => setFieldValue("parentId", parentId)}
+                  />
+                </FormRowVertical>
+                <Button onClick={() => setIsParentModalOpen(true)}>
+                  Add Parent
+                </Button>
+              </div>
             </div>
-          </form>
-        </FormikProvider>
-      </div>
+          </div>
 
-      <ManageParentModal parentFormContext="student" isManageParentModalOpen={isParentModalOpen} onManageParentModalClose={handlePrentModalClose}/>
+          {/* --- Section: Other Information --- */}
+          <div className="bg-white rounded-xl shadow p-6 space-y-4">
+            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">
+              Other Information
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormRowVertical
+                label="Address"
+                name="address"
+                error={errors.address}
+              >
+                <Input
+                  type="text"
+                  {...getFieldProps("address")}
+                  placeholder="Enter address"
+                />
+              </FormRowVertical>
+
+              <FormRowVertical label="National ID" name="nationalId">
+                <Input
+                  type="text"
+                  {...getFieldProps("nationalId")}
+                  placeholder="CNIC"
+                />
+              </FormRowVertical>
+
+              {/* Profile Image */}
+              <FormRowVertical label="Profile Image" name="profileImage">
+                <div className="flex items-center gap-4">
+                  <div className="w-32 h-32 border rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                    {values.profileImage ? (
+                      typeof values.profileImage === "string" ? (
+                        <img
+                          src={values.profileImage}
+                          alt="Profile"
+                          className="object-cover w-full h-full"
+                        />
+                      ) : (
+                        <img
+                          src={URL.createObjectURL(values.profileImage)}
+                          alt="Profile Preview"
+                          className="object-cover w-full h-full"
+                        />
+                      )
+                    ) : (
+                      <span className="text-gray-400">No image</span>
+                    )}
+                  </div>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) setFieldValue("profileImage", file);
+                    }}
+                  />
+                </div>
+              </FormRowVertical>
+            </div>
+          </div>
+
+          {/* --- Form Buttons --- */}
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" type="button" onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Button type="submit" loading={isStudentPending}>
+              {isEditMode ? "Update Student" : "Create Student"}
+            </Button>
+          </div>
+        </form>
+      </FormikProvider>
+
+      {/* Parent Modal */}
+      <ManageParentModal
+        parentFormContext="student"
+        isManageParentModalOpen={isParentModalOpen}
+        onManageParentModalClose={handleParentModalClose}
+      />
     </div>
   );
 };
 
 export default StudentFormPage;
-
-

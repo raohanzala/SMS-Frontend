@@ -51,8 +51,8 @@ const FilterPanel = ({
         <div className="flex items-end">
           <Button
             onClick={onSearch}
-            loading={isLoading}
-            disabled={!selectedClassId || !selectedSession}
+            // loading={isLoading}
+            // disabled={!selectedClassId || !selectedSession}
             startIcon={<FiSearch />}
             fullWidth
           >

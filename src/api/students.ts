@@ -1,6 +1,11 @@
 // src/api/students.js
-import { AddStudentInput, BulkStudentData, UpdateStudentInput } from "@/features/students/types/student.types";
+import {
+  AddStudentInput,
+  BulkStudentData,
+  UpdateStudentInput,
+} from "@/features/students/types/student.types";
 import axiosInstance from "./axiosInstance";
+import { PromoteStudentsRequest } from "@/features/students/types/promotion.types";
 
 export const addStudentApi = async (addStudentInput: AddStudentInput) => {
   const { data } = await axiosInstance.post("/students", addStudentInput, {
@@ -9,10 +14,20 @@ export const addStudentApi = async (addStudentInput: AddStudentInput) => {
   return data;
 };
 
-export const updateStudentApi = async ({ studentId, updateStudentInput }: { studentId: string, updateStudentInput: UpdateStudentInput }) => {
-  const { data } = await axiosInstance.put(`/students/${studentId}`, updateStudentInput, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+export const updateStudentApi = async ({
+  studentId,
+  updateStudentInput,
+}: {
+  studentId: string;
+  updateStudentInput: UpdateStudentInput;
+}) => {
+  const { data } = await axiosInstance.put(
+    `/students/${studentId}`,
+    updateStudentInput,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    }
+  );
   return data;
 };
 
@@ -36,28 +51,44 @@ export const getStudentsByClassApi = async (classId: string) => {
   return data;
 };
 
-export const assignClassToStudentApi = async ({ studentId, classId }: { studentId: string, classId: string }) => {
-  const { data } = await axiosInstance.patch(`/students/${studentId}/assign-class`, { classId });
+export const assignClassToStudentApi = async ({
+  studentId,
+  classId,
+}: {
+  studentId: string;
+  classId: string;
+}) => {
+  const { data } = await axiosInstance.patch(
+    `/students/${studentId}/assign-class`,
+    { classId }
+  );
   return data;
 };
 
 export const bulkAddStudentsApi = async (studentsArray: BulkStudentData[]) => {
-  const { data } = await axiosInstance.post("/students/bulk-add", studentsArray);
+  const { data } = await axiosInstance.post(
+    "/students/bulk-add",
+    studentsArray
+  );
   return data;
 };
 
-export const getStudentsByClassAndSessionApi = async (params: { classId: string; session: string }) => {
-  const { data } = await axiosInstance.get("/students/by-class-session", { params });
-  return data;
-};
-
-export const promoteStudentsApi = async (promotionData: {
-  studentIds: string[];
-  fromClass: string;
-  toClass: string;
-  fromSession: string;
-  toSession: string;
+export const getStudentsByClassAndSessionApi = async (params: {
+  classId: string;
+  session: string;
 }) => {
-  const { data } = await axiosInstance.post("/students/promote", promotionData);
+  const { data } = await axiosInstance.get("/students/by-class-session", {
+    params,
+  });
+  return data;
+};
+
+export const promoteStudentsApi = async (
+  promoteStudent: PromoteStudentsRequest
+) => {
+  const { data } = await axiosInstance.post(
+    "/students/promote",
+    promoteStudent
+  );
   return data;
 };
