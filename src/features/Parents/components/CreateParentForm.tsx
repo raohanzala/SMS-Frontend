@@ -19,7 +19,6 @@ const CreateParentForm = ({
 
   const { addParentMutation, isAddingParent } = useAddParent();
   const { updateParentMutation, isUpdatingParent } = useUpdateParent();
-
   const isParentLoading = isAddingParent || isUpdatingParent;
 
   const formik = useFormik({
@@ -28,13 +27,14 @@ const CreateParentForm = ({
       name: parentToEdit?.name || "",
       email: parentToEdit?.email || "",
       phone: parentToEdit?.phone || "",
-      address: parentToEdit?.address || "",
-      gender: parentToEdit?.gender || "male",
       occupation: parentToEdit?.occupation || "",
+      income: parentToEdit?.income || "",
+      nationalId: parentToEdit?.nationalId || "",
       childrenIds: parentToEdit?.children?.map((c) => c._id) || [],
     },
     validationSchema: addParentSchema,
     onSubmit: async (values) => {
+      console.log(values);
       const payload: AddParentInput = { ...values };
 
       if (parentFormContext === "student") {
@@ -68,11 +68,7 @@ const CreateParentForm = ({
         }}
         className="space-y-4"
       >
-        <FormRowVertical
-          label="Full Name"
-          name="name"
-          error={errors.name as string | undefined}
-        >
+        <FormRowVertical label="Full Name" name="name" error={errors.name}>
           <Input
             type="text"
             placeholder="Enter full name"
@@ -82,24 +78,16 @@ const CreateParentForm = ({
         </FormRowVertical>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormRowVertical
-            label="Email Address"
-            name="email"
-            error={errors.email as string | undefined}
-          >
+          <FormRowVertical label="Email" name="email" error={errors.email}>
             <Input
               type="email"
-              placeholder="Enter email (optional)"
+              placeholder="Enter email"
               disabled={isParentLoading}
               {...getFieldProps("email")}
             />
           </FormRowVertical>
 
-          <FormRowVertical
-            label="Phone"
-            name="phone"
-            error={errors.phone as string | undefined}
-          >
+          <FormRowVertical label="Phone" name="phone" error={errors.phone}>
             <Input
               type="text"
               placeholder="Enter phone number"
@@ -111,97 +99,70 @@ const CreateParentForm = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormRowVertical
-            label="Address"
-            name="address"
-            error={errors.address as string | undefined}
+            label="Occupation"
+            name="occupation"
+            error={errors.occupation}
           >
             <Input
               type="text"
-              placeholder="Enter address (optional)"
+              placeholder="Enter occupation"
               disabled={isParentLoading}
-              {...getFieldProps("address")}
+              {...getFieldProps("occupation")}
             />
           </FormRowVertical>
 
-          <FormRowVertical
-            label="Occupation"
-            name="occupation"
-            error={errors.occupation as string | undefined}
-          >
+          <FormRowVertical label="Income" name="income" error={errors.income}>
             <Input
-              type="text"
-              placeholder="Enter occupation (optional)"
+              type="number"
+              placeholder="Enter income"
               disabled={isParentLoading}
-              {...getFieldProps("occupation")}
+              {...getFieldProps("income")}
             />
           </FormRowVertical>
         </div>
 
         <FormRowVertical
-          label="Gender"
-          name="gender"
-          error={errors.gender as string | undefined}
+          label="National ID (CNIC)"
+          name="nationalId"
+          error={errors.nationalId}
         >
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="gender"
-                value="male"
-                checked={values.gender === "male"}
-                onChange={() => setFieldValue("gender", "male")}
-                disabled={isParentLoading}
-              />
-              Male
-            </label>
-
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="gender"
-                value="female"
-                checked={values.gender === "female"}
-                onChange={() => setFieldValue("gender", "female")}
-                disabled={isParentLoading}
-              />
-              Female
-            </label>
-          </div>
+          <Input
+            type="text"
+            placeholder="Enter CNIC"
+            disabled={isParentLoading}
+            {...getFieldProps("nationalId")}
+          />
         </FormRowVertical>
 
         {parentFormContext === "parent" && (
           <FormRowVertical
-            label="Select Children (Students)"
+            label="Children (Students)"
             name="childrenIds"
-            error={errors.childrenIds as string | undefined}
+            error={errors.childrenIds}
           >
             <EntitySelect
               entity="student"
-              value={values.childrenIds}
-              onChange={(childrenIds) =>
-                setFieldValue("childrenIds", childrenIds)
-              }
+              isMulti={true}
+              value={values.childrenIds || []}
+              onChange={(ids) => setFieldValue("childrenIds", ids)}
             />
           </FormRowVertical>
         )}
 
         {!isEditMode && (
           <p className="text-sm text-gray-500 italic">
-            A secure password will be generated and sent to the parent
-            automatically.
+            A secure password will be generated & emailed automatically.
           </p>
         )}
 
-        <div>
-          <Button
-            fullWidth
-            type="submit"
-            disabled={isParentLoading}
-            loading={isParentLoading}
-          >
-            {!isEditMode ? "Add Parent" : "Edit Parent"}
-          </Button>
-        </div>
+        <Button
+          fullWidth
+          type="submit"
+          disabled={isParentLoading}
+          loading={isParentLoading}
+        >
+          {isEditMode ? "Update Parent" : "Add Parent"}
+        </Button>
       </form>
     </FormikProvider>
   );

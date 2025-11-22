@@ -13,6 +13,7 @@ interface SearchableSelectProps {
   fetchById: (id: string) => Promise<Option | null>;
   placeholder?: string;
   isClearable?: boolean;
+  isMulti?: boolean;
 }
 
 function SearchableSelect({
@@ -22,31 +23,46 @@ function SearchableSelect({
   fetchById,
   placeholder = "Search...",
   isClearable = true,
+  isMulti = false,
 }: SearchableSelectProps) {
-  const [selectedOption, setSelectedOption] = useState<Option | null>(null);
+  const [selected, setSelected] = useState<Option | Option[] | null>(null);
 
+  // Load initial value(s)
   useEffect(() => {
-    const syncOption = async () => {
-      if (!value) {
-        setSelectedOption(null);
+    const loadInitialValue = async () => {
+      if (!value || (Array.isArray(value) && value.length === 0)) {
+        setSelected(isMulti ? [] : null);
         return;
       }
 
-      if (typeof value === "object" && value.value && value.label) {
-        setSelectedOption(value);
+      // MULTI SELECT
+      if (isMulti && Array.isArray(value)) {
+        const fetched = await Promise.all(value.map((id) => fetchById(id)));
+        const validOptions = fetched.filter(Boolean) as Option[];
+        setSelected(validOptions);
         return;
       }
 
-      const option = await fetchById(value as string);
-      if (option) setSelectedOption(option);
+      // SINGLE SELECT
+      if (!isMulti && typeof value === "string") {
+        const option = await fetchById(value);
+        setSelected(option || null);
+        return;
+      }
     };
 
-    syncOption();
-  }, [value, fetchById]);
+    loadInitialValue();
+  }, [value, fetchById, isMulti]);
 
-  const handleChange = (option: Option | null) => {
-    setSelectedOption(option);
-    onChange(option?.value || null);
+  const handleChange = (option: any) => {
+    setSelected(option);
+
+    if (isMulti) {
+      const ids = option?.map((o: Option) => o.value) || [];
+      onChange(ids); // returns string[]
+    } else {
+      onChange(option?.value || null); // returns string
+    }
   };
 
   return (
@@ -54,14 +70,16 @@ function SearchableSelect({
       <AsyncSelect
         cacheOptions
         defaultOptions
+        isMulti={isMulti}
         isClearable={isClearable}
         loadOptions={(inputValue) => fetchOptions(inputValue || "")}
-        value={selectedOption}
+        value={selected}
         onChange={handleChange}
         placeholder={placeholder}
       />
     </div>
   );
 }
+
 
 export default SearchableSelect;

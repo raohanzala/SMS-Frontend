@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { FormikProvider, useFormik } from "formik";
+import { FormikProvider, useFormik, FieldArray } from "formik";
 import { useNavigate, useParams } from "react-router-dom";
 import Button from "@/components/common/Button";
 import EntitySelect from "@/components/common/EntitySelect";
@@ -12,6 +12,9 @@ import { useUpdateStudent } from "@/features/students/hooks/useUpdateStudent";
 import { useStudent } from "@/features/students/hooks/useStudent";
 import { addStudentSchema } from "@/features/students/validations/student.validation";
 import ManageParentModal from "@/features/parents/components/ManageParentModal";
+import ImageCropperInput from "@/components/common/ImageCropperInput";
+
+const guardianRelations = ["Father", "Mother", "Guardian"];
 
 const StudentFormPage = () => {
   const [isParentModalOpen, setIsParentModalOpen] = useState(false);
@@ -42,22 +45,27 @@ const StudentFormPage = () => {
       gender: student?.gender || "male",
       rollNumber: student?.rollNumber || "",
       classId: student?.class?._id || "",
-      parentId: student?.parent?._id || null,
       religion: student?.religion || "",
       session: student?.session || "",
       dob: student?.DOB || "",
       nationalId: student?.nationalId || "",
-      profileImage: undefined as File | undefined,
+      profileImage: undefined as File | string | undefined,
+      guardians:
+        student?.guardians?.map((g) => ({
+          parent: g.parent?._id || "",
+          relation: g.relation || "Guardian",
+        })) || [],
     },
     enableReinitialize: true,
     validationSchema: addStudentSchema,
     onSubmit: async (formValues) => {
+      console.log(formValues);
+
       if (!isEditMode) {
         addStudentMutation(formValues, {
           onSuccess: () => navigate("/admin/students"),
         });
-      }
-      if (studentId) {
+      } else if (studentId) {
         updateStudentMutation(
           { studentId, updateStudentInput: formValues },
           { onSuccess: () => navigate("/admin/students") }
@@ -108,7 +116,7 @@ const StudentFormPage = () => {
         </div>
       </div>
 
-      {/* Form Wrapper */}
+      {/* Form */}
       <FormikProvider value={formik}>
         <form
           onSubmit={(e) => {
@@ -117,7 +125,7 @@ const StudentFormPage = () => {
           }}
           className="space-y-6"
         >
-          {/* --- Section: Student Information --- */}
+          {/* --- Student Information --- */}
           <div className="bg-white rounded-xl shadow p-6 space-y-4">
             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">
               Student Information
@@ -129,82 +137,29 @@ const StudentFormPage = () => {
                 error={errors.name}
               >
                 <Input
-                  type="text"
                   {...getFieldProps("name")}
                   placeholder="Enter full name"
                 />
               </FormRowVertical>
-
               <FormRowVertical label="Email" name="email" error={errors.email}>
-                <Input
-                  type="email"
-                  {...getFieldProps("email")}
-                  placeholder="Enter email"
-                />
+                <Input {...getFieldProps("email")} placeholder="Enter email" />
               </FormRowVertical>
-
               {!isEditMode && (
                 <FormRowVertical label="Password" name="password">
                   <Input
-                    type="password"
                     {...getFieldProps("password")}
                     placeholder="Set password"
+                    type="password"
                   />
                 </FormRowVertical>
               )}
-
               <FormRowVertical label="Phone" name="phone" error={errors.phone}>
-                <Input
-                  type="text"
-                  {...getFieldProps("phone")}
-                  placeholder="Phone number"
-                />
-              </FormRowVertical>
-
-              <FormRowVertical
-                label="Date of Birth"
-                name="dob"
-                error={errors.dob}
-              >
-                <Input
-                  type="date"
-                  value={values.dob || ""}
-                  onChange={(e) => setFieldValue("dob", e.target.value)}
-                />
-              </FormRowVertical>
-
-              <FormRowVertical
-                label="Gender"
-                name="gender"
-                error={errors.gender}
-              >
-                <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="male"
-                      checked={values.gender === "male"}
-                      onChange={() => setFieldValue("gender", "male")}
-                    />
-                    Male
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="female"
-                      checked={values.gender === "female"}
-                      onChange={() => setFieldValue("gender", "female")}
-                    />
-                    Female
-                  </label>
-                </div>
+                <Input {...getFieldProps("phone")} placeholder="Phone number" />
               </FormRowVertical>
             </div>
           </div>
 
-          {/* --- Section: Academic Information --- */}
+          {/* --- Academic Information --- */}
           <div className="bg-white rounded-xl shadow p-6 space-y-4">
             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">
               Academic Information
@@ -221,27 +176,24 @@ const StudentFormPage = () => {
                   onChange={(classId) => setFieldValue("classId", classId)}
                 />
               </FormRowVertical>
-
               <FormRowVertical
                 label="Roll Number"
                 name="rollNumber"
                 error={errors.rollNumber}
               >
                 <Input
-                  type="text"
                   {...getFieldProps("rollNumber")}
                   placeholder="Leave empty to auto-generate"
                 />
               </FormRowVertical>
-
               <FormRowVertical
                 label="Session"
                 name="session"
                 error={errors.session}
               >
                 <select
-                  className="w-full mt-1 px-4 py-3 border rounded-md"
                   {...getFieldProps("session")}
+                  className="w-full mt-1 px-4 py-3 border rounded-md"
                 >
                   <option value="">Select session</option>
                   {sessionOptions.map((s) => (
@@ -251,10 +203,8 @@ const StudentFormPage = () => {
                   ))}
                 </select>
               </FormRowVertical>
-
               <FormRowVertical label="Religion" name="religion">
                 <Input
-                  type="text"
                   {...getFieldProps("religion")}
                   placeholder="Enter religion"
                 />
@@ -262,32 +212,78 @@ const StudentFormPage = () => {
             </div>
           </div>
 
-          {/* --- Section: Parent Information --- */}
+          {/* --- Guardians --- */}
           <div className="bg-white rounded-xl shadow p-6 space-y-4">
             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">
-              Parent Information
+              Guardians
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="grid grid-cols-[3fr_1fr] gap-4 items-center">
-                <FormRowVertical
-                  label="Parent"
-                  name="parentId"
-                  error={errors.parentId}
-                >
-                  <EntitySelect
-                    entity="parent"
-                    value={values.parentId}
-                    onChange={(parentId) => setFieldValue("parentId", parentId)}
-                  />
-                </FormRowVertical>
-                <Button onClick={() => setIsParentModalOpen(true)}>
-                  Add Parent
-                </Button>
-              </div>
-            </div>
+            <FieldArray
+              name="guardians"
+              render={(arrayHelpers) => (
+                <div className="space-y-4">
+                  {values.guardians.map((guardian, index) => (
+                    <div
+                      key={index}
+                      className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"
+                    >
+                      <FormRowVertical
+                        label="Parent"
+                        name={`guardians.${index}.parent`}
+                      >
+                        <EntitySelect
+                          entity="parent"
+                          value={guardian.parent}
+                          onChange={(parentId) =>
+                            setFieldValue(`guardians.${index}.parent`, parentId)
+                          }
+                        />
+                      </FormRowVertical>
+                      <FormRowVertical
+                        label="Relation"
+                        name={`guardians.${index}.relation`}
+                      >
+                        <select
+                          value={guardian.relation}
+                          onChange={(e) =>
+                            setFieldValue(
+                              `guardians.${index}.relation`,
+                              e.target.value
+                            )
+                          }
+                          className="w-full mt-1 px-4 py-3 border rounded-md"
+                        >
+                          {guardianRelations.map((rel) => (
+                            <option key={rel} value={rel}>
+                              {rel}
+                            </option>
+                          ))}
+                        </select>
+                      </FormRowVertical>
+                      <Button
+                        variant="destructive"
+                        onClick={() => arrayHelpers.remove(index)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    onClick={() =>
+                      arrayHelpers.push({ parent: "", relation: "Guardian" })
+                    }
+                  >
+                    Add Guardian
+                  </Button>
+                  <Button onClick={() => setIsParentModalOpen(true)}>
+                    Add Parent
+                  </Button>
+                </div>
+              )}
+            />
           </div>
 
-          {/* --- Section: Other Information --- */}
+          {/* --- Other Information --- */}
           <div className="bg-white rounded-xl shadow p-6 space-y-4">
             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">
               Other Information
@@ -299,51 +295,23 @@ const StudentFormPage = () => {
                 error={errors.address}
               >
                 <Input
-                  type="text"
                   {...getFieldProps("address")}
                   placeholder="Enter address"
                 />
               </FormRowVertical>
-
               <FormRowVertical label="National ID" name="nationalId">
-                <Input
-                  type="text"
-                  {...getFieldProps("nationalId")}
-                  placeholder="CNIC"
-                />
+                <Input {...getFieldProps("nationalId")} placeholder="CNIC" />
               </FormRowVertical>
-
-              {/* Profile Image */}
-              <FormRowVertical label="Profile Image" name="profileImage">
-                <div className="flex items-center gap-4">
-                  <div className="w-32 h-32 border rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
-                    {values.profileImage ? (
-                      typeof values.profileImage === "string" ? (
-                        <img
-                          src={values.profileImage}
-                          alt="Profile"
-                          className="object-cover w-full h-full"
-                        />
-                      ) : (
-                        <img
-                          src={URL.createObjectURL(values.profileImage)}
-                          alt="Profile Preview"
-                          className="object-cover w-full h-full"
-                        />
-                      )
-                    ) : (
-                      <span className="text-gray-400">No image</span>
-                    )}
-                  </div>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) setFieldValue("profileImage", file);
-                    }}
-                  />
-                </div>
+              <FormRowVertical
+                label="Profile Image"
+                name="profileImage"
+                error={errors.profileImage}
+              >
+                <ImageCropperInput
+                  value={values.profileImage}
+                  onChange={(file) => setFieldValue("profileImage", file)}
+                  aspect={1}
+                />
               </FormRowVertical>
             </div>
           </div>

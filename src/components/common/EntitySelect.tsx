@@ -14,12 +14,13 @@ interface Option {
 
 interface EntitySelectProps {
   entity: EntityType;
-  value: string | null;
-  onChange: (value: string | null) => void;
+  value: string | string[] | null;
+  onChange: (value: string | string[] | null) => void;
   placeholder?: string;
+  isMulti?: boolean;
 }
 
-function EntitySelect({ entity, value, onChange, placeholder }: EntitySelectProps) {
+function EntitySelect({ entity, value, onChange, placeholder, isMulti = false }: EntitySelectProps) {
 
   const apiMap = {
     parent: {
@@ -98,6 +99,7 @@ function EntitySelect({ entity, value, onChange, placeholder }: EntitySelectProp
   return (
     <SearchableSelect
       value={value}
+      isMulti={isMulti}
       onChange={onChange}
       fetchOptions={fetchList}
       fetchById={fetchById}

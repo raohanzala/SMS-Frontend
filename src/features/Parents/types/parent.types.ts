@@ -1,27 +1,35 @@
-import { Gender, User } from "../../../types/user.types";
-import { Student } from "../../students/types/student.types";
+import { Student } from "@/features/students/types/student.types";
 
-export interface Parent extends User {
-  children?: Student[];
+export interface Parent {
+  _id: string;
+  name: string;
+  phone: string;
+  email?: string;
   occupation?: string;
+  income?: number;
+  nationalId?: string;
+  children?: Student[];
 }
 
 export interface AddParentInput {
-  parentName: string;
-  parentEmail?: string;
-  parentPhone: string;
-  parentAddress?: string;
-  parentGender: Gender;
+  name: string;
+  phone: string;
+  email?: string;
   occupation?: string;
-  parentChildrenIds?: string[];
+  income?: number;
+  nationalId?: string;
+  childrenIds?: string[];
 }
 
 export interface UpdateParentInput {
-  parentName?: string;
-  parentEmail?: string;
-  parentPhone?: string;
-  parentAddress?: string;
-  parentGender?: Gender;
+  name?: string;
+  phone?: string;
+  email?: string;
   occupation?: string;
-  parentChildrenIds?: string[];
+  income?: number;
+  nationalId?: string;
+  childrenIds?: string[];
 }
+
+
+

@@ -18,7 +18,7 @@ const SubjectsPage = () => {
   const [isShowManageSubjectModal, setIsShowManageSubjectModal] = useState(false);
   const [isShowSubjectDeleteModal, setIsShowSubjectDeleteModal] = useState(false);
 
-  const { pagination, subjectsWithClass, subjectsError, isSubjectsLoading } = useSubjects();
+  const { pagination, subjects, subjectsError, isSubjectsLoading } = useSubjects();
   const { deleteSubjectMutation, isDeletingSubject } = useDeleteSubject();
 
   const handleEditSubject = useCallback((subjectToEdit: Subject) => {
@@ -74,7 +74,7 @@ const SubjectsPage = () => {
       )}
       {!isSubjectsLoading && !subjectsError && (
         <>
-          {subjectsWithClass?.length === 0 ? (
+          {subjects?.length === 0 ? (
             <EmptyState
               icon={FiBookOpen}
               title="No Subjects Found"
@@ -85,11 +85,11 @@ const SubjectsPage = () => {
             />
           ) : (
             <>
-                <SubjectsCards
-                  subjects={subjectsWithClass}
-                  onEditSubject={handleEditSubject}
-                  onDeleteSubject={handleDeleteSubject}
-                />
+              <SubjectsCards
+                subjects={subjects}
+                onEditSubject={handleEditSubject}
+                onDeleteSubject={handleDeleteSubject}
+              />
 
               <Pagination pagination={pagination} />
             </>
@@ -119,4 +119,3 @@ const SubjectsPage = () => {
 };
 
 export default SubjectsPage;
-

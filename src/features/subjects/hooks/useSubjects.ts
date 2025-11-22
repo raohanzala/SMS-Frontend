@@ -18,8 +18,8 @@ export function useSubjects(isAll = false) {
     queryFn: () => getAllSubjectsApi({ page, limit, search }),
   });
 
-  const { classes : subjectsWithClass, pagination } = data?.data || {};
+  const { subjects, pagination } = data?.data || {};
 
-  return { subjectsWithClass, pagination, isSubjectsLoading, subjectsError };
+  return { subjects, pagination, isSubjectsLoading, subjectsError };
 }
 

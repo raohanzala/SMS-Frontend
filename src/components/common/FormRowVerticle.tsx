@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 
 interface FormRowVerticalProps {
   label?: string;
-  error?: string | null;
+  error?: string | null | string[];
   name: string;
   children: ReactNode;
 }
@@ -22,11 +22,9 @@ const FormRowVertical = ({
       )}
       {children}
       <div
-        className={`text-red-500 text-xs mt-1 ${
-          error ? "opacity-100" : "opacity-0"
-        }`}
+        className={`text-red-500 text-xs mt-1`}
       >
-        {error || "none"}
+        {Array.isArray(error) ? error.join(", ") : error}
       </div>
     </div>
   );

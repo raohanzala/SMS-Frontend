@@ -1,10 +1,9 @@
-import { FieldArray, FormikProvider, useFormik } from "formik";
+import { FormikProvider, useFormik } from "formik";
 import FormRowVertical from "@/components/common/FormRowVerticle";
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
 import { useAddSubject } from "../hooks/useAddSubject";
 import { useUpdateSubject } from "../hooks/useUpdateSubject";
-import { FiPlus, FiTrash2 } from "react-icons/fi";
 import EntitySelect from "@/components/common/EntitySelect";
 import { CreateSubjectFormProps } from "../types/subject-components.types";
 import { addSubjectSchema } from "../validation/subject.validation";
@@ -21,17 +20,17 @@ const CreateSubjectForm = ({
 
   const formik = useFormik({
     initialValues: {
-      classId: subjectToEdit?.class?._id || "", // class reference
-      subjectTeacherId: subjectToEdit?.teacher?._id || "", // teacher reference
-      subjectName: subjectToEdit?.name || "",
-      examMarks: subjectToEdit?.examMarks || "", // number field
+      classId: subjectToEdit?.class?._id || "",
+      teacherId: subjectToEdit?.teacher?._id || "",
+      name: subjectToEdit?.name || "",
+      examMarks: subjectToEdit?.examMarks || "",
     },
     validationSchema: addSubjectSchema,
     onSubmit: async (values) => {
       const payload = {
-        name: values.subjectName,
+        name: values.name,
         classId: values.classId,
-        teacherId: values.subjectTeacherId,
+        teacherId: values.teacherId,
         examMarks: Number(values.examMarks),
       };
 
@@ -55,61 +54,57 @@ const CreateSubjectForm = ({
     },
   });
 
+  const { values, errors, getFieldProps, setFieldValue, handleSubmit } = formik;
+
   return (
     <FormikProvider value={formik}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          formik.handleSubmit(e);
+          handleSubmit(e);
         }}
-        className="space-y-6"
+        className="space-y-4"
       >
-        {/* Class Select */}
-        <FormRowVertical label="Class" name="classId">
+        <FormRowVertical label="Class" name="classId" error={errors.classId}>
           <EntitySelect
             entity="class"
-            value={formik.values.classId}
+            value={values.classId}
             onChange={(classId: string | null) =>
-              formik.setFieldValue("classId", classId || "")
+              setFieldValue("classId", classId || "")
             }
           />
         </FormRowVertical>
 
-        {/* Teacher Select */}
-        <FormRowVertical label="Subject Teacher" name="subjectTeacherId">
+        <FormRowVertical
+          label="Subject Teacher"
+          name="teacherId"
+          error={errors.teacherId}
+        >
           <EntitySelect
             entity="teacher"
-            value={formik.values.subjectTeacherId}
+            value={values.teacherId}
             onChange={(teacherId: string | null) =>
-              formik.setFieldValue("subjectTeacherId", teacherId || "")
+              setFieldValue("teacherId", teacherId || "")
             }
           />
         </FormRowVertical>
 
-        {/* Subject Name */}
-        <FormRowVertical label="Subject Name" name="subjectName">
-          <Input
-            name="subjectName"
-            value={formik.values.subjectName}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            placeholder="Enter Subject Name"
-          />
+        <FormRowVertical label="Subject Name" name="name" error={errors.name}>
+          <Input {...getFieldProps("name")} placeholder="Enter Subject Name" />
         </FormRowVertical>
 
-        {/* Exam Marks */}
-        <FormRowVertical label="Exam Marks" name="examMarks">
+        <FormRowVertical
+          label="Exam Marks"
+          name="examMarks"
+          error={errors.examMarks}
+        >
           <Input
-            name="examMarks"
             type="number"
-            value={formik.values.examMarks}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
+            {...getFieldProps("examMarks")}
             placeholder="Enter Exam Marks"
           />
         </FormRowVertical>
 
-        {/* Submit */}
         <div>
           <Button
             fullWidth

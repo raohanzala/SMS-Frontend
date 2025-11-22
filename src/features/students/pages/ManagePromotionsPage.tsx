@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { FiUsers, FiArrowUp } from "react-icons/fi";
+import { FiArrowUp } from "react-icons/fi";
 import FilterPanel from "../components/promotion/FilterPanel";
 import PromotionStudentTable from "../components/promotion/PromotionStudentTable";
 import PromotionPanel from "../components/promotion/PromotionPanel";

@@ -15,9 +15,20 @@ export const addStudentSchema = Yup.object().shape({
       "Roll number can only contain letters, numbers, - or _"
     )
     .nullable(),
-  parentId: Yup.string().required("Parent is required"),
   session: Yup.string().required("Session is required"),
   dob: Yup.string().nullable(),
   religion: Yup.string().nullable(),
   nationalId: Yup.string().nullable(),
+
+  // --- Updated for multiple guardians ---
+  guardians: Yup.array()
+    .of(
+      Yup.object().shape({
+        parent: Yup.string().required("Parent is required"),
+        relation: Yup.string()
+          .oneOf(["Father", "Mother", "Guardian"])
+          .required("Relation is required"),
+      })
+    )
+    .min(1, "At least one guardian is required"),
 });
