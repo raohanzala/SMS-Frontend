@@ -1,4 +1,3 @@
-import { useCallback, useMemo } from "react";
 import { FormikProvider, useFormik } from "formik";
 import { useNavigate, useParams } from "react-router-dom";
 import Button from "@/components/common/Button";
@@ -10,7 +9,6 @@ import { useAddEmployee } from "@/features/employees/hooks/useAddEmployee";
 import { useUpdateEmployee } from "@/features/employees/hooks/useUpdateEmployee";
 import { useEmployee } from "@/features/employees/hooks/useEmployee";
 import { addEmployeeSchema } from "@/features/employees/validations/employee.validation";
-import { EmployeeDesignation } from "@/features/employees/types/employee.types";
 
 const EmployeeFormPage = () => {
   const navigate = useNavigate();
@@ -21,45 +19,9 @@ const EmployeeFormPage = () => {
   const { addEmployeeMutation, isAddingEmployee } = useAddEmployee();
   const { updateEmployeeMutation, isUpdatingEmployee } = useUpdateEmployee();
 
-  const isBusy = isAddingEmployee || isUpdatingEmployee;
+  const isEmployeePending = isAddingEmployee || isUpdatingEmployee;
 
-  const initialValues = useMemo(
-    () => ({
-      employeeName: employee?.name || "",
-      employeeEmail: employee?.email || "",
-      employeePhone: employee?.phone || "",
-      employeeAddress: employee?.address || "",
-      employeeGender: employee?.gender || "male" as "male" | "female",
-      employeeDesignation: employee?.designation || "teacher" as EmployeeDesignation,
-      employeeExperience: employee?.experience || "",
-      employeeEducation: employee?.education || "",
-      employeeHusband: employee?.husband || "",
-      employeeDateOfJoining: employee?.dateOfJoining || "",
-      employeeSalary: employee?.salary || { amount: 0, currency: "PKR" },
-      employeeProfileImage: undefined as File | undefined,
-    }),
-    [employee]
-  );
-
-  type FormValues = {
-    employeeName: string;
-    employeeEmail: string;
-    employeePhone?: string;
-    employeeAddress?: string;
-    employeeGender: "male" | "female";
-    employeeDesignation: EmployeeDesignation;
-    employeeExperience?: string;
-    employeeEducation?: string;
-    employeeHusband?: string;
-    employeeDateOfJoining?: string;
-    employeeSalary?: { amount: number; currency: string };
-    employeeProfileImage?: File | undefined;
-  };
-
-  const toErr = (e: unknown): string | undefined =>
-    typeof e === "string" ? e : undefined;
-
-  const designationOptions: { value: EmployeeDesignation; label: string }[] = [
+  const designationOptions = [
     { value: "teacher", label: "Teacher" },
     { value: "principal", label: "Principal" },
     { value: "accountant", label: "Accountant" },
@@ -74,40 +36,34 @@ const EmployeeFormPage = () => {
     { value: "EUR", label: "EUR" },
   ];
 
-  const formik = useFormik<FormValues>({
+  const formik = useFormik({
     enableReinitialize: true,
-    initialValues,
-    validationSchema: addEmployeeSchema,
-    onSubmit: async (formValues) => {
-      const formData = new FormData();
-      
-      // Append all fields to FormData
-      formData.append("employeeName", formValues.employeeName);
-      formData.append("employeeEmail", formValues.employeeEmail);
-      if (formValues.employeePhone) formData.append("employeePhone", formValues.employeePhone);
-      if (formValues.employeeAddress) formData.append("employeeAddress", formValues.employeeAddress);
-      formData.append("employeeGender", formValues.employeeGender);
-      formData.append("employeeDesignation", formValues.employeeDesignation);
-      if (formValues.employeeExperience) formData.append("employeeExperience", formValues.employeeExperience);
-      if (formValues.employeeEducation) formData.append("employeeEducation", formValues.employeeEducation);
-      if (formValues.employeeHusband) formData.append("employeeHusband", formValues.employeeHusband);
-      if (formValues.employeeDateOfJoining) formData.append("employeeDateOfJoining", formValues.employeeDateOfJoining);
-      
-      if (formValues.employeeSalary) {
-        formData.append("employeeSalary", JSON.stringify(formValues.employeeSalary));
-      }
-      
-      if (formValues.employeeProfileImage) {
-        formData.append("profileImage", formValues.employeeProfileImage);
-      }
-
+    initialValues : {
+      name: employee?.name || "",
+      email: employee?.email || "",
+      phone: employee?.phone || "",
+      address: employee?.address || "",
+      gender: employee?.gender || "male",
+      designation: employee?.designation || "teacher",
+      experience: employee?.experience || "",
+      education: employee?.education || "",
+      husband: employee?.husband || "",
+      dateOfJoining: employee?.dateOfJoining || "",
+      dob: employee?.DOB || "",
+      religion: employee?.religion || "",
+      nationalId: employee?.nationalId || "",
+      salary: employee?.salary || { amount: 0, currency: "PKR" },
+      profileImage: undefined as File | undefined,
+    },
+    validationSchema: addEmployeeSchema, // also update schema names
+    onSubmit: (formValues) => {
       if (!isEditMode) {
-        addEmployeeMutation(formData, {
+        addEmployeeMutation({addEmployeeInput: formValues}, {
           onSuccess: () => navigate("/admin/employees"),
         });
       } else if (employeeId) {
         updateEmployeeMutation(
-          { employeeId, formData },
+          { employeeId, updateEmployeeInput: formValues },
           { onSuccess: () => navigate("/admin/employees") }
         );
       }
@@ -116,9 +72,7 @@ const EmployeeFormPage = () => {
 
   const { values, errors, handleSubmit, setFieldValue, getFieldProps } = formik;
 
-  const handleCancel = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
+  const handleCancel = () => navigate(-1);
 
   if (isEditMode && isEmployeeLoading) {
     return (
@@ -139,18 +93,20 @@ const EmployeeFormPage = () => {
 
   return (
     <div className="space-y-6">
+      {/* HEADER */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">
           {isEditMode ? "Edit Employee" : "Add New Employee"}
         </h2>
         <div className="flex gap-2">
           <Button variant="ghost" onClick={handleCancel}>Cancel</Button>
-          <Button onClick={() => handleSubmit()} loading={isBusy}>
+          <Button onClick={() => handleSubmit()} loading={isEmployeePending}>
             {isEditMode ? "Update Employee" : "Create Employee"}
           </Button>
         </div>
       </div>
 
+      {/* FORM CARD */}
       <div className="bg-white rounded-xl shadow p-5">
         <FormikProvider value={formik}>
           <form
@@ -160,179 +116,157 @@ const EmployeeFormPage = () => {
             }}
             className="space-y-6"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormRowVertical label="Full Name" name="employeeName" error={toErr(errors.employeeName)}>
+
+            {/* 1️⃣ BASIC INFORMATION */}
+            <section>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormRowVertical label="Full Name" name="name" error={errors.name}>
+                  <Input {...getFieldProps("name")} placeholder="Enter full name" disabled={isEmployeePending} />
+                </FormRowVertical>
+
+                <FormRowVertical label="Email" name="email" error={errors.email}>
+                  <Input {...getFieldProps("email")} placeholder="Enter email" disabled={isEmployeePending} />
+                </FormRowVertical>
+
+                <FormRowVertical label="Phone" name="phone" error={errors.phone}>
+                  <Input {...getFieldProps("phone")} placeholder="Enter phone number" disabled={isEmployeePending} />
+                </FormRowVertical>
+
+                <FormRowVertical label="Designation" name="designation" error={errors.designation}>
+                  <select
+                    {...getFieldProps("designation")}
+                    disabled={isEmployeePending}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  >
+                    {designationOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </FormRowVertical>
+              </div>
+            </section>
+
+            {/* 2️⃣ PERSONAL DETAILS */}
+            <section>
+              <FormRowVertical label="Address" name="address" error={errors.address}>
+                <Input {...getFieldProps("address")} placeholder="Enter address" disabled={isEmployeePending} />
+              </FormRowVertical>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormRowVertical label="Gender" name="gender" error={errors.gender}>
+                  <div className="flex gap-4">
+                    {["male", "female"].map((g) => (
+                      <label key={g} className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="gender"
+                          value={g}
+                          checked={values.gender === g}
+                          onChange={() => setFieldValue("gender", g)}
+                          disabled={isEmployeePending}
+                        />
+                        {g.charAt(0).toUpperCase() + g.slice(1)}
+                      </label>
+                    ))}
+                  </div>
+                </FormRowVertical>
+
+                <FormRowVertical label="Date of Joining" name="dateOfJoining">
+                  <Input
+                    type="date"
+                    value={values.dateOfJoining || ""}
+                    onChange={(e) => setFieldValue("dateOfJoining", e.target.value)}
+                    disabled={isEmployeePending}
+                  />
+                </FormRowVertical>
+
+                <FormRowVertical label="Date of Birth" name="dob">
+                  <Input
+                    type="date"
+                    value={values.dob || ""}
+                    onChange={(e) => setFieldValue("dob", e.target.value)}
+                    disabled={isEmployeePending}
+                  />
+                </FormRowVertical>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormRowVertical label="Husband Name" name="husband">
+                  <Input {...getFieldProps("husband")} placeholder="Optional" disabled={isEmployeePending} />
+                </FormRowVertical>
+
+                <FormRowVertical label="Religion" name="religion">
+                  <Input {...getFieldProps("religion")} placeholder="Enter religion" disabled={isEmployeePending} />
+                </FormRowVertical>
+              </div>
+            </section>
+
+            {/* 3️⃣ WORK DETAILS */}
+            <section>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormRowVertical label="Experience" name="experience">
+                  <Input {...getFieldProps("experience")} placeholder="Enter experience" disabled={isEmployeePending} />
+                </FormRowVertical>
+
+                <FormRowVertical label="Education" name="education">
+                  <Input {...getFieldProps("education")} placeholder="Enter education" disabled={isEmployeePending} />
+                </FormRowVertical>
+              </div>
+            </section>
+
+            {/* 4️⃣ SALARY */}
+            <section>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormRowVertical label="Amount" name="salary.amount">
+                  <Input
+                    type="number"
+                    value={values.salary.amount}
+                    onChange={(e) =>
+                      setFieldValue("salary", {
+                        ...values.salary,
+                        amount: Number(e.target.value),
+                      })
+                    }
+                    disabled={isEmployeePending}
+                  />
+                </FormRowVertical>
+
+                <FormRowVertical label="Currency" name="salary.currency">
+                  <select
+                    value={values.salary.currency}
+                    onChange={(e) =>
+                      setFieldValue("salary", {
+                        ...values.salary,
+                        currency: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border rounded-md"
+                    disabled={isEmployeePending}
+                  >
+                    {currencyOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </FormRowVertical>
+              </div>
+            </section>
+
+            {/* 5️⃣ PROFILE IMAGE */}
+            <section>
+              <FormRowVertical label="Upload" name="profileImage">
                 <Input
-                  type="text"
-                  {...getFieldProps("employeeName")}
-                  placeholder="Enter full name"
-                  disabled={isBusy}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setFieldValue("profileImage", e.target.files?.[0])}
+                  disabled={isEmployeePending}
                 />
               </FormRowVertical>
+            </section>
 
-              <FormRowVertical label="Email Address" name="employeeEmail" error={toErr(errors.employeeEmail)}>
-                <Input
-                  type="email"
-                  {...getFieldProps("employeeEmail")}
-                  placeholder="Enter email"
-                  disabled={isBusy}
-                />
-              </FormRowVertical>
-
-              <FormRowVertical label="Phone" name="employeePhone" error={toErr(errors.employeePhone)}>
-                <Input
-                  type="text"
-                  {...getFieldProps("employeePhone")}
-                  placeholder="Enter phone number"
-                  disabled={isBusy}
-                />
-              </FormRowVertical>
-
-              <FormRowVertical label="Designation" name="employeeDesignation" error={toErr(errors.employeeDesignation)}>
-                <select
-                  {...getFieldProps("employeeDesignation")}
-                  disabled={isBusy}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {designationOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </FormRowVertical>
-            </div>
-
-            <FormRowVertical label="Address" name="employeeAddress" error={toErr(errors.employeeAddress)}>
-              <Input
-                type="text"
-                {...getFieldProps("employeeAddress")}
-                placeholder="Enter address"
-                disabled={isBusy}
-              />
-            </FormRowVertical>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormRowVertical label="Gender" name="employeeGender" error={toErr(errors.employeeGender)}>
-                <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="employeeGender"
-                      value="male"
-                      checked={values.employeeGender === "male"}
-                      onChange={() => setFieldValue("employeeGender", "male")}
-                      disabled={isBusy}
-                    />
-                    Male
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="employeeGender"
-                      value="female"
-                      checked={values.employeeGender === "female"}
-                      onChange={() => setFieldValue("employeeGender", "female")}
-                      disabled={isBusy}
-                    />
-                    Female
-                  </label>
-                </div>
-              </FormRowVertical>
-
-              <FormRowVertical label="Date of Joining" name="employeeDateOfJoining" error={undefined}>
-                <Input
-                  type="date"
-                  value={values.employeeDateOfJoining || ""}
-                  onChange={(e) => setFieldValue("employeeDateOfJoining", e.target.value)}
-                  disabled={isBusy}
-                />
-              </FormRowVertical>
-
-              <FormRowVertical label="Husband Name" name="employeeHusband" error={undefined}>
-                <Input
-                  type="text"
-                  {...getFieldProps("employeeHusband")}
-                  placeholder="Enter husband name (optional)"
-                  disabled={isBusy}
-                />
-              </FormRowVertical>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormRowVertical label="Experience" name="employeeExperience" error={undefined}>
-                <Input
-                  type="text"
-                  {...getFieldProps("employeeExperience")}
-                  placeholder="Enter experience"
-                  disabled={isBusy}
-                />
-              </FormRowVertical>
-
-              <FormRowVertical label="Education" name="employeeEducation" error={undefined}>
-                <Input
-                  type="text"
-                  {...getFieldProps("employeeEducation")}
-                  placeholder="Enter education"
-                  disabled={isBusy}
-                />
-              </FormRowVertical>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormRowVertical label="Salary Amount" name="employeeSalary.amount" error={undefined}>
-                <Input
-                  type="number"
-                  value={values.employeeSalary?.amount || 0}
-                  onChange={(e) => {
-                    setFieldValue("employeeSalary", {
-                      ...values.employeeSalary,
-                      amount: Number(e.target.value) || 0,
-                      currency: values.employeeSalary?.currency || "PKR",
-                    });
-                  }}
-                  placeholder="Enter salary amount"
-                  disabled={isBusy}
-                />
-              </FormRowVertical>
-
-              <FormRowVertical label="Currency" name="employeeSalary.currency" error={undefined}>
-                <select
-                  value={values.employeeSalary?.currency || "PKR"}
-                  onChange={(e) => {
-                    setFieldValue("employeeSalary", {
-                      ...values.employeeSalary,
-                      amount: values.employeeSalary?.amount || 0,
-                      currency: e.target.value,
-                    });
-                  }}
-                  disabled={isBusy}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {currencyOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </FormRowVertical>
-            </div>
-
-            <FormRowVertical label="Profile Image" name="employeeProfileImage" error={undefined}>
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) setFieldValue("employeeProfileImage", file);
-                }}
-                disabled={isBusy}
-              />
-            </FormRowVertical>
-
+            {/* ACTION BUTTONS */}
             <div className="flex justify-end gap-2">
-              <Button variant="ghost" type="button" onClick={handleCancel}>Cancel</Button>
-              <Button type="submit" loading={isBusy}>
+              <Button variant="ghost" onClick={handleCancel}>Cancel</Button>
+              <Button type="submit" loading={isEmployeePending}>
                 {isEditMode ? "Update Employee" : "Create Employee"}
               </Button>
             </div>
@@ -342,6 +276,7 @@ const EmployeeFormPage = () => {
     </div>
   );
 };
+
 
 export default EmployeeFormPage;
 

@@ -68,6 +68,14 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
           />
         </FormRowVertical>
 
+        <FormRowVertical label="Class Teacher" name="classTeacherId" error={errors.classTeacherId}>
+          <EntitySelect
+            entity="teacher"
+            value={formik.values.classTeacherId}
+            onChange={(teacherId: string | null) => formik.setFieldValue("classTeacherId", teacherId || "")}
+          />
+        </FormRowVertical>
+
         {/* Monthly Tuition Fee */}
         <FormRowVertical label="Monthly Tuition Fee" name="classMonthlyTuitionFee" error={errors.classMonthlyTuitionFee}>
           <Input
@@ -78,16 +86,9 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
           />
         </FormRowVertical>
 
-        <FormRowVertical label="Class Teacher" name="classTeacherId">
-          <EntitySelect
-            entity="teacher"
-            value={formik.values.classTeacherId}
-            onChange={(teacherId: string | null) => formik.setFieldValue("classTeacherId", teacherId || "")}
-          />
-        </FormRowVertical>
 
         {/* Submit Button */}
-        <div>
+        <div className='mt-5'>
           <Button fullWidth={true} type="submit" loading={isAddingClass || isUpdatingClass}>
             {!isEditMode ? "Add Class" : "Update Class"}
           </Button>

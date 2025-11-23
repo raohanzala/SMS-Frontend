@@ -6,8 +6,7 @@ export function useUpdateEmployee() {
   const queryClient = useQueryClient();
 
   const { isPending: isUpdatingEmployee, mutate: updateEmployeeMutation } = useMutation({
-    mutationFn: ({ employeeId, formData }: { employeeId: string; formData: FormData }) =>
-      updateEmployeeApi(employeeId, formData),
+    mutationFn: updateEmployeeApi,
 
     onSuccess: (data) => {
       toast.success(data.message || "Employee successfully updated");

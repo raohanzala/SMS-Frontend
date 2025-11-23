@@ -11,15 +11,15 @@ export const getEmployeeByIdApi = async (id: string) => {
   return data;
 };
 
-export const addEmployeeApi = async (formData: FormData) => {
-  const { data } = await axiosInstance.post("/employees", formData, {
+export const addEmployeeApi = async (addEmployeeInput: AddEmployeeInput) => {
+  const { data } = await axiosInstance.post("/employees", addEmployeeInput, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
 };
 
-export const updateEmployeeApi = async (employeeId: string, formData: FormData) => {
-  const { data } = await axiosInstance.put(`/employees/${employeeId}`, formData, {
+export const updateEmployeeApi = async ({employeeId, updateEmployeeInput}: {employeeId: string, updateEmployeeInput: UpdateEmployeeInput}) => {
+  const { data } = await axiosInstance.put(`/employees/${employeeId}`, updateEmployeeInput, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;

@@ -29,7 +29,7 @@ const EmployeesCards = React.memo(
             <div className="flex items-center space-x-4">
               <img
                 src={
-                  employee.profileImage || employee.gender === "female"
+                  employee.profileImage ? employee.profileImage : employee.gender === "female"
                     ? "/female-teacher-avatar.jpg"
                     : "/male-teacher-avatar.jpg"
                 }

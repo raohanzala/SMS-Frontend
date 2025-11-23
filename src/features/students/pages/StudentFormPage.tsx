@@ -13,8 +13,7 @@ import { useStudent } from "@/features/students/hooks/useStudent";
 import { addStudentSchema } from "@/features/students/validations/student.validation";
 import ManageParentModal from "@/features/parents/components/ManageParentModal";
 import ImageCropperInput from "@/components/common/ImageCropperInput";
-
-const guardianRelations = ["Father", "Mother", "Guardian"];
+import SearchableSelect from "@/components/common/SearchableSelect";
 
 const StudentFormPage = () => {
   const [isParentModalOpen, setIsParentModalOpen] = useState(false);
@@ -213,75 +212,156 @@ const StudentFormPage = () => {
           </div>
 
           {/* --- Guardians --- */}
-          <div className="bg-white rounded-xl shadow p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">
-              Guardians
-            </h3>
-            <FieldArray
-              name="guardians"
-              render={(arrayHelpers) => (
-                <div className="space-y-4">
-                  {values.guardians.map((guardian, index) => (
-                    <div
-                      key={index}
-                      className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"
-                    >
-                      <FormRowVertical
-                        label="Parent"
-                        name={`guardians.${index}.parent`}
-                      >
-                        <EntitySelect
-                          entity="parent"
-                          value={guardian.parent}
-                          onChange={(parentId) =>
-                            setFieldValue(`guardians.${index}.parent`, parentId)
-                          }
-                        />
-                      </FormRowVertical>
-                      <FormRowVertical
-                        label="Relation"
-                        name={`guardians.${index}.relation`}
-                      >
-                        <select
-                          value={guardian.relation}
-                          onChange={(e) =>
-                            setFieldValue(
-                              `guardians.${index}.relation`,
-                              e.target.value
-                            )
-                          }
-                          className="w-full mt-1 px-4 py-3 border rounded-md"
-                        >
-                          {guardianRelations.map((rel) => (
-                            <option key={rel} value={rel}>
-                              {rel}
-                            </option>
-                          ))}
-                        </select>
-                      </FormRowVertical>
-                      <Button
-                        variant="destructive"
-                        onClick={() => arrayHelpers.remove(index)}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  ))}
-                  <Button
-                    type="button"
-                    onClick={() =>
-                      arrayHelpers.push({ parent: "", relation: "Guardian" })
+          {/* --- Guardians --- */}
+<div className="bg-white rounded-xl shadow p-6 space-y-4">
+  <div className="flex items-center justify-between">
+    <h3 className="text-lg font-semibold text-gray-700">
+      Parent / Guardians
+    </h3>
+
+    <div className="flex gap-2">
+      <Button onClick={() => setIsParentModalOpen(true)}>
+        + Add Parent
+      </Button>
+
+      <Button
+        type="button"
+        variant="secondary"
+        onClick={() =>
+          setFieldValue("guardians", [
+            ...values.guardians,
+            { parent: "", relation: "" },
+          ])
+        }
+      >
+        + Add Guardian
+      </Button>
+    </div>
+  </div>
+
+  <FieldArray
+    name="guardians"
+    render={(arrayHelpers) => (
+      <div className="space-y-4">
+        {values.guardians.map((guardian: { parent: string; relation: string }, index : number) => {
+          const isFatherTaken = values.guardians.some(
+            (g: { parent: string; relation: string }, i: number) => i !== index && g.relation === "Father"
+          );
+          const isMotherTaken = values.guardians.some(
+            (g: { parent: string; relation: string }, i: number) => i !== index && g.relation === "Mother"
+          );
+
+          return (
+            <div
+              key={index}
+              className="p-4 bg-gray-50 border rounded-xl shadow-sm"
+            >
+              {/* Parent Select */}
+              <FormRowVertical
+                label="Select Parent"
+                name={`guardians.${index}.parent`}
+              >
+                <EntitySelect
+                  entity="parent"
+                  value={guardian.parent}
+                  onChange={(parentId) => {
+                    // Prevent duplicate parents
+                    const alreadyUsed = values.guardians.some(
+                      (g: { parent: string; relation: string }, i: number) => i !== index && g.parent === parentId
+                    );
+
+                    if (alreadyUsed) {
+                      alert("This parent is already linked.");
+                      return;
                     }
-                  >
-                    Add Guardian
-                  </Button>
-                  <Button onClick={() => setIsParentModalOpen(true)}>
-                    Add Parent
-                  </Button>
-                </div>
-              )}
-            />
-          </div>
+
+                    setFieldValue(`guardians.${index}.parent`, parentId);
+                  }}
+                  disableOptions={(option) =>
+                    values.guardians.some(
+                      (g: { parent: string; relation: string }, i: number) => i !== index && g.parent === option.value
+                    )
+                  }
+                />
+              </FormRowVertical>
+
+              {/* Relation */}
+              <div className="mt-4">
+  <FormRowVertical
+    label="Relation"
+    name={`guardians.${index}.relation`}
+  >
+    <SearchableSelect
+      value={guardian.relation}
+      onChange={(selected) => {
+        const relation = selected;
+
+        // Prevent multiple fathers
+        if (relation === "Father" && isFatherTaken) {
+          alert("A student can have only one Father.");
+          return;
+        }
+
+        // Prevent multiple mothers
+        if (relation === "Mother" && isMotherTaken) {
+          alert("A student can have only one Mother.");
+          return;
+        }
+
+        setFieldValue(`guardians.${index}.relation`, relation);
+      }}
+      fetchOptions={async (search) => {
+        const allRelations = [
+          { value: "Father", label: "Father", disabled: isFatherTaken },
+          { value: "Mother", label: "Mother", disabled: isMotherTaken },
+          { value: "Guardian", label: "Guardian" },
+          { value: "Other", label: "Other" },
+        ];
+
+        // Filter by search
+        return allRelations
+          .filter((opt) =>
+            opt.label.toLowerCase().includes(search.toLowerCase())
+          )
+          .map((opt) => ({
+            value: opt.value,
+            label: opt.label + (opt.disabled ? " (Not allowed)" : ""),
+            isDisabled: opt.disabled,
+          }));
+      }}
+      fetchById={async (value) => {
+        if (!value) return null;
+
+        return {
+          value,
+          label: value,
+        };
+      }}
+      placeholder="Search relation..."
+      isClearable={false}
+      isMulti={false}
+    />
+  </FormRowVertical>
+</div>
+
+
+              {/* Remove */}
+              <div className="mt-4 flex justify-end">
+                <Button
+                  variant="danger"
+                  onClick={() => arrayHelpers.remove(index)}
+                >
+                  Remove Guardian
+                </Button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    )}
+  />
+</div>
+
 
           {/* --- Other Information --- */}
           <div className="bg-white rounded-xl shadow p-6 space-y-4">

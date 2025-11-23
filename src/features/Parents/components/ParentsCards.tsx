@@ -29,9 +29,10 @@ const ParentsCards = React.memo(
             <div className="flex items-center space-x-4">
               <img
                 src={
-                  parent.profileImage || parent.gender === "female"
-                    ? "/female-parent-avatar.jpg"
-                    : "/male-parent-avatar.jpg"
+                  // parent.gender === "female"
+                  //   ? "/female-parent-avatar.jpg"
+                    // : 
+                    "/male-parent-avatar.jpg"
                 }
                 alt={parent.name}
                 className="h-14 w-14 rounded-full object-cover border"
