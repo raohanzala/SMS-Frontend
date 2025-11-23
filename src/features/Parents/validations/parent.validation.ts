@@ -9,6 +9,7 @@ export const addParentSchema = Yup.object().shape({
   occupation: Yup.string().nullable(),
   income: Yup.number().typeError("Income must be a number").nullable(),
   nationalId: Yup.string().nullable(),
+  gender: Yup.string().oneOf(["male", "female"]).required("Gender is required"),
   childrenIds: Yup.array().of(Yup.string()).nullable(),
 });
 

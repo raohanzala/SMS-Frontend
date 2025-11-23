@@ -6,8 +6,7 @@ export function useUpdateTeacher() {
   const queryClient = useQueryClient();
 
   const { isPending: isUpdatingTeacher, mutate: updateTeacherMutation } = useMutation({
-    mutationFn: ({ teacherId, formData }: { teacherId: string; formData: FormData }) =>
-      updateTeacherApi(teacherId, formData),
+    mutationFn:updateTeacherApi,
 
     onSuccess: (data) => {
       toast.success(data.message || "Teacher successfully updated");

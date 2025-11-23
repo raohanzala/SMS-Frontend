@@ -28,7 +28,7 @@ const TeachersCards = React.memo(
             <div className="flex items-center space-x-4">
               <img
                 src={
-                  teacher.profileImage || teacher.gender === "female"
+                  teacher.profileImage ? teacher.profileImage : teacher.gender === "female"
                     ? "/female-teacher-avatar.jpg"
                     : "/male-teacher-avatar.jpg"
                 }

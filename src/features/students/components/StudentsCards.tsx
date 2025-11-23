@@ -24,7 +24,7 @@ const StudentsCards = React.memo(
             >
               {student.gender === "female" ? "Female" : "Male"}
             </span>
-
+    
             {/* Top Section - Avatar + Name */}
             <div className="flex items-center space-x-4">
               <img
@@ -42,53 +42,51 @@ const StudentsCards = React.memo(
                 <h4 className="text-base font-semibold text-gray-900">
                   {student.name}
                 </h4>
-
                 <p className="text-xs text-gray-500">
                   Roll No: {student.rollNumber || "N/A"}
                 </p>
-
-                <p
-                  className={`${
-                    student.gender === "female"
-                      ? "text-xs text-pink-500"
-                      : "text-xs text-blue-500"
-                  } font-bold relative`}
-                ></p>
               </div>
             </div>
-
+    
             {/* Class & Section */}
             <div className="mt-3">
               <p className="text-sm text-gray-700 font-medium">
                 {student.class?.name || "N/A"}
               </p>
             </div>
-
-            {/* Parent Info */}
+    
+            {/* Guardians Info */}
             <div className="mt-2">
-              <p className="text-sm font-medium text-gray-900">
-                Parent: {student.parent?.name || "N/A"}
-              </p>
-              <p className="text-xs text-gray-500">
-                {student.parent?.phone || "No phone"}
-              </p>
+              {student.guardians.length > 0 ? (
+                student.guardians.map((g) => (
+                  <div key={g._id} className="flex flex-col">
+                    <span className="text-sm font-medium text-gray-900">
+                      {g.parent?.name}
+                    </span>
+                    <span className="text-xs text-gray-500 flex items-center gap-1">
+                      {g.parent?.phone || "No phone"}
+                      <span className="bg-gray-200 px-2 py-0.5 rounded-full text-xs">
+                        {g.relation}
+                      </span>
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <span className="text-gray-400 text-sm">No guardians</span>
+              )}
             </div>
-
+    
             {/* Student Contact */}
             <div className="mt-2">
-              <p className="text-sm text-gray-900">
-                {student.email || "No email"}
-              </p>
-              <p className="text-xs text-gray-500">
-                {student.phone || "No phone"}
-              </p>
+              <p className="text-sm text-gray-900">{student.email || "No email"}</p>
+              <p className="text-xs text-gray-500">{student.phone || "No phone"}</p>
             </div>
-
+    
             {/* Admission Date */}
             <div className="mt-2 text-xs text-gray-400">
               Admitted: {formatShortDate(student.createdAt || "")}
             </div>
-
+    
             {/* Actions */}
             <div className="mt-4 flex justify-end space-x-2">
               <ViewButton navigateTo={`/admin/students/${student._id}`} />
@@ -99,6 +97,7 @@ const StudentsCards = React.memo(
         ))}
       </div>
     );
+    
   }
 );
 

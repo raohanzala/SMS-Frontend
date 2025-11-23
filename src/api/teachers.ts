@@ -11,14 +11,14 @@ export const getTeacherByIdApi = async (id: string) => {
   return data;
 };
 
-export const addTeacherApi = async (addTeacherInput: AddTeacherInput) => {
+export const addTeacherApi = async ({addTeacherInput}: {addTeacherInput: AddTeacherInput}) => {
   const { data } = await axiosInstance.post("/teachers", addTeacherInput, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
 };
 
-export const updateTeacherApi = async (teacherId: string, updateTeacherInput: UpdateTeacherInput) => {
+export const updateTeacherApi = async ({teacherId, updateTeacherInput}: {teacherId: string, updateTeacherInput: UpdateTeacherInput}) => {
   const { data } = await axiosInstance.put(`/teachers/${teacherId}`, updateTeacherInput, {
     headers: { "Content-Type": "multipart/form-data" },
   });

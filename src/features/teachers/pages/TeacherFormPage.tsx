@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useFormik, FormikProvider } from "formik";
 import { useNavigate, useParams } from "react-router-dom";
-import * as Yup from "yup";
 
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
@@ -13,36 +12,9 @@ import { useTeacher } from "@/features/teachers/hooks/useTeacher";
 import { useAddTeacher } from "@/features/teachers/hooks/useAddTeacher";
 import { useUpdateTeacher } from "@/features/teachers/hooks/useUpdateTeacher";
 import { useClasses } from "@/features/classes/hooks/useClasses";
-import EntitySelect from "@/components/common/EntitySelect";
+import { addTeacherSchema } from "../validations/teacher.validation";
+import ImageCropperInput from "@/components/common/ImageCropperInput";
 
-// =======================
-//  Validation Schema
-// =======================
-const addTeacherSchema = Yup.object().shape({
-  name: Yup.string().required("Name is required"),
-  email: Yup.string().email("Invalid email").required("Email is required"),
-  gender: Yup.string().oneOf(["male", "female"], "Gender is required").required(),
-  phone: Yup.string()
-    .matches(/^[0-9]{10,15}$/, "Phone must be 10–15 digits")
-    .nullable(),
-  address: Yup.string().nullable(),
-  experience: Yup.string().nullable(),
-  education: Yup.string().nullable(),
-  husband: Yup.string().nullable(),
-  dateOfJoining: Yup.date().nullable(),
-  religion: Yup.string().nullable(),
-  dob: Yup.date().nullable(),
-  nationalId: Yup.string().nullable(),
-  assignedClasses: Yup.array().of(Yup.string()).nullable(),
-  salary: Yup.object().shape({
-    amount: Yup.number().nullable(),
-    currency: Yup.string().nullable(),
-  }),
-});
-
-// =======================
-//  Component
-// =======================
 const TeacherFormPage = () => {
   const navigate = useNavigate();
   const { teacherId } = useParams();
@@ -73,7 +45,7 @@ const TeacherFormPage = () => {
         typeof c === "string" ? c : c?._id
       ) || [],
       salary: teacher?.salary || { amount: 0, currency: "PKR" },
-      profileImage: undefined as File | undefined,
+      profileImage: teacher?.profileImage as File | undefined,
     }),
     [teacher]
   );
@@ -82,38 +54,16 @@ const TeacherFormPage = () => {
     enableReinitialize: true,
     initialValues,
     validationSchema: addTeacherSchema,
-    onSubmit: async (values) => {
-      const formData = new FormData();
-
-      formData.append("name", values.name);
-      formData.append("email", values.email);
-      if (values.phone) formData.append("phone", values.phone);
-      if (values.address) formData.append("address", values.address);
-      formData.append("gender", values.gender);
-
-      if (values.experience) formData.append("experience", values.experience);
-      if (values.education) formData.append("education", values.education);
-      if (values.husband) formData.append("husband", values.husband);
-      if (values.dateOfJoining) formData.append("dateOfJoining", values.dateOfJoining);
-      if (values.religion) formData.append("religion", values.religion);
-      if (values.dob) formData.append("dob", values.dob);
-      if (values.nationalId) formData.append("nationalId", values.nationalId);
-
-      if (values.assignedClasses?.length) {
-        values.assignedClasses.forEach((id) => formData.append("assignedClasses[]", id));
-      }
-
-      if (values.salary) formData.append("salary", JSON.stringify(values.salary));
-
-      if (values.profileImage) formData.append("profileImage", values.profileImage);
+    onSubmit: async (formValues) => {
+      console.log(formValues);
 
       if (!isEditMode) {
-        addTeacherMutation(formData, {
+        addTeacherMutation({addTeacherInput: formValues}, {
           onSuccess: () => navigate("/admin/teachers"),
         });
       } else if (teacherId) {
         updateTeacherMutation(
-          { teacherId, formData },
+          { teacherId, updateTeacherInput: formValues },
           { onSuccess: () => navigate("/admin/teachers") }
         );
       }
@@ -121,6 +71,8 @@ const TeacherFormPage = () => {
   });
 
   const { values, errors, handleSubmit, setFieldValue, getFieldProps } = formik;
+
+  console.log(errors, values)
 
   const handleCancel = useCallback(() => {
     navigate(-1);
@@ -178,6 +130,13 @@ const TeacherFormPage = () => {
             }}
             className="space-y-6"
           >
+             <div className="md:col-span-1 flex justify-center md:justify-start">
+              <ImageCropperInput
+                value={values.profileImage}
+                onChange={(file) => setFieldValue("profileImage", file)}
+                aspect={1}
+              />
+            </div>
             {/* Section 1: Basic Info */}
             <h3 className="text-lg font-medium text-gray-700">Basic Info</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -323,17 +282,6 @@ const TeacherFormPage = () => {
                 </select>
               </FormRowVertical>
             </div>
-
-            {/* Section 6: Profile Image */}
-            <h3 className="text-lg font-medium text-gray-700">Profile Image</h3>
-            <FormRowVertical label="Profile Image" name="profileImage" error={undefined}>
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setFieldValue("profileImage", e.target.files?.[0])}
-                disabled={isBusy}
-              />
-            </FormRowVertical>
 
             {/* Actions */}
             <div className="flex justify-end gap-2">

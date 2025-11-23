@@ -30,11 +30,14 @@ const CreateParentForm = ({
       occupation: parentToEdit?.occupation || "",
       income: parentToEdit?.income || "",
       nationalId: parentToEdit?.nationalId || "",
+
+      // ✅ ADDED
+      gender: parentToEdit?.gender || "male",
+
       childrenIds: parentToEdit?.children?.map((c) => c._id) || [],
     },
     validationSchema: addParentSchema,
     onSubmit: async (values) => {
-      console.log(values);
       const payload: AddParentInput = { ...values };
 
       if (parentFormContext === "student") {
@@ -75,6 +78,37 @@ const CreateParentForm = ({
             disabled={isParentLoading}
             {...getFieldProps("name")}
           />
+        </FormRowVertical>
+
+        {/* ✅ GENDER RADIO FIELD */}
+        <FormRowVertical label="Gender" name="gender" error={errors.gender}>
+          <div className="flex items-center gap-6">
+            {/* Male */}
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="gender"
+                value="male"
+                checked={values.gender === "male"}
+                onChange={(e) => setFieldValue("gender", e.target.value)}
+                className="h-4 w-4"
+              />
+              <span>Male</span>
+            </label>
+
+            {/* Female */}
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="gender"
+                value="female"
+                checked={values.gender === "female"}
+                onChange={(e) => setFieldValue("gender", e.target.value)}
+                className="h-4 w-4"
+              />
+              <span>Female</span>
+            </label>
+          </div>
         </FormRowVertical>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -167,5 +201,6 @@ const CreateParentForm = ({
     </FormikProvider>
   );
 };
+
 
 export default CreateParentForm;

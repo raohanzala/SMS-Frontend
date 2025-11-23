@@ -1,19 +1,16 @@
-import { FormikProvider, useFormik } from 'formik';
-import FormRowVertical from '@/components/common/FormRowVerticle';
-import Button from '@/components/common/Button';
-import Input from '@/components/common/Input';
-import { useAddClass } from '../hooks/useAddClass';
-import { useUpdateClass } from '../hooks/useUpdateClass';
-import { useTeachers } from '../../teachers/hooks/useTeachers';
-import { CreateClassFormProps } from '../types/class-components.interface';
-import { addClassSchema } from '../validation/class.validation';
-import EntitySelect from '@/components/common/EntitySelect';
+import { FormikProvider, useFormik } from "formik";
+import FormRowVertical from "@/components/common/FormRowVerticle";
+import Button from "@/components/common/Button";
+import Input from "@/components/common/Input";
+import { useAddClass } from "../hooks/useAddClass";
+import { useUpdateClass } from "../hooks/useUpdateClass";
+import { CreateClassFormProps } from "../types/class-components.interface";
+import { addClassSchema } from "../validation/class.validation";
+import EntitySelect from "@/components/common/EntitySelect";
 
 const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
   const { addClassMutation, isAddingClass } = useAddClass();
   const { updateClassMutation, isUpdatingClass } = useUpdateClass();
-
-  const { teachers } = useTeachers()
 
   const isEditMode = !!classToEdit;
 
@@ -22,8 +19,11 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
       className: classToEdit?.name || "",
       classMonthlyTuitionFee: classToEdit?.monthlyTuitionFee ?? 0,
       classTeacherId:
-        (typeof classToEdit?.classTeacher === 'object' && classToEdit?.classTeacher?._id) ||
-        (typeof classToEdit?.classTeacher === 'string' ? classToEdit?.classTeacher : ""),
+        (typeof classToEdit?.classTeacher === "object" &&
+          classToEdit?.classTeacher?._id) ||
+        (typeof classToEdit?.classTeacher === "string"
+          ? classToEdit?.classTeacher
+          : ""),
     },
     validationSchema: addClassSchema,
     onSubmit: async (values) => {
@@ -39,9 +39,12 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
         });
       } else {
         if (classToEdit?._id) {
-          updateClassMutation({ classId: classToEdit._id, classData: payload }, {
-            onSuccess: () => onClose?.(),
-          });
+          updateClassMutation(
+            { classId: classToEdit._id, classData: payload },
+            {
+              onSuccess: () => onClose?.(),
+            }
+          );
         }
       }
     },
@@ -58,8 +61,26 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
           handleSubmit(e);
         }}
       >
+        <FormRowVertical
+          label="Class Teacher"
+          name="classTeacherId"
+          error={errors.classTeacherId}
+        >
+          <EntitySelect
+            entity="teacher"
+            value={formik.values.classTeacherId}
+            onChange={(teacherId: string | null) =>
+              formik.setFieldValue("classTeacherId", teacherId || "")
+            }
+          />
+        </FormRowVertical>
+
         {/* Class Name */}
-        <FormRowVertical label="Class Name" name="className" error={errors.className}>
+        <FormRowVertical
+          label="Class Name"
+          name="className"
+          error={errors.className}
+        >
           <Input
             type="text"
             placeholder="Enter class name"
@@ -68,16 +89,12 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
           />
         </FormRowVertical>
 
-        <FormRowVertical label="Class Teacher" name="classTeacherId" error={errors.classTeacherId}>
-          <EntitySelect
-            entity="teacher"
-            value={formik.values.classTeacherId}
-            onChange={(teacherId: string | null) => formik.setFieldValue("classTeacherId", teacherId || "")}
-          />
-        </FormRowVertical>
-
         {/* Monthly Tuition Fee */}
-        <FormRowVertical label="Monthly Tuition Fee" name="classMonthlyTuitionFee" error={errors.classMonthlyTuitionFee}>
+        <FormRowVertical
+          label="Monthly Tuition Fee"
+          name="classMonthlyTuitionFee"
+          error={errors.classMonthlyTuitionFee}
+        >
           <Input
             type="number"
             placeholder="e.g. 5000"
@@ -86,16 +103,19 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
           />
         </FormRowVertical>
 
-
         {/* Submit Button */}
-        <div className='mt-5'>
-          <Button fullWidth={true} type="submit" loading={isAddingClass || isUpdatingClass}>
+        <div className="mt-5">
+          <Button
+            fullWidth={true}
+            type="submit"
+            loading={isAddingClass || isUpdatingClass}
+          >
             {!isEditMode ? "Add Class" : "Update Class"}
           </Button>
         </div>
       </form>
     </FormikProvider>
   );
-}
+};
 
-export default CreateClassForm
+export default CreateClassForm;

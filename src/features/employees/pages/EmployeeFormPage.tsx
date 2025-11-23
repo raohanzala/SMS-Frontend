@@ -9,6 +9,7 @@ import { useAddEmployee } from "@/features/employees/hooks/useAddEmployee";
 import { useUpdateEmployee } from "@/features/employees/hooks/useUpdateEmployee";
 import { useEmployee } from "@/features/employees/hooks/useEmployee";
 import { addEmployeeSchema } from "@/features/employees/validations/employee.validation";
+import ImageCropperInput from "@/components/common/ImageCropperInput";
 
 const EmployeeFormPage = () => {
   const navigate = useNavigate();
@@ -30,12 +31,6 @@ const EmployeeFormPage = () => {
     { value: "other", label: "Other" },
   ];
 
-  const currencyOptions = [
-    { value: "PKR", label: "PKR" },
-    { value: "USD", label: "USD" },
-    { value: "EUR", label: "EUR" },
-  ];
-
   const formik = useFormik({
     enableReinitialize: true,
     initialValues : {
@@ -52,8 +47,8 @@ const EmployeeFormPage = () => {
       dob: employee?.DOB || "",
       religion: employee?.religion || "",
       nationalId: employee?.nationalId || "",
-      salary: employee?.salary || { amount: 0, currency: "PKR" },
-      profileImage: undefined as File | undefined,
+      salary: employee?.salary || { amount: 0 },
+      profileImage: employee?.profileImage,
     },
     validationSchema: addEmployeeSchema, // also update schema names
     onSubmit: (formValues) => {
@@ -116,6 +111,13 @@ const EmployeeFormPage = () => {
             }}
             className="space-y-6"
           >
+            <div className="md:col-span-1 flex justify-center md:justify-start">
+              <ImageCropperInput
+                value={values.profileImage}
+                onChange={(file) => setFieldValue("profileImage", file)}
+                aspect={1}
+              />
+            </div>
 
             {/* 1️⃣ BASIC INFORMATION */}
             <section>
@@ -230,37 +232,7 @@ const EmployeeFormPage = () => {
                     disabled={isEmployeePending}
                   />
                 </FormRowVertical>
-
-                <FormRowVertical label="Currency" name="salary.currency">
-                  <select
-                    value={values.salary.currency}
-                    onChange={(e) =>
-                      setFieldValue("salary", {
-                        ...values.salary,
-                        currency: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border rounded-md"
-                    disabled={isEmployeePending}
-                  >
-                    {currencyOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                </FormRowVertical>
               </div>
-            </section>
-
-            {/* 5️⃣ PROFILE IMAGE */}
-            <section>
-              <FormRowVertical label="Upload" name="profileImage">
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setFieldValue("profileImage", e.target.files?.[0])}
-                  disabled={isEmployeePending}
-                />
-              </FormRowVertical>
             </section>
 
             {/* ACTION BUTTONS */}

@@ -7,7 +7,7 @@ export function useAddEmployee() {
 
   const { mutate: addEmployeeMutation, isPending: isAddingEmployee } =
     useMutation({
-      mutationFn: (formData: FormData) => addEmployeeApi(formData),
+      mutationFn: addEmployeeApi,
       onSuccess: () => {
         toast.success("New employee successfully created");
         queryClient.invalidateQueries({ queryKey: ["employees"] });

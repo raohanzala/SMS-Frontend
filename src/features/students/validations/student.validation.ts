@@ -10,10 +10,6 @@ export const addStudentSchema = Yup.object().shape({
   gender: Yup.string().oneOf(["male", "female"]).required("Gender is required"),
   classId: Yup.string().required("Class is required"),
   rollNumber: Yup.string()
-    .matches(
-      /^[A-Za-z0-9-_]*$/,
-      "Roll number can only contain letters, numbers, - or _"
-    )
     .nullable(),
   session: Yup.string().required("Session is required"),
   dob: Yup.string().nullable(),

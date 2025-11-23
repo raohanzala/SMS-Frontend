@@ -11,7 +11,7 @@ export const getEmployeeByIdApi = async (id: string) => {
   return data;
 };
 
-export const addEmployeeApi = async (addEmployeeInput: AddEmployeeInput) => {
+export const addEmployeeApi = async ({addEmployeeInput}: {addEmployeeInput: AddEmployeeInput}) => {
   const { data } = await axiosInstance.post("/employees", addEmployeeInput, {
     headers: { "Content-Type": "multipart/form-data" },
   });

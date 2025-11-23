@@ -14,9 +14,10 @@ const StudentsTable = React.memo(
             Students ({students?.length || 0})
           </h3>
         </div>
+    
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50 text-nowrap">
+            <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Student
@@ -25,7 +26,7 @@ const StudentsTable = React.memo(
                   Class & Section
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Parent
+                  Guardians
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Contact
@@ -38,17 +39,19 @@ const StudentsTable = React.memo(
                 </th>
               </tr>
             </thead>
+    
             <tbody className="bg-white divide-y divide-gray-200">
               {students?.map((student) => (
                 <tr key={student._id} className="hover:bg-gray-50">
                   {/* Student Info */}
-                  <td className="px-6 py-4 whitespace-nowrap relative">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <img
                         src={
-                          student.profileImage || student.gender === "female"
+                          student.profileImage ||
+                          (student.gender === "female"
                             ? "/female-student-avatar.jpg"
-                            : "/male-student-avatar.jpg"
+                            : "/male-student-avatar.jpg")
                         }
                         alt={student.name}
                         className="h-14 w-14 rounded-full object-cover border"
@@ -58,61 +61,64 @@ const StudentsTable = React.memo(
                           {student.name}
                         </div>
                         <div className="text-xs text-gray-500">
-                          Roll No: {student.rollNumber || "N/A"}
-                          <p
-                            className={`${
+                          Roll No: {student.rollNumber || "N/A"} |{" "}
+                          <span
+                            className={`font-bold ${
                               student.gender === "female"
-                                ? "text-xs text-pink-500"
-                                : "text-xs text-blue-500"
-                            } font-bold`}
+                                ? "text-pink-500"
+                                : "text-blue-500"
+                            }`}
                           >
-                            Gender: {student.gender}
-                          </p>
+                            {student.gender}
+                          </span>
                         </div>
                       </div>
                     </div>
                   </td>
-
+    
                   {/* Class & Section */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {student.class?.name || "N/A"}{" "}
+                    {student.class?.name || "N/A"}
                   </td>
-
-                  {/* Parent Info */}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {student.parent?.name || "N/A"}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {student.parent?.phone || "No phone"}
-                    </div>
+    
+                  {/* Guardians */}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {student.guardians.length > 0 ? (
+                      student.guardians.map((g) => (
+                        <div key={g._id} className="flex flex-col">
+                          <span className="font-medium">{g.parent?.name}</span>
+                          <span className="text-xs text-gray-500">
+                            {g.parent?.phone || "No phone"} -{" "}
+                            <span className="bg-gray-200 px-2 py-0.5 rounded-full text-xs">
+                              {g.relation}
+                            </span>
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <span className="text-gray-400">No guardians</span>
+                    )}
                   </td>
-
-                  {/* Student Contact */}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {student.email || "No email"}
-                    </div>
+    
+                  {/* Contact */}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div>{student.email || "No email"}</div>
                     <div className="text-xs text-gray-500">
                       {student.phone || "No phone"}
                     </div>
                   </td>
-
+    
                   {/* Admission Date */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatShortDate(student.createdAt || "") }
+                    {formatShortDate(student.createdAt || "")}
                   </td>
-
+    
                   {/* Actions */}
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
-                      <ViewButton
-                        navigateTo={`/admin/students/${student._id}`}
-                      />
+                      <ViewButton navigateTo={`/admin/students/${student._id}`} />
                       <EditButton onClick={() => onEditStudent(student)} />
-                      <DeleteButton
-                        onClick={() => onDeleteStudent(student._id)}
-                      />
+                      <DeleteButton onClick={() => onDeleteStudent(student._id)} />
                     </div>
                   </td>
                 </tr>
@@ -122,6 +128,7 @@ const StudentsTable = React.memo(
         </div>
       </div>
     );
+    
   }
 );
 
