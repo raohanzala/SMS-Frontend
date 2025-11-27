@@ -18,12 +18,7 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
     initialValues: {
       className: classToEdit?.name || "",
       classMonthlyTuitionFee: classToEdit?.monthlyTuitionFee ?? 0,
-      classTeacherId:
-        (typeof classToEdit?.classTeacher === "object" &&
-          classToEdit?.classTeacher?._id) ||
-        (typeof classToEdit?.classTeacher === "string"
-          ? classToEdit?.classTeacher
-          : ""),
+      classTeacherId: classToEdit?.classTeacher?._id || ""
     },
     validationSchema: addClassSchema,
     onSubmit: async (values) => {
@@ -50,7 +45,7 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
     },
   });
 
-  const { errors, getFieldProps, handleSubmit, values } = formik;
+  const { errors, values, setFieldValue, getFieldProps, handleSubmit } = formik;
   console.log("values", values);
 
   return (
@@ -68,9 +63,9 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
         >
           <EntitySelect
             entity="teacher"
-            value={formik.values.classTeacherId}
+            value={values.classTeacherId}
             onChange={(teacherId: string | null) =>
-              formik.setFieldValue("classTeacherId", teacherId || "")
+              setFieldValue("classTeacherId", teacherId)
             }
           />
         </FormRowVertical>

@@ -63,14 +63,14 @@ function EntitySelect({ entity, value, onChange, placeholder, isMulti = false }:
         return (
           data?.teachers?.map((t: any) => ({
             value: t._id,
-            label: `${t.name} (${t.email})`,
+            label: `${t.name} (${t.education})`,
           })) || []
         );
       },
       fetchById: async (id: string): Promise<Option | null> => {
         if (!id) return null;
         const { data } = await getTeacherByIdApi(id);
-        return data ? { value: data._id, label: `${data.name} (${data.email})` } : null;
+        return data ? { value: data.teacher._id, label: `${data.teacher.name} (${data.teacher.education})` } : null;
       },
     },
     student: {
@@ -95,6 +95,8 @@ function EntitySelect({ entity, value, onChange, placeholder, isMulti = false }:
   };
 
   const { fetchList, fetchById } = apiMap[entity];
+
+  console.log("value", value);
 
   return (
     <SearchableSelect
