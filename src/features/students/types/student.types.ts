@@ -4,10 +4,21 @@ import { Attendance } from "@/features/attendance/types/attendance.types";
 
 export type Gender = "male" | "female" | "other" | "";
 
+export interface Guardian {
+  _id: string;
+  parent: {
+    _id: string;
+    name: string;
+    phone?: string;
+  };
+  relation: "Father" | "Mother";
+}
+
 export interface Student extends User {
   rollNumber: string;
   class: Class;
   parent?: Parent;
+  guardians?: Guardian[];
 }
 
 export interface AddStudentInput {

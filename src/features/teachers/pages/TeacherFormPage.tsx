@@ -14,6 +14,7 @@ import { useUpdateTeacher } from "@/features/teachers/hooks/useUpdateTeacher";
 import { useClasses } from "@/features/classes/hooks/useClasses";
 import { addTeacherSchema } from "../validations/teacher.validation";
 import ImageCropperInput from "@/components/common/ImageCropperInput";
+import EntitySelect from "@/components/common/EntitySelect";
 
 const TeacherFormPage = () => {
   const navigate = useNavigate();
@@ -46,6 +47,7 @@ const TeacherFormPage = () => {
       ) || [],
       salary: teacher?.salary || { amount: 0, currency: "PKR" },
       profileImage: teacher?.profileImage as File | undefined,
+      teacherLevel: teacher?.level,
     }),
     [teacher]
   );
@@ -95,11 +97,6 @@ const TeacherFormPage = () => {
     );
   }
 
-  const currencyOptions = [
-    { value: "PKR", label: "PKR" },
-    { value: "USD", label: "USD" },
-    { value: "EUR", label: "EUR" },
-  ];
 
   const toErr = (e: unknown): string | undefined => (typeof e === "string" ? e : undefined);
 
@@ -252,6 +249,20 @@ const TeacherFormPage = () => {
               <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple classes</p>
             </FormRowVertical>
 
+            <FormRowVertical label="Teacher Level" name="teacherLevel" error={toErr(errors.teacherLevel)}>
+              <EntitySelect
+                entity="static"
+                staticOptions={[
+                  { value: "1", label: "Level 1" },
+                  { value: "2", label: "Level 2" },
+                  { value: "3", label: "Level 3" },
+                ]}
+                value={values.teacherLevel}
+                onChange={(level) => setFieldValue("teacherLevel", level)}
+                placeholder="Select Teacher Level"
+                isDisabled={isBusy}
+              />
+            </FormRowVertical>
             {/* Section 5: Salary */}
             <h3 className="text-lg font-medium text-gray-700">Salary</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -268,18 +279,18 @@ const TeacherFormPage = () => {
               </FormRowVertical>
 
               <FormRowVertical label="Currency" name="salary.currency" error={toErr(errors.salary?.currency)}>
-                <select
+                <EntitySelect
+                  entity="static"
+                  staticOptions={[
+                    { value: "PKR", label: "PKR" },
+                    { value: "USD", label: "USD" },
+                    { value: "EUR", label: "EUR" },
+                  ]}
                   value={values.salary?.currency || "PKR"}
-                  onChange={(e) => setFieldValue("salary", { ...values.salary, currency: e.target.value })}
-                  disabled={isBusy}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {currencyOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(currency) => setFieldValue("salary", { ...values.salary, currency: currency as string })}
+                  placeholder="Select Currency"
+                  isDisabled={isBusy}
+                />
               </FormRowVertical>
             </div>
 

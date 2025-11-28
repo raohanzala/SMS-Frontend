@@ -7,13 +7,14 @@ interface Option {
 }
 
 interface SearchableSelectProps {
-  value: string | Option | null;
+  value: string | string[] | Option | Option[] | null;
   onChange: (value: string | null) => void;
   fetchOptions: (search: string) => Promise<Option[]>;
   fetchById: (id: string) => Promise<Option | null>;
   placeholder?: string;
   isClearable?: boolean;
   isMulti?: boolean;
+  isDisabled?: boolean;
 }
 
 function SearchableSelect({
@@ -24,6 +25,7 @@ function SearchableSelect({
   placeholder = "Search...",
   isClearable = true,
   isMulti = false,
+  isDisabled = false,
 }: SearchableSelectProps) {
   const [selected, setSelected] = useState<Option | Option[] | null>(null);
 
@@ -80,6 +82,7 @@ function SearchableSelect({
         loadOptions={(inputValue) => fetchOptions(inputValue || "")}
         value={selected}
         onChange={handleChange}
+        isDisabled={isDisabled}
         placeholder={placeholder}
       />
     </div>

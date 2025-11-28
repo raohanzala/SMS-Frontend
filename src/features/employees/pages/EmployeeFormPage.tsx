@@ -10,6 +10,7 @@ import { useUpdateEmployee } from "@/features/employees/hooks/useUpdateEmployee"
 import { useEmployee } from "@/features/employees/hooks/useEmployee";
 import { addEmployeeSchema } from "@/features/employees/validations/employee.validation";
 import ImageCropperInput from "@/components/common/ImageCropperInput";
+import EntitySelect from "@/components/common/EntitySelect";
 
 const EmployeeFormPage = () => {
   const navigate = useNavigate();
@@ -22,14 +23,6 @@ const EmployeeFormPage = () => {
 
   const isEmployeePending = isAddingEmployee || isUpdatingEmployee;
 
-  const designationOptions = [
-    { value: "teacher", label: "Teacher" },
-    { value: "principal", label: "Principal" },
-    { value: "accountant", label: "Accountant" },
-    { value: "management", label: "Management" },
-    { value: "admin", label: "Admin" },
-    { value: "other", label: "Other" },
-  ];
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -135,15 +128,21 @@ const EmployeeFormPage = () => {
                 </FormRowVertical>
 
                 <FormRowVertical label="Designation" name="designation" error={errors.designation}>
-                  <select
-                    {...getFieldProps("designation")}
-                    disabled={isEmployeePending}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  >
-                    {designationOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
+                  <EntitySelect
+                    entity="static"
+                    staticOptions={[
+                      { value: "teacher", label: "Teacher" },
+                      { value: "principal", label: "Principal" },
+                      { value: "accountant", label: "Accountant" },
+                      { value: "management", label: "Management" },
+                      { value: "admin", label: "Admin" },
+                      { value: "other", label: "Other" },
+                    ]}
+                    value={values.designation}
+                    onChange={(designation) => setFieldValue("designation", designation)}
+                    placeholder="Select Designation"
+                    isDisabled={isEmployeePending}
+                  />
                 </FormRowVertical>
               </div>
             </section>

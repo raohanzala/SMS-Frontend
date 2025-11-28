@@ -9,15 +9,14 @@ import { createTimetableSchema } from "../validation/timetable.validation";
 import EntitySelect from "@/components/common/EntitySelect";
 import { useClassById } from "../hooks/useClassById";
 import { useEffect } from "react";
-import { TimetableEntry } from "../types/timetable.types";
 import { Subject } from "@/features/subjects/types/subject.types";
+import { DayOfWeek } from "../types/timetable.types";
 
 const CreateTimetableForm = ({
   timetableToEdit,
   onClose,
 }: CreateTimetableFormProps) => {
-  const { createTimetableMutation, isCreatingTimetable } =
-    useCreateTimetable();
+  const { createTimetableMutation, isCreatingTimetable } = useCreateTimetable();
   const { updateTimetableMutation, isUpdatingTimetable } = useUpdateTimetable();
 
   const isEditMode = !!timetableToEdit;
@@ -29,9 +28,7 @@ const CreateTimetableForm = ({
       : timetableToEdit.class
     : null;
 
-  const { classData } = useClassById(
-    isEditMode ? classId : null
-  );
+  const { classData } = useClassById(isEditMode ? classId : null);
 
   const formik = useFormik({
     initialValues: {
@@ -39,19 +36,13 @@ const CreateTimetableForm = ({
         (typeof timetableToEdit?.class === "object"
           ? timetableToEdit?.class?._id
           : timetableToEdit?.class) || "",
-      day: (timetableToEdit?.day as any) || "Mon",
+      day: (timetableToEdit?.day as DayOfWeek) || "Mon",
       period: timetableToEdit?.period || 1,
-      startTime: timetableToEdit?.startTime || "",
-      endTime: timetableToEdit?.endTime || "",
       subject: timetableToEdit?.subject || "",
-      teacherId:
-        (typeof timetableToEdit?.teacher === "object"
-          ? timetableToEdit?.teacher?._id
-          : timetableToEdit?.teacher) || "",
       room: timetableToEdit?.room || "",
       notes: timetableToEdit?.notes || "",
       isSubstitute: timetableToEdit?.isSubstitute || false,
-      originalTeacherId:
+      substituteTeacherId:
         (typeof timetableToEdit?.originalTeacher === "object"
           ? timetableToEdit?.originalTeacher?._id
           : timetableToEdit?.originalTeacher) || "",
@@ -63,18 +54,15 @@ const CreateTimetableForm = ({
         classId: values.classId,
         day: values.day,
         period: Number(values.period),
-        startTime: values.startTime,
-        endTime: values.endTime,
         subject: values.subject,
-        teacherId: values.teacherId,
       };
 
       if (values.room) payload.room = values.room;
       if (values.notes) payload.notes = values.notes;
       if (values.isSubstitute) {
         payload.isSubstitute = true;
-        if (values.originalTeacherId) {
-          payload.originalTeacherId = values.originalTeacherId;
+        if (values.substituteTeacherId) {
+          payload.substituteTeacherId = values.substituteTeacherId;
         }
       }
 
@@ -122,11 +110,7 @@ const CreateTimetableForm = ({
         }}
       >
         {/* Class */}
-        <FormRowVertical
-          label="Class"
-          name="classId"
-          error={errors.classId}
-        >
+        <FormRowVertical label="Class" name="classId" error={errors.classId}>
           <EntitySelect
             entity="class"
             value={formik.values.classId}
@@ -134,30 +118,31 @@ const CreateTimetableForm = ({
               formik.setFieldValue("classId", classId || "")
             }
             placeholder="Select class"
+            isDisabled={isCreatingTimetable || isUpdatingTimetable}
           />
         </FormRowVertical>
 
         {/* Day */}
         <FormRowVertical label="Day" name="day" error={errors.day}>
-          <select
-            className="w-full mt-1 text-sm px-4 py-3 border rounded-md"
-            {...getFieldProps("day")}
-          >
-            <option value="Mon">Monday</option>
-            <option value="Tue">Tuesday</option>
-            <option value="Wed">Wednesday</option>
-            <option value="Thu">Thursday</option>
-            <option value="Fri">Friday</option>
-            <option value="Sat">Saturday</option>
-          </select>
+          <EntitySelect
+            entity="static"
+            staticOptions={[
+              { value: "Mon", label: "Monday" },
+              { value: "Tue", label: "Tuesday" },
+              { value: "Wed", label: "Wednesday" },
+              { value: "Thu", label: "Thursday" },
+              { value: "Fri", label: "Friday" },
+              { value: "Sat", label: "Saturday" },
+            ]}
+            value={values.day}
+            onChange={(day) => setFieldValue("day", day)}
+            placeholder="Select Day"
+            isDisabled={isCreatingTimetable || isUpdatingTimetable}
+          />
         </FormRowVertical>
 
         {/* Period */}
-        <FormRowVertical
-          label="Period"
-          name="period"
-          error={errors.period}
-        >
+        <FormRowVertical label="Period" name="period" error={errors.period}>
           <Input
             type="number"
             placeholder="e.g. 1"
@@ -166,38 +151,8 @@ const CreateTimetableForm = ({
           />
         </FormRowVertical>
 
-        {/* Start Time */}
-        <FormRowVertical
-          label="Start Time"
-          name="startTime"
-          error={errors.startTime}
-        >
-          <Input
-            type="time"
-            placeholder="HH:MM"
-            {...getFieldProps("startTime")}
-          />
-        </FormRowVertical>
-
-        {/* End Time */}
-        <FormRowVertical
-          label="End Time"
-          name="endTime"
-          error={errors.endTime}
-        >
-          <Input
-            type="time"
-            placeholder="HH:MM"
-            {...getFieldProps("endTime")}
-          />
-        </FormRowVertical>
-
         {/* Subject */}
-        <FormRowVertical
-          label="Subject"
-          name="subject"
-          error={errors.subject}
-        >
+        <FormRowVertical label="Subject" name="subject" error={errors.subject}>
           <select
             className="w-full mt-1 text-sm px-4 py-3 border rounded-md"
             {...getFieldProps("subject")}
@@ -216,22 +171,6 @@ const CreateTimetableForm = ({
               </option>
             ))}
           </select>
-        </FormRowVertical>
-
-        {/* Teacher */}
-        <FormRowVertical
-          label="Teacher"
-          name="teacherId"
-          error={errors.teacherId}
-        >
-          <EntitySelect
-            entity="teacher"
-            value={formik.values.teacherId}
-            onChange={(teacherId: string | null) =>
-              formik.setFieldValue("teacherId", teacherId || "")
-            }
-            placeholder="Select teacher"
-          />
         </FormRowVertical>
 
         {/* Room (Optional) */}
@@ -267,7 +206,7 @@ const CreateTimetableForm = ({
               onChange={(e) => {
                 setFieldValue("isSubstitute", e.target.checked);
                 if (!e.target.checked) {
-                  setFieldValue("originalTeacherId", "");
+                  setFieldValue("substituteTeacherId", "");
                 }
               }}
               className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
@@ -284,17 +223,18 @@ const CreateTimetableForm = ({
         {/* Original Teacher (if substitute) */}
         {values.isSubstitute && (
           <FormRowVertical
-            label="Original Teacher"
-            name="originalTeacherId"
-            error={errors.originalTeacherId}
+            label="Substitute Teacher"
+            name="substituteTeacherId"
+            error={errors.substituteTeacherId}
           >
             <EntitySelect
               entity="teacher"
-              value={formik.values.originalTeacherId}
+              value={formik.values.substituteTeacherId}
               onChange={(teacherId: string | null) =>
-                formik.setFieldValue("originalTeacherId", teacherId || "")
+                formik.setFieldValue("substituteTeacherId", teacherId || "")
               }
-              placeholder="Select original teacher"
+              placeholder="Select substitute teacher"
+              isDisabled={isCreatingTimetable || isUpdatingTimetable}
             />
           </FormRowVertical>
         )}
@@ -315,4 +255,3 @@ const CreateTimetableForm = ({
 };
 
 export default CreateTimetableForm;
-

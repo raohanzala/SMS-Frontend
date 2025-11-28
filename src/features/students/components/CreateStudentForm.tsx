@@ -166,6 +166,7 @@ const CreateStudentForm = ({
                 onChange={(classId: string | null) =>
                   setFieldValue("studentClassId", classId)
                 }
+                isDisabled={isLoadingStudent}
               />
             </FormRowVertical>
 
@@ -196,6 +197,7 @@ const CreateStudentForm = ({
                   onChange={(parentId: string | null) =>
                     setFieldValue("studentParentId", parentId)
                   }
+                  isDisabled={isLoadingStudent}
                 />
               </div>
               <Button

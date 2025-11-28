@@ -41,12 +41,6 @@ const SubjectsCards = React.memo(
                   <p className="text-sm font-medium text-gray-900">
                     Class: {subject.class.name}
                   </p>
-
-                  {/* {subject.class.monthlyFee !== undefined && (
-                    <p className="text-xs text-gray-600">
-                      Monthly Fee: {subject.class.monthlyFee.toLocaleString()} PKR
-                    </p>
-                  )} */}
                 </div>
               )}
 

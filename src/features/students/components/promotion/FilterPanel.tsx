@@ -30,22 +30,22 @@ const FilterPanel = ({
             value={selectedClassId}
             onChange={onClassChange}
             placeholder="Select class"
+            isDisabled={isLoading}
           />
         </FormRowVertical>
 
         <FormRowVertical label="Session" name="session">
-          <select
-            className="w-full mt-1 text-sm px-4 py-3 border rounded-md"
+          <EntitySelect
+            entity="static"
+            staticOptions={sessionOptions.map((session) => ({
+              value: session,
+              label: session,
+            }))}
             value={selectedSession}
-            onChange={(e) => onSessionChange(e.target.value)}
-          >
-            <option value="">Select session</option>
-            {sessionOptions.map((session) => (
-              <option key={session} value={session}>
-                {session}
-              </option>
-            ))}
-          </select>
+            onChange={(session) => onSessionChange(session as string)}
+            placeholder="Select session"
+            isDisabled={isLoading}
+          />
         </FormRowVertical>
 
         <div className="flex items-end">

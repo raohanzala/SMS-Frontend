@@ -58,6 +58,7 @@ function App() {
                   <Route path="students" element={<AdminStudents />} />
                   <Route path="students/new" element={<AdminStudentForm />} />
                   <Route path="students/promotions" element={<AdminManagePromotions />} />
+                  <Route path="students/family-tree" element={<AdminFamilyTree />} />
                   <Route path="students/:studentId" element={<StudentDetail />} />
                   <Route path="students/:studentId/edit" element={<AdminStudentForm />} />
                   <Route path="parents" element={<AdminParents />} />
@@ -159,6 +160,7 @@ const AdminDashboard = React.lazy(() => import('./pages/private/admin/Dashboard'
 const AdminStudents = React.lazy(() => import('./features/students/pages/StudentsPage'));
 const AdminStudentForm = React.lazy(() => import('./features/students/pages/StudentFormPage'));
 const AdminManagePromotions = React.lazy(() => import('./features/students/pages/ManagePromotionsPage'));
+const AdminFamilyTree = React.lazy(() => import('./features/students/pages/FamilyTreePage'));
 const AdminEmployees = React.lazy(() => import('./features/employees/pages/EmployeesPage'));
 const AdminEmployeeForm = React.lazy(() => import('./features/employees/pages/EmployeeFormPage'));
 const EmployeeDetail = React.lazy(() => import('./pages/private/admin/EmployeeDetail'));

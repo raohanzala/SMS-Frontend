@@ -16,6 +16,7 @@ import {
   FiBriefcase,
   FiBook,
   FiLayers,
+  FiGitBranch,
 } from 'react-icons/fi';
 
 
@@ -26,6 +27,7 @@ export const adminNav = [
     icon: FiUsers,
     children: [
       { name: 'All Students', href: '/admin/students' },
+      { name: 'Family Tree', href: '/admin/students/family-tree', icon: FiGitBranch },
       { name: 'Manage Promotions', href: '/admin/students/promotions' },
     ],
   },

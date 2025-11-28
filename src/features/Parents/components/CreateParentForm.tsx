@@ -8,6 +8,7 @@ import { addParentSchema } from "../validations/parent.validation";
 import { CreateParentFormProps } from "../types/parent-components.interface";
 import { AddParentInput } from "../types/parent.types";
 import EntitySelect from "@/components/common/EntitySelect";
+import RadioGroup from "@/components/common/RadioGroup";
 
 const CreateParentForm = ({
   parentToEdit,
@@ -80,35 +81,12 @@ const CreateParentForm = ({
           />
         </FormRowVertical>
 
-        {/* ✅ GENDER RADIO FIELD */}
         <FormRowVertical label="Gender" name="gender" error={errors.gender}>
-          <div className="flex items-center gap-6">
-            {/* Male */}
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="gender"
-                value="male"
-                checked={values.gender === "male"}
-                onChange={(e) => setFieldValue("gender", e.target.value)}
-                className="h-4 w-4"
-              />
-              <span>Male</span>
-            </label>
-
-            {/* Female */}
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="gender"
-                value="female"
-                checked={values.gender === "female"}
-                onChange={(e) => setFieldValue("gender", e.target.value)}
-                className="h-4 w-4"
-              />
-              <span>Female</span>
-            </label>
-          </div>
+          <RadioGroup
+            name="gender"
+            value={values.gender}
+            onChange={(gender) => setFieldValue("gender", gender)}
+          />
         </FormRowVertical>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -179,6 +157,7 @@ const CreateParentForm = ({
               isMulti={true}
               value={values.childrenIds || []}
               onChange={(ids) => setFieldValue("childrenIds", ids)}
+              isDisabled={isParentLoading}
             />
           </FormRowVertical>
         )}
@@ -201,6 +180,5 @@ const CreateParentForm = ({
     </FormikProvider>
   );
 };
-
 
 export default CreateParentForm;

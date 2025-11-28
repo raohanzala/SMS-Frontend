@@ -67,6 +67,7 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
             onChange={(teacherId: string | null) =>
               setFieldValue("classTeacherId", teacherId)
             }
+            isDisabled={isAddingClass || isUpdatingClass}
           />
         </FormRowVertical>
 

@@ -58,15 +58,15 @@ const StudentsCards = React.memo(
             {/* Guardians Info */}
             <div className="mt-2">
               {student.guardians.length > 0 ? (
-                student.guardians.map((g) => (
-                  <div key={g._id} className="flex flex-col">
+                student.guardians.map((guardian) => (
+                  <div key={guardian._id} className="flex flex-col">
                     <span className="text-sm font-medium text-gray-900">
-                      {g.parent?.name}
+                      {guardian.parent?.name}
                     </span>
                     <span className="text-xs text-gray-500 flex items-center gap-1">
-                      {g.parent?.phone || "No phone"}
+                      {guardian.parent?.phone || "No phone"}
                       <span className="bg-gray-200 px-2 py-0.5 rounded-full text-xs">
-                        {g.relation}
+                        {guardian.relation}
                       </span>
                     </span>
                   </div>

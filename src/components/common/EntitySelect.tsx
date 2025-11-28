@@ -5,7 +5,7 @@ import { getAllTeachersApi, getTeacherByIdApi } from "@/api/teachers";
 import { getAllStudentsApi, getStudentByIdApi } from "@/api/students";
 
 
-type EntityType = 'parent' | 'class' | 'teacher' | 'student';
+type EntityType = 'parent' | 'class' | 'teacher' | 'student' | 'static';
 
 interface Option {
   value: string;
@@ -18,9 +18,27 @@ interface EntitySelectProps {
   onChange: (value: string | string[] | null) => void;
   placeholder?: string;
   isMulti?: boolean;
+  staticOptions?: Option[];
+  isDisabled?: boolean;
 }
 
-function EntitySelect({ entity, value, onChange, placeholder, isMulti = false }: EntitySelectProps) {
+function EntitySelect({ entity = "static", value, onChange, placeholder, isMulti = false, staticOptions = [], isDisabled = false }: EntitySelectProps) {
+
+  if (entity === "static") {
+    return (
+      <SearchableSelect
+        value={value}
+        isMulti={isMulti}
+        onChange={onChange}
+        placeholder={placeholder}
+        fetchOptions={async () => staticOptions}
+        fetchById={async (id: string) => {
+          return staticOptions.find((option) => option.value === id) || null;
+        }}
+        isDisabled={isDisabled}
+      />
+    );
+  }
 
   const apiMap = {
     parent: {
@@ -96,8 +114,6 @@ function EntitySelect({ entity, value, onChange, placeholder, isMulti = false }:
 
   const { fetchList, fetchById } = apiMap[entity];
 
-  console.log("value", value);
-
   return (
     <SearchableSelect
       value={value}
@@ -106,6 +122,7 @@ function EntitySelect({ entity, value, onChange, placeholder, isMulti = false }:
       fetchOptions={fetchList}
       fetchById={fetchById}
       placeholder={placeholder || `Search ${entity}...`}
+      isDisabled={isDisabled}
     />
   );
 }

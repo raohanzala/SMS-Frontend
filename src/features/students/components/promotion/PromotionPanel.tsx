@@ -39,22 +39,22 @@ const PromotionPanel = ({
             value={toClassId}
             onChange={onToClassChange}
             placeholder="Select new class"
+            isDisabled={isPromoting || disabled}
           />
         </FormRowVertical>
 
         <FormRowVertical label="To Session" name="toSession">
-          <select
-            className="w-full mt-1 text-sm px-4 py-3 border rounded-md"
+          <EntitySelect
+            entity="static"
+            staticOptions={sessionOptions.map((session) => ({
+              value: session,
+              label: session,
+            }))}
             value={toSession}
-            onChange={(e) => onToSessionChange(e.target.value)}
-          >
-            <option value="">Select new session</option>
-            {sessionOptions.map((session) => (
-              <option key={session} value={session}>
-                {session}
-              </option>
-            ))}
-          </select>
+            onChange={(session) => onToSessionChange(session as string)}
+            placeholder="Select new session"
+            isDisabled={isPromoting || disabled}
+          />
         </FormRowVertical>
       </div>
 

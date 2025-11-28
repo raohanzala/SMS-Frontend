@@ -6,6 +6,7 @@ import { useAddTeacher } from "../hooks/useAddTeacher";
 import { useUpdateTeacher } from "../hooks/useUpdateTeacher";
 import { CreateTeacherFormProps } from "../types/teacher-components.types";
 import { useClasses } from "@/features/classes/hooks/useClasses";
+import EntitySelect from "../../../components/common/EntitySelect";
 
 const CreateTeacherForm = ({
   teacherToEdit,
@@ -38,6 +39,7 @@ const CreateTeacherForm = ({
       teacherSalaryAmount: teacherToEdit?.salary?.amount || 0,
       teacherSalaryCurrency: teacherToEdit?.salary?.currency || "PKR",
       teacherProfileImage: undefined as File | undefined,
+      teacherLevel: teacherToEdit?.level || "1",
     },
     onSubmit: async (formValues) => {
       const formData = new FormData();
@@ -196,6 +198,25 @@ const CreateTeacherForm = ({
         </FormRowVertical>
 
         <FormRowVertical
+            label="Teacher Level"
+            name="teacherLevel"
+            error={errors.teacherLevel}
+          >
+            <EntitySelect
+              entity="static"
+              staticOptions={[
+                { value: "1", label: "Level 1" },
+                { value: "2", label: "Level 2" },
+                { value: "3", label: "Level 3" },
+              ]}
+              value={values.teacherLevel}
+              onChange={(level) => setFieldValue("teacherLevel", level as string)}
+              placeholder="Select Teacher Level"
+              isDisabled={isLoadingTeacher}
+            />
+          </FormRowVertical>
+
+        <FormRowVertical
           label="Assigned Classes"
           name="teacherAssignedClasses"
           error={errors.teacherAssignedClasses}
@@ -242,18 +263,18 @@ const CreateTeacherForm = ({
             name="teacherSalaryCurrency"
             error={errors.teacherSalaryCurrency}
           >
-            <select
-              id="teacherSalaryCurrency"
-              name="teacherSalaryCurrency"
-              className="block w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isLoadingTeacher}
+            <EntitySelect
+              entity="static"
+              staticOptions={[
+                { value: "PKR", label: "PKR" },
+                { value: "USD", label: "USD" },
+                { value: "EUR", label: "EUR" },
+              ]}
               value={values.teacherSalaryCurrency}
-              onChange={(e) => setFieldValue("teacherSalaryCurrency", e.target.value)}
-            >
-              <option value="PKR">PKR</option>
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
-            </select>
+              onChange={(currency) => setFieldValue("teacherSalaryCurrency", currency as string)}
+              placeholder="Select Currency"
+              isDisabled={isLoadingTeacher}
+            />
           </FormRowVertical>
         </div>
 

@@ -14,6 +14,7 @@ import { addStudentSchema } from "@/features/students/validations/student.valida
 import ManageParentModal from "@/features/parents/components/ManageParentModal";
 import ImageCropperInput from "@/components/common/ImageCropperInput";
 import SearchableSelect from "@/components/common/SearchableSelect";
+import RadioGroup from "@/components/common/RadioGroup";
 
 const StudentFormPage = () => {
   const [isParentModalOpen, setIsParentModalOpen] = useState(false);
@@ -204,6 +205,7 @@ const StudentFormPage = () => {
                   entity="class"
                   value={values.classId}
                   onChange={(classId) => setFieldValue("classId", classId)}
+                  isDisabled={isStudentPending}
                 />
               </FormRowVertical>
               <FormRowVertical
@@ -221,17 +223,17 @@ const StudentFormPage = () => {
                 name="session"
                 error={errors.session}
               >
-                <select
-                  {...getFieldProps("session")}
-                  className="w-full mt-1 px-4 py-3 border rounded-md"
-                >
-                  <option value="">Select session</option>
-                  {sessionOptions.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
+                <EntitySelect
+                  entity="static"
+                  staticOptions={sessionOptions.map((s) => ({
+                    value: s,
+                    label: s,
+                  }))}
+                  value={values.session}
+                  onChange={(session) => setFieldValue("session", session)}
+                  placeholder="Select Session"
+                  isDisabled={isStudentPending}
+                />
               </FormRowVertical>
               <FormRowVertical label="Religion" name="religion">
                 <Input
@@ -242,7 +244,6 @@ const StudentFormPage = () => {
             </div>
           </div>
 
-          {/* --- Guardians --- */}
           {/* --- Guardians --- */}
           <div className="bg-white rounded-xl shadow p-6 space-y-4">
             <div className="flex items-center justify-between">
@@ -320,6 +321,7 @@ const StudentFormPage = () => {
                                   parentId
                                 );
                               }}
+                              isDisabled={isStudentPending}
                               disableOptions={(option) =>
                                 values.guardians.some(
                                   (
@@ -445,6 +447,18 @@ const StudentFormPage = () => {
               </FormRowVertical>
               <FormRowVertical label="National ID" name="nationalId">
                 <Input {...getFieldProps("nationalId")} placeholder="CNIC" />
+              </FormRowVertical>
+
+              <FormRowVertical
+                label="Gender"
+                name="gender"
+                error={errors.gender}
+              >
+                <RadioGroup
+                  name="gender"
+                  value={values.gender}
+                  onChange={(gender) => setFieldValue("gender", gender)}
+                />
               </FormRowVertical>
             </div>
           </div>

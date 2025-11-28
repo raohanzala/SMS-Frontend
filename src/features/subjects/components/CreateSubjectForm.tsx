@@ -72,6 +72,7 @@ const CreateSubjectForm = ({
             onChange={(classId: string | null) =>
               setFieldValue("classId", classId || "")
             }
+            isDisabled={isLoadingSubject}
           />
         </FormRowVertical>
 
@@ -86,6 +87,7 @@ const CreateSubjectForm = ({
             onChange={(teacherId: string | null) =>
               setFieldValue("teacherId", teacherId || "")
             }
+            isDisabled={isLoadingSubject}
           />
         </FormRowVertical>
 

@@ -20,5 +20,6 @@ export const addTeacherSchema = Yup.object().shape({
     amount: Yup.number().nullable(),
     currency: Yup.string().nullable(),
   }),
+  teacherLevel: Yup.string().oneOf(["1", "2", "3"], "Teacher level is required").required(),
 });
 
