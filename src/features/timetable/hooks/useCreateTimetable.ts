@@ -1,13 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { createTimetable } from "@/api/timetable";
-import { CreateTimetableInput } from "../types/timetable.types";
+import { createTimetableApi } from "@/api/timetable";
 
 export function useCreateTimetable() {
   const queryClient = useQueryClient();
 
   const { mutate: createTimetableMutation, isPending: isCreatingTimetable } = useMutation({
-    mutationFn: (timetableData: CreateTimetableInput) => createTimetable(timetableData),
+    mutationFn: createTimetableApi,
     onSuccess: (data) => {
       toast.success(data.message || "Timetable entry created successfully");
       queryClient.invalidateQueries({ queryKey: ["timetables"] });

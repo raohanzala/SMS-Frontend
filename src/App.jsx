@@ -75,7 +75,7 @@ function App() {
                   <Route path="subjects" element={<AdminSubjects />} />
                   <Route path="timetable" element={<AdminTimetable />} />
                   <Route path="timetable/create" element={<AdminCreateTimetable />} />
-                  <Route path="timetable/create/:id" element={<AdminCreateTimetable />} />
+                  <Route path="timetable/create/:timetableId" element={<AdminCreateTimetable />} />
                   <Route path="timetable/class" element={<AdminClassTimetable />} />
                   <Route path="timetable/class/:classId" element={<AdminClassTimetable />} />
                   <Route path="timetable/teacher" element={<AdminTeacherTimetable />} />

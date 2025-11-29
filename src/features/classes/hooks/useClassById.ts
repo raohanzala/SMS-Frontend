@@ -2,6 +2,7 @@ import { getClassByIdApi } from "@/api/classes";
 import { useQuery } from "@tanstack/react-query";
 
 export function useClassById(classId: string | null) {
+
   const {
     isPending: isClassLoading,
     error: classError,

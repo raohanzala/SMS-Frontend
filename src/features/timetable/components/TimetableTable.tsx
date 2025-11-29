@@ -117,7 +117,7 @@ const TimetableTable = React.memo(
                       <div className="flex justify-end space-x-2">
                         <EditButton onClick={() => onEditTimetable(timetable)} />
                         <DeleteButton
-                          onClick={() => onDeleteTimetable(timetable._id)}
+                          onClick={() => onDeleteTimetable(timetable._id || "")}
                         />
                       </div>
                     </td>

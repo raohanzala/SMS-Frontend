@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { updateTimetable } from "@/api/timetable";
+import { updateTimetableApi } from "@/api/timetable";
 import { UpdateTimetableInput } from "../types/timetable.types";
 
 export function useUpdateTimetable() {
@@ -8,7 +8,7 @@ export function useUpdateTimetable() {
 
   const { mutate: updateTimetableMutation, isPending: isUpdatingTimetable } = useMutation({
     mutationFn: ({ id, formData }: { id: string; formData: UpdateTimetableInput }) =>
-      updateTimetable({ id, formData }),
+      updateTimetableApi({ id, formData }),
     onSuccess: (data) => {
       toast.success(data.message || "Timetable entry updated successfully");
       queryClient.invalidateQueries({ queryKey: ["timetables"] });

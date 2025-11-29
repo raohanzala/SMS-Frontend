@@ -15,6 +15,7 @@ interface SearchableSelectProps {
   isClearable?: boolean;
   isMulti?: boolean;
   isDisabled?: boolean;
+  forceRefreshKey?: number;
 }
 
 function SearchableSelect({
@@ -26,10 +27,11 @@ function SearchableSelect({
   isClearable = true,
   isMulti = false,
   isDisabled = false,
+  forceRefreshKey,
 }: SearchableSelectProps) {
   const [selected, setSelected] = useState<Option | Option[] | null>(null);
 
-  console.log("selected", selected, value);
+  // console.log("selected", selected, value);
 
 
   // Load initial value(s)
@@ -51,7 +53,7 @@ function SearchableSelect({
       // SINGLE SELECT
       if (!isMulti && typeof value === "string") {
         const option = await fetchById(value);
-        console.log("option in single select", option);
+        // console.log("option in single select", option);
         setSelected(option || null);
         return;
       }
@@ -67,7 +69,7 @@ function SearchableSelect({
       const ids = option?.map((o: Option) => o.value) || [];
       onChange(ids); // returns string[]
     } else {
-      console.log("option", option);
+      // console.log("option", option);
       onChange(option?.value || null); // returns string
     }
   };
@@ -75,7 +77,8 @@ function SearchableSelect({
   return (
     <div className="mt-1">
       <AsyncSelect
-        cacheOptions
+      key={forceRefreshKey}
+        cacheOptions={false}
         defaultOptions
         isMulti={isMulti}
         isClearable={isClearable}

@@ -1,4 +1,4 @@
-import { getAllTimetables } from "@/api/timetable";
+import { getAllTimetablesApi } from "@/api/timetable";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 
@@ -29,7 +29,7 @@ export function useTimetables() {
     data,
   } = useQuery({
     queryKey: ["timetables", page, limit, classId, teacherId, day, period, room],
-    queryFn: () => getAllTimetables(params),
+    queryFn: () => getAllTimetablesApi(params),
   });
 
   const { timetables, pagination } = data?.data || {};

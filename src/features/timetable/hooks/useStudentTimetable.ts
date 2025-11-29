@@ -1,4 +1,4 @@
-import { getStudentTimetable } from "@/api/timetable";
+import { getStudentTimetableApi } from "@/api/timetable";
 import { useQuery } from "@tanstack/react-query";
 
 export function useStudentTimetable(studentId: string | null) {
@@ -8,7 +8,7 @@ export function useStudentTimetable(studentId: string | null) {
     data,
   } = useQuery({
     queryKey: ["studentTimetable", studentId],
-    queryFn: () => getStudentTimetable(studentId!),
+    queryFn: () => getStudentTimetableApi(studentId!),
     enabled: !!studentId,
   });
 

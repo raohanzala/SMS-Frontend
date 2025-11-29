@@ -1,12 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { deleteTimetable } from "@/api/timetable";
+import { deleteTimetableApi } from "@/api/timetable";
 
 export function useDeleteTimetable() {
   const queryClient = useQueryClient();
 
   const { mutate: deleteTimetableMutation, isPending: isDeletingTimetable } = useMutation({
-    mutationFn: (id: string) => deleteTimetable(id),
+    mutationFn: (id: string) => deleteTimetableApi(id),
     onSuccess: (data) => {
       toast.success(data.message || "Timetable entry deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["timetables"] });

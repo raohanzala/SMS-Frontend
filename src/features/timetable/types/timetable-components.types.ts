@@ -1,23 +1,23 @@
-import { TimetableEntry } from "./timetable.types";
+import { Timetable, TimetableEntry } from "./timetable.types";
 
 export interface TimetableToolbarProps {
   onClickAddTimetable: () => void;
 }
 
 export interface TimetableTableProps {
-  timetables: TimetableEntry[];
-  onEditTimetable: (timetable: TimetableEntry) => void;
+  timetables: Timetable[];
+  onEditTimetable: (timetable: Timetable) => void;
   onDeleteTimetable: (timetableId: string) => void;
-}
+} 
 
 export interface ManageTimetableModalProps {
   isManageTimetableModalOpen: boolean;
   onManageTimetableModalClose: () => void;
-  timetableToEdit: TimetableEntry | null;
+  timetableToEdit: Timetable | null;
 }
 
 export interface CreateTimetableFormProps {
-  timetableToEdit: TimetableEntry | null;
+  timetableToEdit: Timetable | null;
   onClose: () => void;
 }
 

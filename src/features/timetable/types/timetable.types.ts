@@ -1,3 +1,6 @@
+import { Class } from "@/features/classes/types/class.types";
+import { Teacher } from "@/features/teachers/types/teacher.types";
+
 export type DayOfWeek = "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat";
 
 export interface TimetableEntry {
@@ -16,6 +19,25 @@ export interface TimetableEntry {
   createdAt?: string;
   updatedAt?: string;
 }
+
+
+export interface Timetable {
+  _id?: string;
+  class: Class; 
+  day: DayOfWeek;
+  period: number;
+  startTime: string;
+  endTime: string;  
+  subject: string; 
+  teacher: Teacher; 
+  room?: string;
+  notes?: string;
+  isSubstitute?: boolean;
+  originalTeacher?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 
 export interface WeeklyTimetableGrid {
   Mon: TimetableEntry[];
@@ -68,7 +90,7 @@ export interface StudentTimetableResponse {
   raw: TimetableEntry[];
 }
 
-export interface CreateTimetableInput {
+export interface AddTimetableInput {
   classId: string;
   day: DayOfWeek;
   period: number;

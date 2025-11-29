@@ -2,28 +2,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import Button from "../../../components/common/Button";
 import CreateTimetableForm from "../components/CreateTimetableForm";
-import { getTimetableById } from "@/api/timetable";
-import { useQuery } from "@tanstack/react-query";
 import Spinner from "../../../components/common/Spinner";
 import ErrorMessage from "../../../components/common/ErrorMessage";
+import { useTimetableById } from "../hooks/useTimtetableById";
 
 const CreateTimetablePage = () => {
   const navigate = useNavigate();
-  const { id } = useParams<{ id?: string }>();
-  const isEditMode = !!id;
+  const { timetableId } = useParams<{ timetableId?: string }>();
+  const isEditMode = !!timetableId;
 
-  // Fetch timetable data if editing
-  const {
-    data: timetableData,
-    isLoading: isTimetableLoading,
-    error: timetableError,
-  } = useQuery({
-    queryKey: ["timetable", id],
-    queryFn: () => getTimetableById(id!),
-    enabled: !!id,
-  });
-
-  const timetableToEdit = timetableData?.data?.timetable || null;
+  const { timetable, isTimetableLoading, timetableError } = useTimetableById();
 
   const handleClose = () => {
     navigate("/admin/timetable");
@@ -81,7 +69,7 @@ const CreateTimetablePage = () => {
       {/* Form */}
       <div className="bg-white rounded-lg shadow p-6">
         <CreateTimetableForm
-          timetableToEdit={timetableToEdit}
+          timetableToEdit={timetable}
           onClose={handleClose}
         />
       </div>

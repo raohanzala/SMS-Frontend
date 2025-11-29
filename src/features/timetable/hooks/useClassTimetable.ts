@@ -1,4 +1,4 @@
-import { getClassTimetable } from "@/api/timetable";
+import { getClassTimetableApi } from "@/api/timetable";
 import { useQuery } from "@tanstack/react-query";
 
 export function useClassTimetable(classId: string | null) {
@@ -8,7 +8,7 @@ export function useClassTimetable(classId: string | null) {
     data,
   } = useQuery({
     queryKey: ["classTimetable", classId],
-    queryFn: () => getClassTimetable(classId!),
+    queryFn: () => getClassTimetableApi(classId!),
     enabled: !!classId,
   });
 

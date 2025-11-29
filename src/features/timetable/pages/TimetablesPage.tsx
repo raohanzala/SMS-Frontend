@@ -10,6 +10,7 @@ import TimetableTable from "../components/TimetableTable";
 import TimetableToolbar from "../components/TimetableToolbar";
 import { useDeleteTimetable } from "../hooks/useDeleteTimetable";
 import { useTimetables } from "../hooks/useTimetables";
+import { Timetable } from "../types/timetable.types";
 
 const TimetablesPage = () => {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ const TimetablesPage = () => {
   const { pagination, timetables, timetablesError, isTimetablesLoading } = useTimetables();
   const { deleteTimetableMutation, isDeletingTimetable } = useDeleteTimetable();
 
-  const handleEditTimetable = useCallback((timetable: any) => {
+  const handleEditTimetable = useCallback((timetable: Timetable) => {
     navigate(`/admin/timetable/create/${timetable._id}`);
   }, [navigate]);
 

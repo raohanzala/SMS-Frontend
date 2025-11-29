@@ -4,8 +4,7 @@ import { getClassByIdApi, getClassesApi } from "@/api/classes";
 import { getAllTeachersApi, getTeacherByIdApi } from "@/api/teachers";
 import { getAllStudentsApi, getStudentByIdApi } from "@/api/students";
 
-
-type EntityType = 'parent' | 'class' | 'teacher' | 'student' | 'static';
+type EntityType = "parent" | "class" | "teacher" | "student" | "static";
 
 interface Option {
   value: string;
@@ -22,8 +21,15 @@ interface EntitySelectProps {
   isDisabled?: boolean;
 }
 
-function EntitySelect({ entity = "static", value, onChange, placeholder, isMulti = false, staticOptions = [], isDisabled = false }: EntitySelectProps) {
-
+function EntitySelect({
+  entity = "static",
+  value,
+  onChange,
+  placeholder,
+  isMulti = false,
+  staticOptions = [],
+  isDisabled = false,
+}: EntitySelectProps) {
   if (entity === "static") {
     return (
       <SearchableSelect
@@ -31,11 +37,17 @@ function EntitySelect({ entity = "static", value, onChange, placeholder, isMulti
         isMulti={isMulti}
         onChange={onChange}
         placeholder={placeholder}
-        fetchOptions={async () => staticOptions}
+        fetchOptions={async (search: string) => {
+          if (!search) return staticOptions;
+          return staticOptions.filter((option) =>
+            option.label.toLowerCase().includes(search.toLowerCase())
+          );
+        }}
         fetchById={async (id: string) => {
           return staticOptions.find((option) => option.value === id) || null;
         }}
         isDisabled={isDisabled}
+        forceRefreshKey={staticOptions.length}
       />
     );
   }
@@ -54,7 +66,9 @@ function EntitySelect({ entity = "static", value, onChange, placeholder, isMulti
       fetchById: async (id: string): Promise<Option | null> => {
         if (!id) return null;
         const { data } = await getParentByIdApi(id);
-        return data ? { value: data._id, label: `${data.name} (${data.email})` } : null;
+        return data
+          ? { value: data._id, label: `${data.name} (${data.email})` }
+          : null;
       },
     },
 
@@ -77,7 +91,11 @@ function EntitySelect({ entity = "static", value, onChange, placeholder, isMulti
 
     teacher: {
       fetchList: async (search: string): Promise<Option[]> => {
-        const { data } = await getAllTeachersApi({ page: 1, limit: 10, search });
+        const { data } = await getAllTeachersApi({
+          page: 1,
+          limit: 10,
+          search,
+        });
         return (
           data?.teachers?.map((t: any) => ({
             value: t._id,
@@ -88,26 +106,41 @@ function EntitySelect({ entity = "static", value, onChange, placeholder, isMulti
       fetchById: async (id: string): Promise<Option | null> => {
         if (!id) return null;
         const { data } = await getTeacherByIdApi(id);
-        return data ? { value: data.teacher._id, label: `${data.teacher.name} (${data.teacher.education})` } : null;
+        return data
+          ? {
+              value: data.teacher._id,
+              label: `${data.teacher.name} (${data.teacher.education})`,
+            }
+          : null;
       },
     },
     student: {
       fetchList: async (search: string): Promise<Option[]> => {
-        const { data } = await getAllStudentsApi({ page: 1, limit: 10, search });
+        const { data } = await getAllStudentsApi({
+          page: 1,
+          limit: 10,
+          search,
+        });
         return (
           data?.students?.map((s: any) => ({
             value: s._id,
-            label: `${s.name}${s.rollNumber ? ` (${s.rollNumber})` : ''}${s.email ? ` - ${s.email}` : ''}`,
+            label: `${s.name}${s.rollNumber ? ` (${s.rollNumber})` : ""}${
+              s.email ? ` - ${s.email}` : ""
+            }`,
           })) || []
         );
       },
       fetchById: async (id: string): Promise<Option | null> => {
         if (!id) return null;
         const { data } = await getStudentByIdApi(id);
-        return data ? { 
-          value: data._id, 
-          label: `${data.name}${data.rollNumber ? ` (${data.rollNumber})` : ''}${data.email ? ` - ${data.email}` : ''}` 
-        } : null;
+        return data
+          ? {
+              value: data._id,
+              label: `${data.name}${
+                data.rollNumber ? ` (${data.rollNumber})` : ""
+              }${data.email ? ` - ${data.email}` : ""}`,
+            }
+          : null;
       },
     },
   };
@@ -128,4 +161,3 @@ function EntitySelect({ entity = "static", value, onChange, placeholder, isMulti
 }
 
 export default EntitySelect;
-
