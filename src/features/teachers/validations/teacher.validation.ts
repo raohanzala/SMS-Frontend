@@ -15,11 +15,10 @@ export const addTeacherSchema = Yup.object().shape({
   religion: Yup.string().nullable(),
   dob: Yup.date().nullable(),
   nationalId: Yup.string().nullable(),
-  assignedClasses: Yup.array().of(Yup.string()).nullable(),
+  levelsIds: Yup.array().of(Yup.string()).required("Teacher levels are required"),
   salary: Yup.object().shape({
     amount: Yup.number().nullable(),
     currency: Yup.string().nullable(),
   }),
-  teacherLevel: Yup.string().oneOf(["1", "2", "3"], "Teacher level is required").required(),
 });
 

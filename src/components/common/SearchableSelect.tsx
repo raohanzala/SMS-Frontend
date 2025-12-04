@@ -62,7 +62,7 @@ function SearchableSelect({
     loadInitialValue();
   }, [value, fetchById, isMulti]);
 
-  const handleChange = (option: any) => {
+  const handleChange = (option: Option) => {
     setSelected(option);
 
     if (isMulti) {

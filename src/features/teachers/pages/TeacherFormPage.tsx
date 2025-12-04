@@ -11,10 +11,10 @@ import ErrorMessage from "@/components/common/ErrorMessage";
 import { useTeacher } from "@/features/teachers/hooks/useTeacher";
 import { useAddTeacher } from "@/features/teachers/hooks/useAddTeacher";
 import { useUpdateTeacher } from "@/features/teachers/hooks/useUpdateTeacher";
-import { useClasses } from "@/features/classes/hooks/useClasses";
 import { addTeacherSchema } from "../validations/teacher.validation";
 import ImageCropperInput from "@/components/common/ImageCropperInput";
 import EntitySelect from "@/components/common/EntitySelect";
+import { useSettings } from "@/features/settings/hooks/useSettings";
 
 const TeacherFormPage = () => {
   const navigate = useNavigate();
@@ -24,7 +24,9 @@ const TeacherFormPage = () => {
   const { teacher, isTeacherLoading, teacherError } = useTeacher(teacherId);
   const { addTeacherMutation, isAddingTeacher } = useAddTeacher();
   const { updateTeacherMutation, isUpdatingTeacher } = useUpdateTeacher();
-  const { classes } = useClasses();
+  const {settings: { classLevels = [] } = {}} = useSettings();
+
+  console.log(classLevels)
 
   const isBusy = isAddingTeacher || isUpdatingTeacher;
 
@@ -42,12 +44,9 @@ const TeacherFormPage = () => {
       religion: teacher?.religion || "",
       dob: teacher?.DOB || "",
       nationalId: teacher?.nationalId || "",
-      assignedClasses: teacher?.assignedClasses?.map((c: any) =>
-        typeof c === "string" ? c : c?._id
-      ) || [],
       salary: teacher?.salary || { amount: 0, currency: "PKR" },
       profileImage: teacher?.profileImage as File | undefined,
-      teacherLevel: teacher?.level,
+      levelsIds: teacher?.levelsIds || [],
     }),
     [teacher]
   );
@@ -227,39 +226,14 @@ const TeacherFormPage = () => {
               </FormRowVertical>
             </div>
 
-            {/* Section 4: Assigned Classes */}
-            <h3 className="text-lg font-medium text-gray-700">Assignments</h3>
-            <FormRowVertical label="Assigned Classes" name="assignedClasses" error={toErr(errors.assignedClasses)}>
-              <select
-                multiple
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[120px]"
-                disabled={isBusy}
-                value={values.assignedClasses || []}
-                onChange={(e) => {
-                  const selectedOptions = Array.from(e.target.selectedOptions, (option) => option.value);
-                  setFieldValue("assignedClasses", selectedOptions);
-                }}
-              >
-                {classes?.map((cls: { _id: string; name: string; section?: string }) => (
-                  <option key={cls._id} value={cls._id}>
-                    {cls.name} {cls.section ? `- ${cls.section}` : ""}
-                  </option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple classes</p>
-            </FormRowVertical>
-
-            <FormRowVertical label="Teacher Level" name="teacherLevel" error={toErr(errors.teacherLevel)}>
+            <FormRowVertical label="Teacher Level" name="levelsIds" error={toErr(errors.levelsIds)}>
               <EntitySelect
                 entity="static"
-                staticOptions={[
-                  { value: "1", label: "Level 1" },
-                  { value: "2", label: "Level 2" },
-                  { value: "3", label: "Level 3" },
-                ]}
-                value={values.teacherLevel}
-                onChange={(level) => setFieldValue("teacherLevel", level)}
+                staticOptions={classLevels.map(classLevel => ({ value: classLevel._id, label: classLevel.name })) }
+                value={values.levelsIds}
+                onChange={(levelsIds) => setFieldValue("levelsIds", levelsIds)}
                 placeholder="Select Teacher Level"
+                isMulti={true}
                 isDisabled={isBusy}
               />
             </FormRowVertical>

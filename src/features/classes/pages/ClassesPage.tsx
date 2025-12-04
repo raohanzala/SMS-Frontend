@@ -11,6 +11,7 @@ import ClassesTable from "../components/ClassesTable";
 import ClassesCards from "../components/ClassesCards";
 import ClassesToolbar from "../components/ClassesToolbar";
 import { useDeleteClass } from "../hooks/useDeleteClass";
+import { useBulkDeleteClasses } from "../hooks/useBulkDeleteClasses";
 import { useClasses } from "../hooks/useClasses";
 import { Class } from "../types/class.types";
 
@@ -19,11 +20,14 @@ const ClassesPage = () => {
   const [classToDelete, setClassToDelete] = useState<string | null>(null);
   const [isShowManageClassModal, setIsShowManageClassModal] = useState(false);
   const [isShowClassDeleteModal, setIsShowClassDeleteModal] = useState(false);
+  const [selectedClasses, setSelectedClasses] = useState<Set<string>>(new Set());
+  const [isShowBulkDeleteModal, setIsShowBulkDeleteModal] = useState(false);
 
   const [searchParams] = useSearchParams();
   const view = searchParams.get("view") || "table";
   const { pagination, classes, classesError, isClassesLoading } = useClasses();
   const { deleteClassMutation, isDeletingClass } = useDeleteClass();
+  const { bulkDeleteClassesMutation, isBulkDeletingClasses } = useBulkDeleteClasses();
 
   const handleEditClass = useCallback((classToEdit: Class) => {
     setClassToEdit(classToEdit);
@@ -60,9 +64,56 @@ const ClassesPage = () => {
     }
   }, [deleteClassMutation, classToDelete]);
 
+  // Selection handlers
+  const handleToggleSelect = useCallback((classId: string) => {
+    setSelectedClasses((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(classId)) {
+        newSet.delete(classId);
+      } else {
+        newSet.add(classId);
+      }
+      return newSet;
+    });
+  }, []);
+
+  const handleSelectAll = useCallback(() => {
+    if (classes) {
+      setSelectedClasses(new Set(classes.map((c: Class) => c._id)));
+    }
+  }, [classes]);
+
+  const handleDeselectAll = useCallback(() => {
+    setSelectedClasses(new Set());
+  }, []);
+
+  const handleBulkDelete = useCallback(() => {
+    setIsShowBulkDeleteModal(true);
+  }, []);
+
+  const handleConfirmBulkDelete = useCallback(() => {
+    if (selectedClasses.size > 0) {
+      bulkDeleteClassesMutation(Array.from(selectedClasses), {
+        onSuccess: () => {
+          setIsShowBulkDeleteModal(false);
+          setSelectedClasses(new Set());
+        },
+      });
+    }
+  }, [bulkDeleteClassesMutation, selectedClasses]);
+
+  const handleCloseBulkDeleteModal = useCallback(() => {
+    setIsShowBulkDeleteModal(false);
+  }, []);
+
   return (
     <div className="space-y-6">
-      <ClassesToolbar onClickAddClass={handleShowManageClassModal} />
+      <ClassesToolbar 
+        onClickAddClass={handleShowManageClassModal}
+        selectedCount={selectedClasses.size}
+        onBulkDelete={handleBulkDelete}
+        isDeleting={isBulkDeletingClasses}
+      />
 
       {isClassesLoading && (
         <div className="flex justify-center py-6">
@@ -94,12 +145,18 @@ const ClassesPage = () => {
                   classes={classes}
                   onEditClass={handleEditClass}
                   onDeleteClass={handleDeleteClass}
+                  selectedClasses={selectedClasses}
+                  onToggleSelect={handleToggleSelect}
+                  onSelectAll={handleSelectAll}
+                  onDeselectAll={handleDeselectAll}
                 />
               ) : (
                 <ClassesCards
                   classes={classes}
                   onEditClass={handleEditClass}
                   onDeleteClass={handleDeleteClass}
+                  selectedClasses={selectedClasses}
+                  onToggleSelect={handleToggleSelect}
                 />
               )}
 
@@ -125,6 +182,18 @@ const ClassesPage = () => {
         onClose={handleCloseClassDeleteModal}
         onConfirm={handleConfirmClassDelete}
         isLoading={isDeletingClass}
+      />
+
+      <ConfirmationModal
+        title="Delete Selected Classes"
+        message={`Are you sure you want to delete ${selectedClasses.size} selected class(es)? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        isOpen={isShowBulkDeleteModal}
+        onClose={handleCloseBulkDeleteModal}
+        onConfirm={handleConfirmBulkDelete}
+        isLoading={isBulkDeletingClasses}
       />
     </div>
   );

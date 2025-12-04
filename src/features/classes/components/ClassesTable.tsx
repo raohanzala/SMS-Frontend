@@ -6,7 +6,18 @@ import { ClassesTableProps } from '../types/class-components.interface';
 import { formatShortDate } from '@/utils/helpers';
 
 const ClassesTable = React.memo(
-  ({ classes, onEditClass, onDeleteClass }: ClassesTableProps) => {
+  ({ 
+    classes, 
+    onEditClass, 
+    onDeleteClass,
+    selectedClasses,
+    onToggleSelect,
+    onSelectAll,
+    onDeselectAll,
+  }: ClassesTableProps) => {
+    const allSelected = classes.length > 0 && classes.every(c => selectedClasses.has(c._id));
+    const someSelected = classes.some(c => selectedClasses.has(c._id));
+
     return (
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">
@@ -18,6 +29,23 @@ const ClassesTable = React.memo(
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-6 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    ref={(input) => {
+                      if (input) input.indeterminate = someSelected && !allSelected;
+                    }}
+                    onChange={() => {
+                      if (allSelected) {
+                        onDeselectAll();
+                      } else {
+                        onSelectAll();
+                      }
+                    }}
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
+                  />
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Class Name
                 </th>
@@ -37,17 +65,31 @@ const ClassesTable = React.memo(
             </thead>
 
             <tbody className="bg-white divide-y divide-gray-200">
-              {classes?.map((classItem) => (
-                <tr key={classItem._id} className="hover:bg-gray-50">
-                  {/* Class Name */}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {classItem.name}
-                  </td>
+              {classes?.map((classItem) => {
+                const isSelected = selectedClasses.has(classItem._id);
+                return (
+                  <tr 
+                    key={classItem._id} 
+                    className={`hover:bg-gray-50 ${isSelected ? 'bg-indigo-50' : ''}`}
+                  >
+                    {/* Checkbox */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => onToggleSelect(classItem._id)}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
+                      />
+                    </td>
+                    {/* Class Name */}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {classItem.name}
+                    </td>
 
                   {/* Monthly Fee */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {classItem.monthlyTuitionFee 
-                      ? `${classItem.monthlyTuitionFee.toLocaleString()} PKR`
+                    {classItem.monthlyFee 
+                      ? `${classItem.monthlyFee.toLocaleString()} PKR`
                       : '—'}
                   </td>
 
@@ -72,7 +114,8 @@ const ClassesTable = React.memo(
                     </div>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

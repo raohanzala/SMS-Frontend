@@ -10,18 +10,25 @@ export const getClassByIdApi = async (classId: string) => {
   return data;
 };
 
-export const addClassApi = async (classData: any) => {
-  const res = await axiosInstance.post(`/classes`, classData);
+export const addClassApi = async ({addClassInput}: {addClassInput: any}) => {
+  const res = await axiosInstance.post(`/classes`, addClassInput);
   return res.data;
 };
 
-export const updateClassApi = async ({ classId, classData }: { classId: string, classData: any }) => {
-  const res = await axiosInstance.put(`/classes/${classId}`, classData);
+export const updateClassApi = async ({ classId, updateClassInput }: { classId: string, updateClassInput: any }) => {
+  const res = await axiosInstance.put(`/classes/${classId}`, updateClassInput);
   return res.data;
 };
 
 export const deleteClassApi = async (classId: string) => {
   const res = await axiosInstance.delete(`/classes/${classId}`);
+  return res.data;
+};
+
+export const bulkDeleteClassesApi = async (classIds: string[]) => {
+  const res = await axiosInstance.delete(`/classes/bulk`, {
+    data: { classIds },
+  });
   return res.data;
 };
 

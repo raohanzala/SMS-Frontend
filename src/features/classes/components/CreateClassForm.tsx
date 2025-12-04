@@ -7,35 +7,36 @@ import { useUpdateClass } from "../hooks/useUpdateClass";
 import { CreateClassFormProps } from "../types/class-components.interface";
 import { addClassSchema } from "../validation/class.validation";
 import EntitySelect from "@/components/common/EntitySelect";
+import { useSettings } from "@/features/settings/hooks/useSettings";
 
 const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
   const { addClassMutation, isAddingClass } = useAddClass();
   const { updateClassMutation, isUpdatingClass } = useUpdateClass();
+  const { settings: { classLevels = [] } = {} } = useSettings();
 
   const isEditMode = !!classToEdit;
+  const isClassLoading = isAddingClass || isUpdatingClass;
 
   const formik = useFormik({
     initialValues: {
-      className: classToEdit?.name || "",
-      classMonthlyTuitionFee: classToEdit?.monthlyTuitionFee ?? 0,
-      classTeacherId: classToEdit?.classTeacher?._id || ""
+      name: classToEdit?.name || "",
+      monthlyFee: classToEdit?.monthlyFee ?? 0,
+      classTeacherId: classToEdit?.classTeacher?._id || "",
+      levelId: classToEdit?.level || "",
     },
     validationSchema: addClassSchema,
-    onSubmit: async (values) => {
-      const payload = {
-        className: values.className,
-        classMonthlyTuitionFee: Number(values.classMonthlyTuitionFee),
-        classTeacherId: values.classTeacherId,
-      };
-
+    onSubmit: async (formValues) => {
       if (!isEditMode) {
-        addClassMutation(payload, {
-          onSuccess: () => onClose?.(),
-        });
+        addClassMutation(
+          { addClassInput: formValues },
+          {
+            onSuccess: () => onClose?.(),
+          }
+        );
       } else {
         if (classToEdit?._id) {
           updateClassMutation(
-            { classId: classToEdit._id, classData: payload },
+            { classId: classToEdit._id, updateClassInput: formValues },
             {
               onSuccess: () => onClose?.(),
             }
@@ -46,7 +47,6 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
   });
 
   const { errors, values, setFieldValue, getFieldProps, handleSubmit } = formik;
-  console.log("values", values);
 
   return (
     <FormikProvider value={formik}>
@@ -64,48 +64,51 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
           <EntitySelect
             entity="teacher"
             value={values.classTeacherId}
-            onChange={(teacherId: string | null) =>
-              setFieldValue("classTeacherId", teacherId)
-            }
-            isDisabled={isAddingClass || isUpdatingClass}
+            onChange={(teacherId) => setFieldValue("classTeacherId", teacherId)}
+            isDisabled={isClassLoading}
+          />
+        </FormRowVertical>
+        <FormRowVertical label="Class Level" name="level" error={errors.levelId}>
+          <EntitySelect
+            entity="static"
+            staticOptions={classLevels.map((classLevel) => ({
+              value: classLevel._id,
+              label: classLevel.name,
+            }))}
+            value={values.levelId}
+            onChange={(levelId) => setFieldValue("levelId", levelId)}
+            placeholder="Select Class Level"
+            isDisabled={isClassLoading}
           />
         </FormRowVertical>
 
         {/* Class Name */}
-        <FormRowVertical
-          label="Class Name"
-          name="className"
-          error={errors.className}
-        >
+        <FormRowVertical label="Class Name" name="name" error={errors.name}>
           <Input
             type="text"
             placeholder="Enter class name"
-            // disabled={.isSubmitting}
-            {...getFieldProps("className")}
+            disabled={isClassLoading}
+            {...getFieldProps("name")}
           />
         </FormRowVertical>
 
         {/* Monthly Tuition Fee */}
         <FormRowVertical
           label="Monthly Tuition Fee"
-          name="classMonthlyTuitionFee"
-          error={errors.classMonthlyTuitionFee}
+          name="monthlyFee"
+          error={errors.monthlyFee}
         >
           <Input
             type="number"
             placeholder="e.g. 5000"
-            // disabled={.isSubmitting}
-            {...getFieldProps("classMonthlyTuitionFee")}
+            disabled={isClassLoading}
+            {...getFieldProps("monthlyFee")}
           />
         </FormRowVertical>
 
         {/* Submit Button */}
         <div className="mt-5">
-          <Button
-            fullWidth={true}
-            type="submit"
-            loading={isAddingClass || isUpdatingClass}
-          >
+          <Button fullWidth={true} type="submit" loading={isClassLoading}>
             {!isEditMode ? "Add Class" : "Update Class"}
           </Button>
         </div>

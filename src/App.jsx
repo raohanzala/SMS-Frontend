@@ -90,6 +90,7 @@ function App() {
                   <Route path="exams" element={<AdminExams />} />
                   <Route path="results" element={<AdminResults />} />
                   <Route path="noticeboard" element={<AdminNoticeboard />} />
+                  <Route path="settings" element={<AdminSettings />} />
                 </Route>
 
                 {/* Teacher Routes */}
@@ -178,7 +179,7 @@ const AdminFees = React.lazy(() => import('./pages/private/admin/Fees'));
 const AdminExams = React.lazy(() => import('./pages/private/admin/Exams'));
 const AdminResults = React.lazy(() => import('./pages/private/admin/Results'));
 const AdminNoticeboard = React.lazy(() => import('./pages/private/admin/Noticeboard'));
-// const AdminSettings = React.lazy(() => import('./pages/private/admin/Settings'));
+const AdminSettings = React.lazy(() => import('./features/settings/pages/SettingsPage'));
 
 const TeacherDashboard = React.lazy(() => import('./pages/private/teacher/Dashboard'));
 const TeacherAttendance = React.lazy(() => import('./pages/private/teacher/Attendance'));

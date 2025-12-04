@@ -1,8 +1,9 @@
 export interface Class {
   _id: string;
   name: string;
-  monthlyTuitionFee?: number;
+  monthlyFee?: number;
   classTeacher?: { _id: string; name: string; email?: string } | string;
+  level: string;
   createdAt?: string;
   updatedAt?: string;
 }
