@@ -1,17 +1,17 @@
 import * as Yup from "yup";
 
-const validDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const validDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export const createTimetableSchema = Yup.object().shape({
   classId: Yup.string().required("Class is required"),
   day: Yup.string()
-    .oneOf(validDays, "Invalid day. Must be one of: Mon, Tue, Wed, Thu, Fri, Sat")
+    .oneOf(validDays, "Invalid day. Must be one of: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday")
     .required("Day is required"),
   period: Yup.number()
     .integer("Period must be an integer")
     .min(1, "Period must be at least 1")
     .required("Period is required"),
-  subject: Yup.string().required("Subject is required"),
+  subjectId: Yup.string().required("Subject is required"),
   room: Yup.string().optional(),
   notes: Yup.string().optional(),
   isSubstitute: Yup.boolean().optional(),

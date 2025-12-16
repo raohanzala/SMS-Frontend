@@ -73,6 +73,7 @@ function App() {
                   <Route path="teachers/:teacherId/edit" element={<AdminTeacherForm />} />
                   <Route path="classes" element={<AdminClasses />} />
                   <Route path="subjects" element={<AdminSubjects />} />
+                  <Route path="sessions" element={<AdminSessions />} />
                   <Route path="timetable" element={<AdminTimetable />} />
                   <Route path="timetable/create" element={<AdminCreateTimetable />} />
                   <Route path="timetable/create/:timetableId" element={<AdminCreateTimetable />} />
@@ -170,6 +171,7 @@ const AdminTeacherForm = React.lazy(() => import('./features/teachers/pages/Teac
 const AdminParents = React.lazy(() => import('./features/parents/pages/ParentsPage'));
 const AdminClasses = React.lazy(() => import('./features/classes/pages/ClassesPage'));
 const AdminSubjects = React.lazy(() => import('./pages/private/admin/Subjects'));
+const AdminSessions = React.lazy(() => import('./features/sessions/pages/SessionsPage'));
 const AdminTimetable = React.lazy(() => import('./pages/private/admin/Timetable'));
 const AdminCreateTimetable = React.lazy(() => import('./features/timetable/pages/CreateTimetablePage'));
 const AdminClassTimetable = React.lazy(() => import('./features/timetable/pages/ClassTimetablePage'));

@@ -15,6 +15,10 @@ export interface TeachersTableProps {
   teachers: Teacher[];
   onEditTeacher: (teacher: Teacher) => void;
   onDeleteTeacher: (teacherId: string) => void;
+  selectedTeachers?: Set<string>;
+  onToggleSelect?: (teacherId: string) => void;
+  onSelectAll?: () => void;
+  onDeselectAll?: () => void;
 }
 
 export interface TeachersToolbarProps {

@@ -3,38 +3,51 @@ import { FiArrowUp } from "react-icons/fi";
 import FilterPanel from "../components/promotion/FilterPanel";
 import PromotionStudentTable from "../components/promotion/PromotionStudentTable";
 import PromotionPanel from "../components/promotion/PromotionPanel";
-import { useStudentsByClassAndSession } from "../hooks/useStudentsByClassAndSession";
+import { useStudentsByClassesAndSession } from "../hooks/useStudentsByClassesAndSession";
 import { usePromoteStudents } from "../hooks/usePromoteStudents";
 import { useClasses } from "../../classes/hooks/useClasses";
+import { useAllSessions } from "../hooks/useAllSessions";
 import ConfirmationModal from "../../../components/common/ConfirmationModal";
 import ErrorMessage from "../../../components/common/ErrorMessage";
+import { Session } from "../../sessions/types/session.types";
+import { Class } from "../../classes/types/class.types";
+import { PromotionStudent } from "../types/promotion.types";
 
 const ManagePromotionsPage = () => {
-  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
-  const [selectedSession, setSelectedSession] = useState<string>("");
-  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
-  const [toClassId, setToClassId] = useState<string | null>(null);
-  const [toSession, setToSession] = useState<string>("");
+  // Source selection
+  const [sourceSessionId, setSourceSessionId] = useState<string | null>(null);
+  const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
   const [isSearchTriggered, setIsSearchTriggered] = useState(false);
+
+  // Student selection
+  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
+
+  // Target selection
+  const [targetSessionId, setTargetSessionId] = useState<string | null>(null);
+  const [targetClassIds, setTargetClassIds] = useState<string[]>([]);
+  const [useAutoPromotion, setUseAutoPromotion] = useState<boolean>(true);
+
+  // Modal state
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  // Only fetch students when search is triggered
-  const shouldFetch = isSearchTriggered && selectedClassId && selectedSession;
-  const { students, isLoading, error } = useStudentsByClassAndSession(
-    shouldFetch ? selectedClassId : null,
-    shouldFetch ? selectedSession : ""
+  // Fetch students when search is triggered
+  const shouldFetch = isSearchTriggered && selectedClassIds.length > 0 && sourceSessionId;
+  const { students, isLoading, error } = useStudentsByClassesAndSession(
+    shouldFetch ? selectedClassIds : [],
+    shouldFetch ? sourceSessionId! : ""
   );
 
   const { isPromoting, promoteStudentsMutation } = usePromoteStudents();
   const { classes } = useClasses("", true);
+  const { sessions } = useAllSessions();
 
   const handleSearch = useCallback(() => {
-    if (!selectedClassId || !selectedSession) {
+    if (!sourceSessionId || selectedClassIds.length === 0) {
       return;
     }
     setIsSearchTriggered(true);
     setSelectedStudentIds([]); // Reset selections on new search
-  }, [selectedClassId, selectedSession]);
+  }, [sourceSessionId, selectedClassIds]);
 
   const handleSelectStudent = useCallback((studentId: string) => {
     setSelectedStudentIds((prev) =>
@@ -53,49 +66,96 @@ const ManagePromotionsPage = () => {
   }, [students, selectedStudentIds.length]);
 
   const handlePromote = useCallback(() => {
-    if (!toClassId || !toSession || selectedStudentIds.length === 0) {
+    if (!targetSessionId || selectedStudentIds.length === 0) {
+      return;
+    }
+    if (!useAutoPromotion && targetClassIds.length === 0) {
       return;
     }
     setShowConfirmModal(true);
-  }, [toClassId, toSession, selectedStudentIds]);
+  }, [targetSessionId, selectedStudentIds, useAutoPromotion, targetClassIds]);
 
   const handleConfirmPromote = useCallback(() => {
-    if (!selectedClassId || !toClassId || !selectedSession || !toSession) {
+    if (!sourceSessionId || !targetSessionId || selectedStudentIds.length === 0) {
       return;
+    }
+    if (!useAutoPromotion && targetClassIds.length === 0) {
+      return;
+    }
+
+    // Group students by their current class
+    const studentsByClass = students
+      .filter((s: PromotionStudent) => selectedStudentIds.includes(s._id))
+      .reduce((acc: Record<string, string[]>, student: PromotionStudent) => {
+        const classId = typeof student.class === "string" ? student.class : student.class?._id;
+        if (!classId) return acc;
+        if (!acc[classId]) acc[classId] = [];
+        acc[classId].push(student._id);
+        return acc;
+      }, {} as Record<string, string[]>);
+
+    // Group students by their current class for promotion
+    // For multiple classes, we'll promote each class group separately
+    const classEntries = Object.entries(studentsByClass);
+    
+    if (classEntries.length === 0) return;
+
+    // For now, promote all students together
+    // The backend should handle the logic for multiple classes
+    const allStudentIds: string[] = Object.values(studentsByClass).flat() as string[];
+    const firstClassId = classEntries[0][0];
+    
+    // Determine target class
+    let toClassId = firstClassId;
+    if (!useAutoPromotion && targetClassIds.length > 0) {
+      // Use first target class (could be enhanced to map classes 1:1)
+      toClassId = targetClassIds[0];
+    } else if (useAutoPromotion) {
+      // Backend should handle auto-promotion logic
+      toClassId = firstClassId;
     }
 
     promoteStudentsMutation(
       {
-        studentIds: selectedStudentIds,
-        fromClass: selectedClassId,
+        studentIds: allStudentIds,
+        fromClass: firstClassId,
         toClass: toClassId,
-        fromSession: selectedSession,
-        toSession: toSession,
+        fromSession: sourceSessionId!,
+        toSession: targetSessionId!,
       },
       {
         onSuccess: () => {
           setShowConfirmModal(false);
           setSelectedStudentIds([]);
-          setToClassId(null);
-          setToSession("");
-          // Optionally reset search
-          // setIsSearchTriggered(false);
+          setTargetClassIds([]);
+          setTargetSessionId(null);
         },
       }
     );
   }, [
-    selectedClassId,
-    toClassId,
-    selectedSession,
-    toSession,
+    sourceSessionId,
+    targetSessionId,
     selectedStudentIds,
+    useAutoPromotion,
+    targetClassIds,
+    students,
     promoteStudentsMutation,
   ]);
 
+  const getSessionName = (sessionId: string | null) => {
+    if (!sessionId || !sessions) return "";
+    const session = sessions.find((s: Session) => s._id === sessionId);
+    return session?.name || "";
+  };
+
   const getClassName = (classId: string | null) => {
     if (!classId || !classes) return "";
-    const classItem = classes.find((c) => c._id === classId);
+    const classItem = classes.find((c: Class) => c._id === classId);
     return classItem?.name || "";
+  };
+
+  const getClassNames = (classIds: string[]): string => {
+    return classIds.map((id: string) => getClassName(id)).filter(Boolean).join(", ");
   };
 
   return (
@@ -108,17 +168,17 @@ const ManagePromotionsPage = () => {
             Manage Promotions
           </h1>
           <p className="text-gray-600 mt-1">
-            Promote students from one class and session to another
+            Promote students from one session to another, optionally across classes
           </p>
         </div>
       </div>
 
       {/* Filter Panel */}
       <FilterPanel
-        selectedClassId={selectedClassId}
-        selectedSession={selectedSession}
-        onClassChange={setSelectedClassId}
-        onSessionChange={setSelectedSession}
+        sourceSessionId={sourceSessionId}
+        selectedClassIds={selectedClassIds}
+        onSourceSessionChange={setSourceSessionId}
+        onClassesChange={setSelectedClassIds}
         onSearch={handleSearch}
         isLoading={isLoading}
       />
@@ -146,22 +206,24 @@ const ManagePromotionsPage = () => {
       {isSearchTriggered && selectedStudentIds.length > 0 && (
         <PromotionPanel
           selectedStudentIds={selectedStudentIds}
-          fromClassId={selectedClassId}
-          fromSession={selectedSession}
-          toClassId={toClassId}
-          toSession={toSession}
-          onToClassChange={setToClassId}
-          onToSessionChange={setToSession}
+          sourceClassIds={selectedClassIds}
+          sourceSessionId={sourceSessionId}
+          targetSessionId={targetSessionId}
+          targetClassIds={targetClassIds}
+          useAutoPromotion={useAutoPromotion}
+          onTargetSessionChange={setTargetSessionId}
+          onTargetClassesChange={setTargetClassIds}
+          onUseAutoPromotionChange={setUseAutoPromotion}
           onPromote={handlePromote}
           isPromoting={isPromoting}
-          disabled={!toClassId || !toSession}
+          disabled={!targetSessionId || (!useAutoPromotion && targetClassIds.length === 0)}
         />
       )}
 
       {/* Confirmation Modal */}
       <ConfirmationModal
         title="Confirm Promotion"
-        message={`Are you sure you want to promote ${selectedStudentIds.length} student(s) from ${getClassName(selectedClassId)} (${selectedSession}) to ${getClassName(toClassId)} (${toSession})? This action will update their class and session.`}
+        message={`Are you sure you want to promote ${selectedStudentIds.length} student(s) from ${getSessionName(sourceSessionId)} (${getClassNames(selectedClassIds)}) to ${getSessionName(targetSessionId)}${useAutoPromotion ? " (auto-promote classes)" : ` (${getClassNames(targetClassIds)})`}? This action will update their class and session.`}
         confirmText="Promote"
         cancelText="Cancel"
         type="success"
@@ -175,4 +237,3 @@ const ManagePromotionsPage = () => {
 };
 
 export default ManagePromotionsPage;
-

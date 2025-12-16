@@ -1,6 +1,7 @@
 import DeleteButton from "@/components/common/DeleteButton";
 import EditButton from "@/components/common/EditButton";
 import ViewButton from "@/components/common/ViewButton";
+import { SelectableCard } from "@/components/common/SelectableCard";
 import React from "react";
 import { StudentsCardsProps } from "../types/student-components.types";
 import { formatShortDate } from "@/utils/helpers";
@@ -10,9 +11,9 @@ const StudentsCards = React.memo(
     return (
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {students?.map((student) => (
-          <div
+          <SelectableCard
             key={student._id}
-            className="bg-white rounded-xl shadow hover:shadow-md transition p-4 flex flex-col relative"
+            className="flex flex-col relative"
           >
             {/* ✅ Gender Label */}
             <span
@@ -93,7 +94,7 @@ const StudentsCards = React.memo(
               <EditButton onClick={() => onEditStudent(student)} />
               <DeleteButton onClick={() => onDeleteStudent(student._id)} />
             </div>
-          </div>
+          </SelectableCard>
         ))}
       </div>
     );

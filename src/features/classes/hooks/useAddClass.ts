@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'react-toastify';
 import { addClassApi } from '@/api/classes';
+import { toastError, toastSuccess } from '@/utils/helpers';
 
 export function useAddClass() {
   const queryClient = useQueryClient();
@@ -8,12 +8,10 @@ export function useAddClass() {
   const { mutate: addClassMutation, isPending: isAddingClass } = useMutation({
     mutationFn: addClassApi,
     onSuccess: (data) => {
-      toast.success(data.message || 'Class created successfully');
+      toastSuccess(data.message || 'Class created successfully');
       queryClient.invalidateQueries({ queryKey: ['classes'] });
     },
-    onError: (err) => {
-      toast.error(err?.response?.data?.message || 'Failed to create class');
-    },
+    onError: (err) => toastError(err),
   });
 
   return { isAddingClass, addClassMutation };

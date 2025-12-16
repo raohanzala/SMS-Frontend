@@ -1,5 +1,9 @@
 import { useCallback, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useDeleteClass } from "../hooks/useDeleteClass";
+import { useBulkDeleteClasses } from "../hooks/useBulkDeleteClasses";
+import { useClasses } from "../hooks/useClasses";
+import { Class } from "../types/class.types";
 import { FiBook } from "react-icons/fi";
 import ConfirmationModal from "../../../components/common/ConfirmationModal";
 import EmptyState from "../../../components/common/EmptyState";
@@ -10,17 +14,13 @@ import ManageClassModal from "../components/ManageClassModal";
 import ClassesTable from "../components/ClassesTable";
 import ClassesCards from "../components/ClassesCards";
 import ClassesToolbar from "../components/ClassesToolbar";
-import { useDeleteClass } from "../hooks/useDeleteClass";
-import { useBulkDeleteClasses } from "../hooks/useBulkDeleteClasses";
-import { useClasses } from "../hooks/useClasses";
-import { Class } from "../types/class.types";
+import { useSelectable } from "@/hooks/useSelectable";
 
 const ClassesPage = () => {
   const [classToEdit, setClassToEdit] = useState<Class | null>(null);
   const [classToDelete, setClassToDelete] = useState<string | null>(null);
   const [isShowManageClassModal, setIsShowManageClassModal] = useState(false);
   const [isShowClassDeleteModal, setIsShowClassDeleteModal] = useState(false);
-  const [selectedClasses, setSelectedClasses] = useState<Set<string>>(new Set());
   const [isShowBulkDeleteModal, setIsShowBulkDeleteModal] = useState(false);
 
   const [searchParams] = useSearchParams();
@@ -28,6 +28,14 @@ const ClassesPage = () => {
   const { pagination, classes, classesError, isClassesLoading } = useClasses();
   const { deleteClassMutation, isDeletingClass } = useDeleteClass();
   const { bulkDeleteClassesMutation, isBulkDeletingClasses } = useBulkDeleteClasses();
+
+  const {
+    selectedItems: selectedClasses,
+    handleToggleSelect,
+    handleSelectAll,
+    handleDeselectAll,
+    setSelectedItems
+  } = useSelectable(classes || []);
 
   const handleEditClass = useCallback((classToEdit: Class) => {
     setClassToEdit(classToEdit);
@@ -64,43 +72,20 @@ const ClassesPage = () => {
     }
   }, [deleteClassMutation, classToDelete]);
 
-  // Selection handlers
-  const handleToggleSelect = useCallback((classId: string) => {
-    setSelectedClasses((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(classId)) {
-        newSet.delete(classId);
-      } else {
-        newSet.add(classId);
-      }
-      return newSet;
-    });
-  }, []);
-
-  const handleSelectAll = useCallback(() => {
-    if (classes) {
-      setSelectedClasses(new Set(classes.map((c: Class) => c._id)));
-    }
-  }, [classes]);
-
-  const handleDeselectAll = useCallback(() => {
-    setSelectedClasses(new Set());
-  }, []);
-
   const handleBulkDelete = useCallback(() => {
     setIsShowBulkDeleteModal(true);
   }, []);
 
   const handleConfirmBulkDelete = useCallback(() => {
-    if (selectedClasses.size > 0) {
+    if (selectedClasses) {
       bulkDeleteClassesMutation(Array.from(selectedClasses), {
         onSuccess: () => {
           setIsShowBulkDeleteModal(false);
-          setSelectedClasses(new Set());
+          setSelectedItems(new Set());
         },
       });
     }
-  }, [bulkDeleteClassesMutation, selectedClasses]);
+  }, [bulkDeleteClassesMutation, selectedClasses, setSelectedItems]);
 
   const handleCloseBulkDeleteModal = useCallback(() => {
     setIsShowBulkDeleteModal(false);
@@ -112,6 +97,7 @@ const ClassesPage = () => {
         onClickAddClass={handleShowManageClassModal}
         selectedCount={selectedClasses.size}
         onBulkDelete={handleBulkDelete}
+        onCancelSelection={()=> setSelectedItems(new Set())}
         isDeleting={isBulkDeletingClasses}
       />
 

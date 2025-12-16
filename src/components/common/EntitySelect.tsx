@@ -3,8 +3,10 @@ import SearchableSelect from "./SearchableSelect";
 import { getClassByIdApi, getClassesApi } from "@/api/classes";
 import { getAllTeachersApi, getTeacherByIdApi } from "@/api/teachers";
 import { getAllStudentsApi, getStudentByIdApi } from "@/api/students";
+import { getSessionsApi, getSessionByIdApi } from "@/api/sessions";
+import { useCallback } from "react";
 
-type EntityType = "parent" | "class" | "teacher" | "student" | "static";
+type EntityType = "parent" | "class" | "teacher" | "student" | "session" | "static";
 
 interface Option {
   value: string;
@@ -143,17 +145,37 @@ function EntitySelect({
           : null;
       },
     },
+    session: {
+      fetchList: async (search: string): Promise<Option[]> => {
+        const { data } = await getSessionsApi({ page: 1, limit: 10, search });
+        return (
+          data?.sessions?.map((s: any) => ({
+            value: s._id,
+            label: s.name,
+          })) || []
+        );
+      },
+      fetchById: async (id: string): Promise<Option | null> => {
+        if (!id) return null;
+        const { data } = await getSessionByIdApi(id);
+        return data?.data
+          ? { value: data.data._id, label: data.data.name }
+          : null;
+      },
+    },
   };
 
   const { fetchList, fetchById } = apiMap[entity];
+  const memoFetchList = useCallback(fetchList, []);
+  const memoFetchById = useCallback(fetchById, []);
 
   return (
     <SearchableSelect
       value={value}
       isMulti={isMulti}
       onChange={onChange}
-      fetchOptions={fetchList}
-      fetchById={fetchById}
+      fetchOptions={memoFetchList}
+      fetchById={memoFetchById}
       placeholder={placeholder || `Search ${entity}...`}
       isDisabled={isDisabled}
     />

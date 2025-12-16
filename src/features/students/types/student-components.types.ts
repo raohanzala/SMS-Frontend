@@ -21,6 +21,10 @@ export interface StudentsTableProps {
   students: Student[];
   onEditStudent: (student: Student) => void;
   onDeleteStudent: (studentId: string) => void;
+  selectedStudents?: Set<string>;
+  onToggleSelect?: (studentId: string) => void;
+  onSelectAll?: () => void;
+  onDeselectAll?: () => void;
 }
 
 export interface StudentsToolbarProps {

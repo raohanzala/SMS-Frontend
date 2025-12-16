@@ -8,6 +8,10 @@ export interface TimetableTableProps {
   timetables: Timetable[];
   onEditTimetable: (timetable: Timetable) => void;
   onDeleteTimetable: (timetableId: string) => void;
+  selectedTimetables?: Set<string>;
+  onToggleSelect?: (timetableId: string) => void;
+  onSelectAll?: () => void;
+  onDeselectAll?: () => void;
 } 
 
 export interface ManageTimetableModalProps {

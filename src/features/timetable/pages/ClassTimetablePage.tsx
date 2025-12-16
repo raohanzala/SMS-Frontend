@@ -65,6 +65,7 @@ const ClassTimetablePage = () => {
                 </h2>
               </div>
               <WeeklyTimetableGrid
+              periodConfig={classTimetable.periodConfig}
                 timetable={classTimetable.timetable}
                 title=""
               />

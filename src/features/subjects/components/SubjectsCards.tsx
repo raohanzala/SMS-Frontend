@@ -1,6 +1,7 @@
 import DeleteButton from "@/components/common/DeleteButton";
 import EditButton from "@/components/common/EditButton";
 import ViewButton from "@/components/common/ViewButton";
+import { SelectableCard } from "@/components/common/SelectableCard";
 import React from "react";
 import { SubjectsCardsProps } from "../types/subject-components.types";
 
@@ -10,9 +11,9 @@ const SubjectsCards = React.memo(
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {subjects?.map((subject) => {
           return (
-            <div
+            <SelectableCard
               key={subject._id}
-              className="bg-white rounded-xl shadow hover:shadow-md transition p-4 flex flex-col relative"
+              className="flex flex-col relative"
             >
               {/* Top Section - Subject Icon + Name */}
               <div className="flex items-center space-x-4 mb-3">
@@ -61,9 +62,9 @@ const SubjectsCards = React.memo(
               <div className="mt-4 flex justify-end space-x-2">
                 <ViewButton navigateTo={`/admin/subjects/${subject._id}`} />
                 <EditButton onClick={() => onEditSubject(subject)} />
-                <DeleteButton onClick={() => onDeleteSubject(subject._id)} />
+                <DeleteButton onClick={() => onDeleteSubject({subjectName : subject.name, className : subject.class})} />
               </div>
-            </div>
+            </SelectableCard>
           );
         })}
       </div>

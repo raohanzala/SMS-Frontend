@@ -22,7 +22,7 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
       name: classToEdit?.name || "",
       monthlyFee: classToEdit?.monthlyFee ?? 0,
       classTeacherId: classToEdit?.classTeacher?._id || "",
-      levelId: classToEdit?.level || "",
+      levelId: classToEdit?.level?._id || "",
     },
     validationSchema: addClassSchema,
     onSubmit: async (formValues) => {

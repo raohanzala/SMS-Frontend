@@ -21,7 +21,14 @@ const TimetablesPage = () => {
   const { deleteTimetableMutation, isDeletingTimetable } = useDeleteTimetable();
 
   const handleEditTimetable = useCallback((timetable: Timetable) => {
-    navigate(`/admin/timetable/create/${timetable._id}`);
+    // Use timetableDocId if available (for new backend structure), otherwise use _id
+    const idToUse = timetable.timetableDocId || timetable._id;
+    // Pass period _id as query param if we have timetableDocId
+    const periodId = timetable.timetableDocId ? timetable._id : undefined;
+    const url = periodId 
+      ? `/admin/timetable/create/${idToUse}?periodId=${periodId}`
+      : `/admin/timetable/create/${idToUse}`;
+    navigate(url);
   }, [navigate]);
 
   const handleDeleteTimetable = useCallback((timetableId: string) => {

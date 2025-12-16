@@ -1,6 +1,7 @@
 import DeleteButton from "@/components/common/DeleteButton";
 import EditButton from "@/components/common/EditButton";
 import ViewButton from "@/components/common/ViewButton";
+import { SelectableCard } from "@/components/common/SelectableCard";
 import React from "react";
 import { ParentsTableProps } from "../types/parent-components.interface";
 import { formatShortDate } from "@/utils/helpers";
@@ -10,9 +11,9 @@ const ParentsCards = React.memo(
     return (
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {parents?.map((parent) => (
-          <div
+          <SelectableCard
             key={parent._id}
-            className="bg-white rounded-xl shadow hover:shadow-md transition p-4 flex flex-col relative"
+            className="flex flex-col relative"
           >
             {/* Gender Label */}
             <span
@@ -87,7 +88,7 @@ const ParentsCards = React.memo(
               <EditButton onClick={() => onEditParent(parent)} />
               <DeleteButton onClick={() => onDeleteParent(parent._id)} />
             </div>
-          </div>
+          </SelectableCard>
         ))}
       </div>
     );

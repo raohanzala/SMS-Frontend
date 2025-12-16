@@ -36,6 +36,7 @@ export const adminNav = [
   { name: 'Teachers', href: '/admin/teachers', icon: FiUserCheck },
   { name: 'Classes', href: '/admin/classes', icon: FiLayers },
   { name: 'Subjects', href: '/admin/subjects', icon: FiBook },
+  { name: 'Sessions', href: '/admin/sessions', icon: FiCalendar },
   {
     name: 'Timetable',
     icon: FiCalendar,

@@ -1,129 +1,89 @@
-import React from 'react';
+import React, { useMemo } from "react";
+import Table from "@/components/common/Table";
 import ViewButton from "@/components/common/ViewButton";
 import EditButton from "@/components/common/EditButton";
 import DeleteButton from "@/components/common/DeleteButton";
-import { ClassesTableProps } from '../types/class-components.interface';
-import { formatShortDate } from '@/utils/helpers';
+import { formatShortDate } from "@/utils/helpers";
+import { ClassesTableProps } from "../types/class-components.interface";
+import { Class } from "../types/class.types";
 
-const ClassesTable = React.memo(
-  ({ 
-    classes, 
-    onEditClass, 
-    onDeleteClass,
-    selectedClasses,
-    onToggleSelect,
-    onSelectAll,
-    onDeselectAll,
-  }: ClassesTableProps) => {
-    const allSelected = classes.length > 0 && classes.every(c => selectedClasses.has(c._id));
-    const someSelected = classes.some(c => selectedClasses.has(c._id));
+const ClassesTable = ({
+  classes,
+  onEditClass,
+  onDeleteClass,
+  selectedClasses,
+  onToggleSelect,
+  onSelectAll,
+  onDeselectAll,
+}: ClassesTableProps) => {
 
-    return (
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">
-            Classes ({classes?.length || 0})
-          </h3>
+  const classColumns = [
+    {
+      key: "name",
+      header: "Class Name",
+      render: (row: Class) => (
+        <span className="font-medium text-gray-900">{row.name}</span>
+      ),
+    },
+    {
+      key: "monthlyFee",
+      header: "Monthly Fee",
+      render: (row: Class) =>
+        row.monthlyFee ? `${row.monthlyFee.toLocaleString()} PKR` : "—",
+    },
+    {
+      key: "classTeacher",
+      header: "Class Teacher",
+      render: (row: Class) =>
+        typeof row.classTeacher === "object"
+          ? row.classTeacher?.name || "—"
+          : row.classTeacher || "—",
+    },
+    {
+      key: "createdAt",
+      header: "Created At",
+      render: (row: Class) => formatShortDate(row.createdAt || ""),
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      render: (
+        row: Class & {
+          onEditClass: (row: Class) => void;
+          onDeleteClass: (id: string) => void;
+        }
+      ) => (
+        <div className="flex justify-end space-x-2">
+          <ViewButton navigateTo={`/admin/classes/${row._id}`} />
+          <EditButton onClick={() => row?.onEditClass?.(row)} />
+          <DeleteButton onClick={() => row?.onDeleteClass?.(row._id)} />
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left">
-                  <input
-                    type="checkbox"
-                    checked={allSelected}
-                    ref={(input) => {
-                      if (input) input.indeterminate = someSelected && !allSelected;
-                    }}
-                    onChange={() => {
-                      if (allSelected) {
-                        onDeselectAll();
-                      } else {
-                        onSelectAll();
-                      }
-                    }}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
-                  />
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Class Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Monthly Fee
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Class Teacher
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created At
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
+      ),
+      width: "150px",
+    },
+  ];
 
-            <tbody className="bg-white divide-y divide-gray-200">
-              {classes?.map((classItem) => {
-                const isSelected = selectedClasses.has(classItem._id);
-                return (
-                  <tr 
-                    key={classItem._id} 
-                    className={`hover:bg-gray-50 ${isSelected ? 'bg-indigo-50' : ''}`}
-                  >
-                    {/* Checkbox */}
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => onToggleSelect(classItem._id)}
-                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
-                      />
-                    </td>
-                    {/* Class Name */}
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {classItem.name}
-                    </td>
+  const classesTableData = useMemo(() => 
+    classes.map((item) => ({
+      ...item,
+      onEditClass,
+      onDeleteClass,
+    })),
+    [classes, onEditClass, onDeleteClass]
+  );
 
-                  {/* Monthly Fee */}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {classItem.monthlyFee 
-                      ? `${classItem.monthlyFee.toLocaleString()} PKR`
-                      : '—'}
-                  </td>
+  return (
+    <Table
+      title="Classes"
+      data={classesTableData}
+      columns={classColumns}
+      selectable={true}
+      selectedRows={selectedClasses}
+      onToggleSelect={onToggleSelect}
+      onSelectAll={onSelectAll}
+      onDeselectAll={onDeselectAll}
+    />
+  );
+};
 
-                  {/* Class Teacher */}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {typeof classItem.classTeacher === "object" 
-                      ? classItem.classTeacher?.name || '—'
-                      : classItem.classTeacher || '—'}
-                  </td>
-
-                  {/* Created At */}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatShortDate(classItem.createdAt || "")}
-                  </td>
-
-                  {/* Actions */}
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex justify-end space-x-2">
-                      <ViewButton navigateTo={`/admin/classes/${classItem._id}`} />
-                      <EditButton onClick={() => onEditClass(classItem)} />
-                      <DeleteButton onClick={() => onDeleteClass(classItem._id)} />
-                    </div>
-                  </td>
-                </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  }
-);
-
-ClassesTable.displayName = "ClassesTable";
-
-export default ClassesTable;
+export default React.memo(ClassesTable);

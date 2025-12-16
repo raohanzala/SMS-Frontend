@@ -6,23 +6,18 @@ import { PromotionPanelProps } from "../../types/promotion-components.types";
 
 const PromotionPanel = ({
   selectedStudentIds,
-  fromClassId,
-  fromSession,
-  toClassId,
-  toSession,
-  onToClassChange,
-  onToSessionChange,
+  sourceClassIds,
+  sourceSessionId,
+  targetSessionId,
+  targetClassIds,
+  useAutoPromotion,
+  onTargetSessionChange,
+  onTargetClassesChange,
+  onUseAutoPromotionChange,
   onPromote,
   isPromoting = false,
   disabled = false,
 }: PromotionPanelProps) => {
-  // Generate session options (e.g., 2020-2021 to current year + 1)
-  const currentYear = new Date().getFullYear();
-  const sessionOptions = [];
-  for (let year = 2020; year <= currentYear + 1; year++) {
-    sessionOptions.push(`${year}-${year + 1}`);
-  }
-
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-center gap-2 mb-4">
@@ -32,37 +27,58 @@ const PromotionPanel = ({
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <FormRowVertical label="To Class" name="toClass">
+      <div className="space-y-4 mb-6">
+        <FormRowVertical label="To Session" name="targetSession">
           <EntitySelect
-            entity="class"
-            value={toClassId}
-            onChange={onToClassChange}
-            placeholder="Select new class"
+            entity="session"
+            value={targetSessionId}
+            onChange={(sessionId) => onTargetSessionChange(sessionId as string | null)}
+            placeholder="Select target session"
             isDisabled={isPromoting || disabled}
           />
         </FormRowVertical>
 
-        <FormRowVertical label="To Session" name="toSession">
-          <EntitySelect
-            entity="static"
-            staticOptions={sessionOptions.map((session) => ({
-              value: session,
-              label: session,
-            }))}
-            value={toSession}
-            onChange={(session) => onToSessionChange(session as string)}
-            placeholder="Select new session"
-            isDisabled={isPromoting || disabled}
+        <div className="flex items-center gap-2 mb-4">
+          <input
+            type="checkbox"
+            id="useAutoPromotion"
+            checked={useAutoPromotion}
+            onChange={(e) => onUseAutoPromotionChange(e.target.checked)}
+            disabled={isPromoting || disabled}
+            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
           />
-        </FormRowVertical>
+          <label htmlFor="useAutoPromotion" className="text-sm font-medium text-gray-700">
+            Use automatic class promotion (promote to next class level)
+          </label>
+        </div>
+
+        {!useAutoPromotion && (
+          <FormRowVertical label="To Class(es)" name="targetClasses">
+            <EntitySelect
+              entity="class"
+              value={targetClassIds}
+              onChange={(classIds) => onTargetClassesChange(classIds as string[])}
+              placeholder="Select one or more target classes"
+              isMulti={true}
+              isDisabled={isPromoting || disabled || useAutoPromotion}
+            />
+          </FormRowVertical>
+        )}
+
+        {useAutoPromotion && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <p className="text-sm text-blue-800">
+              Students will be automatically promoted to the next class level based on their current class.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="border-t pt-4">
         <Button
           onClick={onPromote}
           loading={isPromoting}
-          disabled={disabled || selectedStudentIds.length === 0}
+          disabled={disabled || selectedStudentIds.length === 0 || !targetSessionId || (!useAutoPromotion && targetClassIds.length === 0)}
           startIcon={<FiArrowRight />}
           fullWidth
           size="lg"
@@ -75,4 +91,3 @@ const PromotionPanel = ({
 };
 
 export default PromotionPanel;
-

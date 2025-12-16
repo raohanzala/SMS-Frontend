@@ -1,7 +1,8 @@
 import DeleteButton from "@/components/common/DeleteButton";
 import EditButton from "@/components/common/EditButton";
 import ViewButton from "@/components/common/ViewButton";
-import React, { useState } from "react";
+import { SelectableCard } from "@/components/common/SelectableCard";
+import React from "react";
 import { ClassesCardsProps } from "../types/class-components.interface";
 import { Class } from "../types/class.types";
 
@@ -51,28 +52,12 @@ const ClassCard = ({
   onEditClass,
   onDeleteClass,
 }: ClassCardProps) => {
-  const [isHovered, setIsHovered] = useState(false);
-
   return (
-    <div
-      className={`bg-white rounded-xl shadow hover:shadow-md transition p-4 flex flex-col relative ${
-        isSelected ? "ring-2 ring-indigo-500" : ""
-      }`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+    <SelectableCard
+      isSelected={isSelected}
+      onToggleSelect={() => onToggleSelect(classItem._id)}
+      className="flex flex-col relative"
     >
-      {/* Checkbox - Shows on hover or when selected */}
-      {(isHovered || isSelected) && (
-        <div className="absolute top-3 left-3 z-10">
-          <input
-            type="checkbox"
-            checked={isSelected}
-            onChange={() => onToggleSelect(classItem._id)}
-            className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      )}
       {/* Top Section - Class Name */}
       <div className="flex items-center space-x-4 mb-3">
         <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center border">
@@ -122,7 +107,7 @@ const ClassCard = ({
         <EditButton onClick={() => onEditClass(classItem)} />
         <DeleteButton onClick={() => onDeleteClass(classItem._id)} />
       </div>
-    </div>
+    </SelectableCard>
   );
 };
 

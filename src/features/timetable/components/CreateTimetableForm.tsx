@@ -1,15 +1,41 @@
 import { FormikProvider, useFormik } from "formik";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Subject } from "@/features/subjects/types/subject.types";
 import { useCreateTimetable } from "../hooks/useCreateTimetable";
 import { useUpdateTimetable } from "../hooks/useUpdateTimetable";
 import { CreateTimetableFormProps } from "../types/timetable-components.types";
 import { createTimetableSchema } from "../validation/timetable.validation";
-import { useClassById } from "../../classes/hooks/useClassById";
 import FormRowVertical from "@/components/common/FormRowVerticle";
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
 import EntitySelect from "@/components/common/EntitySelect";
+import { getAllSubjectsApi } from "@/api/subjects";
+import { useQuery } from "@tanstack/react-query";
+
+// Helper function to convert short day names to full names
+const convertDayToFullName = (day: string): string => {
+  const dayMap: Record<string, string> = {
+    Mon: "Monday",
+    Tue: "Tuesday",
+    Wed: "Wednesday",
+    Thu: "Thursday",
+    Fri: "Friday",
+    Sat: "Saturday",
+  };
+  return dayMap[day] || day;
+};
+
+// Helper function to get subjectId from subject (handles both string names and objects)
+const getSubjectId = (subject: string | Subject | undefined, subjects: Subject[]): string => {
+  if (!subject) return "";
+  if (typeof subject === "string") {
+    // If it's a string, try to find by name first, then by _id
+    const found = subjects.find((s) => s.name === subject || s._id === subject);
+    return found?._id || "";
+  }
+  // If it's an object, return _id
+  return (subject as Subject)._id || "";
+};
 
 const CreateTimetableForm = ({
   timetableToEdit,
@@ -19,34 +45,64 @@ const CreateTimetableForm = ({
   const { updateTimetableMutation, isUpdatingTimetable } = useUpdateTimetable();
 
   const isEditMode = !!timetableToEdit;
-  const classId = timetableToEdit?.class._id
+  const editClassId = timetableToEdit?.class?._id || (typeof timetableToEdit?.class === "string" ? timetableToEdit.class : "");
 
-  const { classData } = useClassById(isEditMode ? classId || "" : null);
+  // Fetch subjects for the selected class in edit mode
+  const { data: subjectsData } = useQuery({
+    queryKey: ["subjects", "class", editClassId],
+    queryFn: () => getAllSubjectsApi({ classId: editClassId, isAll: true }),
+    enabled: !!editClassId && isEditMode,
+  });
+
+  const editModeSubjects = useMemo(() => subjectsData?.data?.subjects || [], [subjectsData?.data?.subjects]);
 
   const formik = useFormik({
     initialValues: {
-      classId: timetableToEdit?.class,
-      day: timetableToEdit?.day || "Mon",
+      classId: typeof timetableToEdit?.class === "object" && timetableToEdit?.class?._id
+        ? timetableToEdit.class._id
+        : (typeof timetableToEdit?.class === "string" ? timetableToEdit.class : ""),
+      day: timetableToEdit?.day ? convertDayToFullName(timetableToEdit.day) : "Monday",
       period: timetableToEdit?.period || 1,
-      subject: timetableToEdit?.subject || "",
+      subjectId: "",
       room: timetableToEdit?.room || "",
       notes: timetableToEdit?.notes || "",
       isSubstitute: timetableToEdit?.isSubstitute || false,
-      substituteTeacherId: timetableToEdit?.teacher || "",
+      substituteTeacherId: typeof timetableToEdit?.teacher === "object" && timetableToEdit?.teacher?._id
+        ? timetableToEdit.teacher._id
+        : (typeof timetableToEdit?.teacher === "string" ? timetableToEdit.teacher : ""),
     },
     validationSchema: createTimetableSchema,
     enableReinitialize: true,
     onSubmit: async (formValues) => {
-
+      // Transform form values to match backend expectations
+      const submitData: {
+        classId: string;
+        day: "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday";
+        period: number;
+        subjectId: string;
+        room?: string;
+        notes?: string;
+        isSubstitute?: boolean;
+        substituteTeacherId?: string;
+      } = {
+        classId: formValues.classId,
+        day: formValues.day as "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday",
+        period: formValues.period,
+        subjectId: formValues.subjectId,
+        room: formValues.room || undefined,
+        notes: formValues.notes || undefined,
+        isSubstitute: formValues.isSubstitute || undefined,
+        substituteTeacherId: formValues.isSubstitute ? formValues.substituteTeacherId : undefined,
+      };
 
       if (!isEditMode) {
-        createTimetableMutation(formValues, {
+        createTimetableMutation(submitData, {
           onSuccess: () => onClose?.(),
         });
       } else {
         if (timetableToEdit?._id) {
           updateTimetableMutation(
-            { id: timetableToEdit._id, formData: formValues },
+            { id: timetableToEdit._id, formData: submitData },
             {
               onSuccess: () => onClose?.(),
             }
@@ -56,14 +112,36 @@ const CreateTimetableForm = ({
     },
   });
   const { errors, getFieldProps, handleSubmit, values, setFieldValue } = formik;
-  const { classData: selectedClass } = useClassById(values.classId || null);
-  const subjects = (isEditMode ? classData?.subjects : selectedClass?.subjects) || [];
+
+  // Fetch subjects for the currently selected class
+  const { data: currentSubjectsData } = useQuery({
+    queryKey: ["subjects", "class", values.classId],
+    queryFn: () => getAllSubjectsApi({ classId: values.classId, isAll: true }),
+    enabled: !!values.classId && !isEditMode,
+  });
+
+  const subjects = useMemo(() => {
+    if (isEditMode) {
+      return editModeSubjects;
+    }
+    return currentSubjectsData?.data?.subjects || [];
+  }, [isEditMode, editModeSubjects, currentSubjectsData]);
+
+  // Set subjectId when editing and subjects are loaded
+  useEffect(() => {
+    if (isEditMode && subjects.length > 0 && !values.subjectId) {
+      const subjectId = getSubjectId(timetableToEdit?.subject, subjects);
+      if (subjectId) {
+        setFieldValue("subjectId", subjectId);
+      }
+    }
+  }, [isEditMode, subjects, timetableToEdit?.subject, values.subjectId, setFieldValue]);
 
   useEffect(() => {
-    if (!isEditMode && formik.values.classId) {
-      formik.setFieldValue("subject", "");
+    if (!isEditMode && values.classId) {
+      setFieldValue("subjectId", "");
     }
-  }, [formik.values.classId, isEditMode]);
+  }, [values.classId, isEditMode, setFieldValue]);
 
 
   return (
@@ -78,9 +156,10 @@ const CreateTimetableForm = ({
           <EntitySelect
             entity="class"
             value={values.classId}
-            onChange={(classId: string | null) =>
-              setFieldValue("classId", classId || "")
-            }
+            onChange={(value) => {
+              const classId = Array.isArray(value) ? value[0] : value;
+              setFieldValue("classId", classId || "");
+            }}
             placeholder="Select class"
             isDisabled={isCreatingTimetable || isUpdatingTimetable}
           />
@@ -90,12 +169,12 @@ const CreateTimetableForm = ({
           <EntitySelect
             entity="static"
             staticOptions={[
-              { value: "Mon", label: "Monday" },
-              { value: "Tue", label: "Tuesday" },
-              { value: "Wed", label: "Wednesday" },
-              { value: "Thu", label: "Thursday" },
-              { value: "Fri", label: "Friday" },
-              { value: "Sat", label: "Saturday" },
+              { value: "Monday", label: "Monday" },
+              { value: "Tuesday", label: "Tuesday" },
+              { value: "Wednesday", label: "Wednesday" },
+              { value: "Thursday", label: "Thursday" },
+              { value: "Friday", label: "Friday" },
+              { value: "Saturday", label: "Saturday" },
             ]}
             value={values.day}
             onChange={(day) => setFieldValue("day", day)}
@@ -113,18 +192,19 @@ const CreateTimetableForm = ({
           />
         </FormRowVertical>
 
-        <FormRowVertical label="Subject" name="subject" error={errors.subject}>
+        <FormRowVertical label="Subject" name="subjectId" error={errors.subjectId}>
           <EntitySelect
             entity="static"
             staticOptions={subjects.map((subject: Subject) => ({
-              value: subject.name,
+              value: subject._id,
               label: subject.name,
             }))}
             isDisabled={!values.classId || subjects.length === 0}
-            value={values.subject}
-            onChange={(subject: string | null) =>
-              setFieldValue("subject", subject || "")
-            }
+            value={values.subjectId}
+            onChange={(value) => {
+              const subjectId = Array.isArray(value) ? value[0] : value;
+              setFieldValue("subjectId", subjectId || "");
+            }}
             placeholder="Select subject"
           />
         </FormRowVertical>
@@ -182,9 +262,10 @@ const CreateTimetableForm = ({
             <EntitySelect
               entity="teacher"
               value={values.substituteTeacherId}
-              onChange={(teacherId: string | null) =>
-                setFieldValue("substituteTeacherId", teacherId || "")
-              }
+              onChange={(value) => {
+                const teacherId = Array.isArray(value) ? value[0] : value;
+                setFieldValue("substituteTeacherId", teacherId || "");
+              }}
               placeholder="Select substitute teacher"
               isDisabled={isCreatingTimetable || isUpdatingTimetable}
             />

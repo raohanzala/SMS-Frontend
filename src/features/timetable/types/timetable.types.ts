@@ -2,6 +2,7 @@ import { Class } from "@/features/classes/types/class.types";
 import { Teacher } from "@/features/teachers/types/teacher.types";
 
 export type DayOfWeek = "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat";
+export type DayOfWeekFull = "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday";
 
 export interface TimetableEntry {
   _id: string;
@@ -22,18 +23,20 @@ export interface TimetableEntry {
 
 
 export interface Timetable {
-  _id?: string;
-  class: Class; 
-  day: DayOfWeek;
+  _id: string; // Period _id
+  timetableDocId?: string; // Timetable document _id (for editing/deleting)
+  class: Class | { _id: string; name: string }; 
+  day: DayOfWeek | DayOfWeekFull;
   period: number;
   startTime: string;
   endTime: string;  
   subject: string; 
-  teacher: Teacher; 
+  subjectId?: { _id: string; name: string } | string; // Subject object or ID
+  teacher: Teacher | { _id: string; name: string }; 
   room?: string;
   notes?: string;
   isSubstitute?: boolean;
-  originalTeacher?: string | null;
+  originalTeacher?: { _id: string; name: string } | string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -92,29 +95,52 @@ export interface StudentTimetableResponse {
 
 export interface AddTimetableInput {
   classId: string;
-  day: DayOfWeek;
+  day: DayOfWeekFull;
   period: number;
-  startTime: string;
-  endTime: string;
-  subject: string;
-  teacherId: string;
+  subjectId: string;
   room?: string;
   notes?: string;
   isSubstitute?: boolean;
-  originalTeacherId?: string;
+  substituteTeacherId?: string;
 }
 
 export interface UpdateTimetableInput {
   classId?: string;
-  day?: DayOfWeek;
+  day?: DayOfWeekFull;
   period?: number;
-  startTime?: string;
-  endTime?: string;
-  subject?: string;
-  teacherId?: string;
+  subjectId?: string;
   room?: string;
   notes?: string;
   isSubstitute?: boolean;
-  originalTeacherId?: string;
+  substituteTeacherId?: string;
+}
+
+// Backend response structure
+export interface TimetablePeriod {
+  period: number;
+  subjectId: { _id: string; name: string } | string;
+  teacherId: { _id: string; name: string } | string;
+  startTime: string;
+  endTime: string;
+  room?: string;
+  notes?: string;
+  isSubstitute?: boolean;
+  originalTeacherId?: { _id: string; name: string } | string | null;
+  _id: string;
+}
+
+export interface TimetableDay {
+  day: DayOfWeekFull;
+  periods: TimetablePeriod[];
+  _id: string;
+}
+
+export interface TimetableBackendResponse {
+  _id: string;
+  classId: { _id: string; name: string } | string;
+  academicYear?: string;
+  timetable: TimetableDay[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 

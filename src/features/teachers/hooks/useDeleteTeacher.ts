@@ -8,8 +8,8 @@ export function useDeleteTeacher() {
   const { isPending: isDeletingTeacher, mutate: deleteTeacherMutation } = useMutation({
     mutationFn: deleteTeacherApi,
 
-    onSuccess: () => {
-      toast.success('Teacher successfully deleted');
+    onSuccess: (data) => {
+      toast.success(data?.message || 'Teacher successfully deleted');
       queryClient.invalidateQueries({
         queryKey: ["teachers"],
       });

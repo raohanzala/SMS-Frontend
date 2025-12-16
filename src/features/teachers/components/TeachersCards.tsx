@@ -1,17 +1,20 @@
 import DeleteButton from "@/components/common/DeleteButton";
 import EditButton from "@/components/common/EditButton";
 import ViewButton from "@/components/common/ViewButton";
+import { SelectableCard } from "@/components/common/SelectableCard";
 import React from "react";
 import { TeachersTableProps } from "../types/teacher-components.types";
 
 const TeachersCards = React.memo(
-  ({ teachers, onEditTeacher, onDeleteTeacher }: TeachersTableProps) => {
+  ({ teachers, onEditTeacher, onDeleteTeacher, onToggleSelect }: TeachersTableProps) => {
     return (
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {teachers?.map((teacher) => (
-          <div
+          <SelectableCard
+          
             key={teacher._id}
-            className="bg-white rounded-xl shadow hover:shadow-md transition p-4 flex flex-col relative"
+            onToggleSelect={() => onToggleSelect(teacher._id)}
+            className="flex flex-col relative"
           >
             {/* Gender Label */}
             <span
@@ -42,6 +45,7 @@ const TeachersCards = React.memo(
                 <p className="text-xs text-gray-500 capitalize">
                   {teacher.designation || "Teacher"}
                 </p>
+                {teacher?.levelNames.map((level=><p className="text-xs text-purple-600">{level}</p>)) }
               </div>
             </div>
 
@@ -87,7 +91,7 @@ const TeachersCards = React.memo(
               <EditButton onClick={() => onEditTeacher(teacher)} />
               <DeleteButton onClick={() => onDeleteTeacher(teacher._id)} />
             </div>
-          </div>
+          </SelectableCard>
         ))}
       </div>
     );

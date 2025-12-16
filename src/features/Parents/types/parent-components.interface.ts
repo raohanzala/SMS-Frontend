@@ -23,6 +23,10 @@ export interface ParentsTableProps {
   parents: Parent[];
   onEditParent: (parent: Parent) => void;
   onDeleteParent: (parentId: string) => void;
+  selectedParents?: Set<string>;
+  onToggleSelect?: (parentId: string) => void;
+  onSelectAll?: () => void;
+  onDeselectAll?: () => void;
 }
 
 export interface ParentsToolbarProps {

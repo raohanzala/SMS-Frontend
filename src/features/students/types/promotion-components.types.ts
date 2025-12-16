@@ -1,10 +1,10 @@
 import { PromotionStudent } from "./promotion.types";
 
 export interface FilterPanelProps {
-  selectedClassId: string | null;
-  selectedSession: string;
-  onClassChange: (classId: string | null) => void;
-  onSessionChange: (session: string) => void;
+  sourceSessionId: string | null;
+  selectedClassIds: string[];
+  onSourceSessionChange: (sessionId: string | null) => void;
+  onClassesChange: (classIds: string[]) => void;
   onSearch: () => void;
   isLoading?: boolean;
 }
@@ -19,14 +19,15 @@ export interface PromotionStudentTableProps {
 
 export interface PromotionPanelProps {
   selectedStudentIds: string[];
-  fromClassId: string | null;
-  fromSession: string;
-  toClassId: string | null;
-  toSession: string;
-  onToClassChange: (classId: string | null) => void;
-  onToSessionChange: (session: string) => void;
+  sourceClassIds: string[];
+  sourceSessionId: string | null;
+  targetSessionId: string | null;
+  targetClassIds: string[];
+  useAutoPromotion: boolean;
+  onTargetSessionChange: (sessionId: string | null) => void;
+  onTargetClassesChange: (classIds: string[]) => void;
+  onUseAutoPromotionChange: (useAuto: boolean) => void;
   onPromote: () => void;
   isPromoting?: boolean;
   disabled?: boolean;
 }
-

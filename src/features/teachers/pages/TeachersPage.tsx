@@ -12,6 +12,7 @@ import TeachersToolbar from "../components/TeachersToolbar";
 import { useDeleteTeacher } from "../hooks/useDeleteTeacher";
 import { useTeachers } from "../hooks/useTeachers";
 import { Teacher } from "../types/teacher.types";
+import { useSelectable } from "@/hooks/useSelectable";
 
 const TeachersPage = () => {
   const navigate = useNavigate();
@@ -22,6 +23,14 @@ const TeachersPage = () => {
   const view = searchParams.get("view") || "table";
   const { pagination, teachers, teachersError, isTeachersLoading } = useTeachers();
   const { deleteTeacherMutation, isDeletingTeacher } = useDeleteTeacher();
+
+  const {
+    selectedItems: selectedTeachers,
+    handleToggleSelect,
+    handleSelectAll,
+    handleDeselectAll,
+    setSelectedItems
+  } = useSelectable(teachers || []);
 
   const handleEditTeacher = useCallback((teacher: Teacher) => {
     navigate(`/admin/teachers/${teacher._id}/edit`);
@@ -86,12 +95,18 @@ const TeachersPage = () => {
                   teachers={teachers}
                   onEditTeacher={handleEditTeacher}
                   onDeleteTeacher={handleDeleteTeacher}
+                  selectedTeachers={selectedTeachers}
+                  onToggleSelect={handleToggleSelect}
+                  onSelectAll={handleSelectAll}
+                  onDeselectAll={handleDeselectAll}
                 />
               ) : (
                 <TeachersCards
                   teachers={teachers}
                   onEditTeacher={handleEditTeacher}
                   onDeleteTeacher={handleDeleteTeacher}
+                  selectedTeachers={selectedTeachers}
+                  onToggleSelect={handleToggleSelect}
                 />
               )}
 

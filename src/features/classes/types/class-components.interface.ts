@@ -25,6 +25,7 @@ export interface ClassesToolbarProps {
   onClickAddClass: () => void;
   selectedCount: number;
   onBulkDelete: () => void;
+  onCancelSelection: () => void;
   isDeleting: boolean;
 }
 

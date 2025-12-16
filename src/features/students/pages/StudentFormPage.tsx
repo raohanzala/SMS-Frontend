@@ -224,11 +224,7 @@ const StudentFormPage = () => {
                 error={errors.session}
               >
                 <EntitySelect
-                  entity="static"
-                  staticOptions={sessionOptions.map((s) => ({
-                    value: s,
-                    label: s,
-                  }))}
+                  entity="session"
                   value={values.session}
                   onChange={(session) => setFieldValue("session", session)}
                   placeholder="Select Session"

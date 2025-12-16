@@ -14,7 +14,11 @@ export interface ManageSubjectModalProps {
 export interface SubjectsTableProps {
   subjects: Subject[];
   onEditSubject: (subject: Subject) => void;
-  onDeleteSubject: (subjectId: string) => void;
+  onDeleteSubject: () => void;
+  selectedSubjects?: Set<string>;
+  onToggleSelect?: (subjectId: string) => void;
+  onSelectAll?: () => void;
+  onDeselectAll?: () => void;
 }
 
 export interface SubjectsCardsProps {

@@ -1,796 +1,331 @@
-import { Timetable } from '../models/timetable.model.js';
-import { Class } from '../models/class.model.js';
-import { Teacher } from '../models/teacher.model.js';
-import { Student } from '../models/student.model.js';
-import { Parent } from '../models/parent.model.js';
-import { User } from '../models/user.model.js';
-import mongoose from 'mongoose';
+import { Session } from '../models/session.model.js';
 
-// Helper function to format timetable as weekly grid
-const formatWeeklyGrid = (timetableEntries) => {
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const grid = {};
-  
-  days.forEach(day => {
-    grid[day] = [];
-  });
 
-  timetableEntries.forEach(entry => {
-    if (!grid[entry.day]) grid[entry.day] = [];
-    grid[entry.day].push(entry);
-  });
+router.get('/', authenticate, getAllSessions);
 
-  // Sort periods for each day
-  days.forEach(day => {
-    grid[day].sort((a, b) => a.period - b.period);
-  });
+// Add new session
+router.post('/', authenticate, addSession);
 
-  return grid;
+// Update session
+router.put('/:sessionId', authenticate, updateSession);
+
+// Delete session
+router.delete('/:sessionId', authenticate, deleteSession);
+
+export default router;
+
+
+// Get all sessions
+export const getAllSessions = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
+
+    const filter = {};
+
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const sort = {};
+    sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const sessions = await Session.find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(parseInt(limit))
+      .select('name startDate endDate isActive createdAt updatedAt');
+
+    const totalSessions = await Session.countDocuments(filter);
+    const totalPages = Math.ceil(totalSessions / parseInt(limit));
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+
+    res.status(200).json({
+      success: true,
+      message: 'Sessions retrieved successfully',
+      data: {
+        sessions,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages,
+          totalSessions,
+          hasNextPage,
+          hasPrevPage,
+          limit: parseInt(limit)
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Get all sessions error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error while retrieving sessions',
+      error: error.message
+    });
+  }
 };
 
-// POST /timetable - Create a period for a class
-export const createTimetable = async (req, res) => {
+// Add new session
+export const addSession = async (req, res) => {
   try {
-    const {
-      classId,
-      day,
-      period,
-      startTime,
-      endTime,
-      subject,
-      teacherId,
-      room,
-      notes,
-      isSubstitute,
-      originalTeacherId
-    } = req.body;
+    const { name, startDate, endDate, isActive } = req.body;
 
-    // Validation
-    if (!classId || !day || !period || !startTime || !endTime || !subject || !teacherId) {
+    // Basic validation
+    if (!name || !startDate || !endDate) {
       return res.status(400).json({
         success: false,
-        message: 'Class, day, period, startTime, endTime, subject, and teacher are required'
+        message: 'Session name, start date, and end date are required'
       });
     }
 
-    // Validate day
-    const validDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    if (!validDays.includes(day)) {
+    // Validate date format
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
       return res.status(400).json({
         success: false,
-        message: `Invalid day. Must be one of: ${validDays.join(', ')}`
+        message: 'Invalid date format. Please provide valid dates.'
       });
     }
 
-    // Validate period
-    if (!Number.isInteger(period) || period < 1) {
+    // Validate that end date is after start date
+    if (end <= start) {
       return res.status(400).json({
         success: false,
-        message: 'Period must be a positive integer'
+        message: 'End date must be after start date'
       });
     }
 
-    // Validate class exists
-    const classExists = await Class.findById(classId);
-    if (!classExists) {
-      return res.status(404).json({
+    // Check if session name already exists
+    const existingSession = await Session.findOne({ name: name.trim() });
+    if (existingSession) {
+      return res.status(409).json({
         success: false,
-        message: 'Class not found'
+        message: 'Session with this name already exists'
       });
     }
 
-    // Validate subject exists in class
-    const subjectExists = classExists.subjects.some(
-      s => s.name.toLowerCase().trim() === subject.toLowerCase().trim()
-    );
-    if (!subjectExists) {
-      return res.status(400).json({
-        success: false,
-        message: `Subject "${subject}" not found in class "${classExists.name}"`
-      });
+    // If setting this session as active, deactivate all other sessions
+    if (isActive === true) {
+      await Session.updateMany(
+        { isActive: true },
+        { $set: { isActive: false } }
+      );
     }
 
-    // Validate teacher exists
-    const teacher = await Teacher.findById(teacherId);
-    if (!teacher) {
-      return res.status(404).json({
-        success: false,
-        message: 'Teacher not found'
-      });
-    }
-
-    // Validate original teacher if substitute
-    if (isSubstitute && originalTeacherId) {
-      const originalTeacher = await Teacher.findById(originalTeacherId);
-      if (!originalTeacher) {
-        return res.status(404).json({
-          success: false,
-          message: 'Original teacher not found'
-        });
-      }
-    }
-
-    // Check for conflicts: Class cannot have two teachers at the same period
-    const classConflict = await Timetable.findOne({
-      class: classId,
-      day,
-      period
+    // Create session
+    const newSession = await Session.create({
+      name: name.trim(),
+      startDate: start,
+      endDate: end,
+      isActive: isActive || false
     });
-    if (classConflict) {
-      return res.status(400).json({
-        success: false,
-        message: `Class already has a teacher assigned for ${day}, Period ${period}`
-      });
-    }
-
-    // Check for conflicts: Teacher cannot have two classes at the same time
-    const teacherConflict = await Timetable.findOne({
-      teacher: teacherId,
-      day,
-      period
-    });
-    if (teacherConflict) {
-      return res.status(400).json({
-        success: false,
-        message: `Teacher is already assigned to another class on ${day}, Period ${period}`
-      });
-    }
-
-    // Check for conflicts: Room cannot be double-booked (if room is provided)
-    if (room && room.trim()) {
-      const roomConflict = await Timetable.findOne({
-        room: room.trim(),
-        day,
-        period
-      });
-      if (roomConflict) {
-        return res.status(400).json({
-          success: false,
-          message: `Room "${room}" is already booked for ${day}, Period ${period}`
-        });
-      }
-    }
-
-    // Create timetable entry
-    const timetable = await Timetable.create({
-      class: classId,
-      day,
-      period,
-      startTime: startTime.trim(),
-      endTime: endTime.trim(),
-      subject: subject.trim(),
-      teacher: teacherId,
-      room: room?.trim() || undefined,
-      notes: notes || '',
-      isSubstitute: isSubstitute || false,
-      originalTeacher: originalTeacherId || undefined
-    });
-
-    const populatedTimetable = await Timetable.findById(timetable._id)
-      .populate('class', 'name')
-      .populate('teacher', 'name')
-      .populate('originalTeacher', 'name');
 
     res.status(201).json({
       success: true,
-      message: 'Timetable entry created successfully',
-      data: {
-        timetable: populatedTimetable
-      }
+      message: 'Session created successfully',
+      data: newSession
     });
 
   } catch (error) {
-    console.error('Create timetable error:', error);
-    
-    // Handle unique constraint violations
-    if (error.code === 11000) {
-      const field = Object.keys(error.keyPattern)[0];
+    console.error('Add session error:', error);
+    if (error.code === 11000 && error.keyPattern?.name) {
       return res.status(400).json({
         success: false,
-        message: `Conflict detected: ${field === 'room' ? 'Room' : field === 'teacher' ? 'Teacher' : 'Class'} already has an entry for this time slot`
+        message: 'Session name already exists. Please use a different name.'
       });
     }
-
     res.status(500).json({
       success: false,
-      message: 'Error creating timetable',
+      message: 'Internal server error while creating session',
       error: error.message
     });
   }
 };
 
-// GET /timetable/class/:classId - Get full weekly timetable for a class
-export const getClassTimetable = async (req, res) => {
+// Update session
+export const updateSession = async (req, res) => {
   try {
-    const { classId } = req.params;
+    const { sessionId } = req.params;
+    const { name, startDate, endDate, isActive } = req.body;
 
-    if (!classId) {
+    if (!sessionId) {
       return res.status(400).json({
         success: false,
-        message: 'Class ID is required'
+        message: 'Session ID is required'
       });
     }
 
-    // Validate class exists
-    const classExists = await Class.findById(classId);
-    if (!classExists) {
+    // Check if session exists
+    const session = await Session.findById(sessionId);
+    if (!session) {
       return res.status(404).json({
         success: false,
-        message: 'Class not found'
+        message: 'Session not found'
       });
     }
 
-    // Get all timetable entries for this class
-    const timetableEntries = await Timetable.find({ class: classId })
-      .populate('teacher', 'name')
-      .populate('originalTeacher', 'name')
-      .sort({ day: 1, period: 1 });
-
-    // Format as weekly grid
-    const weeklyGrid = formatWeeklyGrid(timetableEntries);
-
-    res.status(200).json({
-      success: true,
-      message: 'Class timetable retrieved successfully',
-      data: {
-        class: {
-          _id: classExists._id,
-          name: classExists.name
-        },
-        timetable: weeklyGrid,
-        raw: timetableEntries // Also provide raw data for flexibility
-      }
-    });
-
-  } catch (error) {
-    console.error('Get class timetable error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error retrieving class timetable',
-      error: error.message
-    });
-  }
-};
-
-// GET /timetable/student/:studentId - Get student timetable (same as class timetable)
-export const getStudentTimetable = async (req, res) => {
-  try {
-    const { studentId } = req.params;
-    const userRole = req.user?.role;
-    const userId = req.user?.userId;
-
-    if (!studentId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Student ID is required'
-      });
-    }
-
-    // Find student and get their class
-    const student = await Student.findById(studentId)
-      .populate('class', 'name');
-
-    if (!student) {
-      return res.status(404).json({
-        success: false,
-        message: 'Student not found'
-      });
-    }
-
-    // Authorization check for parents: they can only view their own children's timetables
-    if (userRole === 'parent') {
-      if (!userId) {
-        return res.status(401).json({
-          success: false,
-          message: 'User authentication required'
-        });
-      }
-
-      // Get parent profile from userRef
-      const user = await User.findById(userId);
-      if (!user || !user.userRef) {
-        return res.status(403).json({
-          success: false,
-          message: 'Parent profile not found'
-        });
-      }
-
-      const parent = await Parent.findById(user.userRef);
-      if (!parent) {
-        return res.status(403).json({
-          success: false,
-          message: 'Parent profile not found'
-        });
-      }
-
-      // Check if student is a child of this parent
-      const isChild = parent.children.some(
-        childId => childId.toString() === studentId
-      );
-
-      if (!isChild) {
-        return res.status(403).json({
-          success: false,
-          message: 'You are not authorized to view this student\'s timetable'
-        });
-      }
-    }
-
-    // Authorization check for students: they can only view their own timetable
-    if (userRole === 'student') {
-      if (!userId) {
-        return res.status(401).json({
-          success: false,
-          message: 'User authentication required'
-        });
-      }
-
-      const user = await User.findById(userId);
-      if (!user || !user.userRef || user.userRef.toString() !== studentId) {
-        return res.status(403).json({
-          success: false,
-          message: 'You are not authorized to view this student\'s timetable'
-        });
-      }
-    }
-
-    if (!student.class) {
-      return res.status(400).json({
-        success: false,
-        message: 'Student is not assigned to a class'
-      });
-    }
-
-    // Get class timetable (reuse getClassTimetable logic)
-    const timetableEntries = await Timetable.find({ class: student.class._id })
-      .populate('teacher', 'name')
-      .populate('originalTeacher', 'name')
-      .sort({ day: 1, period: 1 });
-
-    const weeklyGrid = formatWeeklyGrid(timetableEntries);
-
-    res.status(200).json({
-      success: true,
-      message: 'Student timetable retrieved successfully',
-      data: {
-        student: {
-          _id: student._id,
-          name: student.name,
-          rollNumber: student.rollNumber
-        },
-        class: {
-          _id: student.class._id,
-          name: student.class.name
-        },
-        timetable: weeklyGrid,
-        raw: timetableEntries
-      }
-    });
-
-  } catch (error) {
-    console.error('Get student timetable error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error retrieving student timetable',
-      error: error.message
-    });
-  }
-};
-
-// GET /timetable/teacher/:teacherId - Get teacher timetable
-export const getTeacherTimetable = async (req, res) => {
-  try {
-    const { teacherId } = req.params;
-
-    if (!teacherId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Teacher ID is required'
-      });
-    }
-
-    // Validate teacher exists
-    const teacher = await Teacher.findById(teacherId);
-    if (!teacher) {
-      return res.status(404).json({
-        success: false,
-        message: 'Teacher not found'
-      });
-    }
-
-    // Get all timetable entries for this teacher
-    const timetableEntries = await Timetable.find({ teacher: teacherId })
-      .populate('class', 'name')
-      .populate('originalTeacher', 'name')
-      .sort({ day: 1, period: 1 });
-
-    // Format as weekly grid
-    const weeklyGrid = formatWeeklyGrid(timetableEntries);
-
-    // Calculate free periods (optional enhancement)
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const freePeriods = {};
-    const maxPeriod = 8; // Assuming max 8 periods per day
-
-    days.forEach(day => {
-      freePeriods[day] = [];
-      const bookedPeriods = (weeklyGrid[day] || []).map(e => e.period);
-      for (let p = 1; p <= maxPeriod; p++) {
-        if (!bookedPeriods.includes(p)) {
-          freePeriods[day].push(p);
-        }
-      }
-    });
-
-    // Separate regular and substitute classes
-    const regularClasses = timetableEntries.filter(e => !e.isSubstitute);
-    const substituteClasses = timetableEntries.filter(e => e.isSubstitute);
-
-    res.status(200).json({
-      success: true,
-      message: 'Teacher timetable retrieved successfully',
-      data: {
-        teacher: {
-          _id: teacher._id,
-          name: teacher.name
-        },
-        timetable: weeklyGrid,
-        freePeriods,
-        regularClasses,
-        substituteClasses,
-        raw: timetableEntries
-      }
-    });
-
-  } catch (error) {
-    console.error('Get teacher timetable error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error retrieving teacher timetable',
-      error: error.message
-    });
-  }
-};
-
-// GET /timetable - Get all timetables (with optional filters)
-export const getAllTimetables = async (req, res) => {
-  try {
-    const {
-      classId,
-      teacherId,
-      day,
-      period,
-      room,
-      page = 1,
-      limit = 50
-    } = req.query;
-
-    const filter = {};
-    if (classId) filter.class = classId;
-    if (teacherId) filter.teacher = teacherId;
-    if (day) filter.day = day;
-    if (period) filter.period = parseInt(period, 10);
-    if (room) filter.room = room;
-
-    const pageNum = parseInt(page, 10);
-    const limitNum = parseInt(limit, 10);
-    const skip = (pageNum - 1) * limitNum;
-
-    const timetables = await Timetable.find(filter)
-      .populate('class', 'name')
-      .populate('teacher', 'name')
-      .populate('originalTeacher', 'name')
-      .sort({ day: 1, period: 1 })
-      .skip(skip)
-      .limit(limitNum);
-
-    const total = await Timetable.countDocuments(filter);
-
-    res.status(200).json({
-      success: true,
-      message: 'Timetables retrieved successfully',
-      data: {
-        timetables,
-        pagination: {
-          currentPage: pageNum,
-          totalPages: Math.ceil(total / limitNum),
-          totalItems: total,
-          itemsPerPage: limitNum
-        }
-      }
-    });
-
-  } catch (error) {
-    console.error('Get all timetables error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error retrieving timetables',
-      error: error.message
-    });
-  }
-};
-
-// PUT /timetable/:id - Update a timetable entry
-export const updateTimetable = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const {
-      classId,
-      day,
-      period,
-      startTime,
-      endTime,
-      subject,
-      teacherId,
-      room,
-      notes,
-      isSubstitute,
-      originalTeacherId
-    } = req.body;
-
-    if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: 'Timetable ID is required'
-      });
-    }
-
-    // Find existing timetable
-    const existingTimetable = await Timetable.findById(id);
-    if (!existingTimetable) {
-      return res.status(404).json({
-        success: false,
-        message: 'Timetable entry not found'
-      });
-    }
-
-    // Build update object
+    // Build update data
     const updateData = {};
-    if (classId !== undefined) {
-      const classExists = await Class.findById(classId);
-      if (!classExists) {
-        return res.status(404).json({
-          success: false,
-          message: 'Class not found'
-        });
-      }
-      updateData.class = classId;
-    }
-    if (day !== undefined) {
-      const validDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      if (!validDays.includes(day)) {
-        return res.status(400).json({
-          success: false,
-          message: `Invalid day. Must be one of: ${validDays.join(', ')}`
-        });
-      }
-      updateData.day = day;
-    }
-    if (period !== undefined) {
-      if (!Number.isInteger(period) || period < 1) {
-        return res.status(400).json({
-          success: false,
-          message: 'Period must be a positive integer'
-        });
-      }
-      updateData.period = period;
-    }
-    if (startTime !== undefined) updateData.startTime = startTime.trim();
-    if (endTime !== undefined) updateData.endTime = endTime.trim();
-    if (subject !== undefined) {
-      // Validate subject exists in class
-      const targetClassId = classId || existingTimetable.class;
-      const targetClass = await Class.findById(targetClassId);
-      if (!targetClass) {
-        return res.status(404).json({
-          success: false,
-          message: 'Class not found for subject validation'
-        });
-      }
-      const subjectExists = targetClass.subjects.some(
-        s => s.name.toLowerCase().trim() === subject.toLowerCase().trim()
-      );
-      if (!subjectExists) {
-        return res.status(400).json({
-          success: false,
-          message: `Subject "${subject}" not found in class`
-        });
-      }
-      updateData.subject = subject.trim();
-    }
-    if (teacherId !== undefined) {
-      const teacher = await Teacher.findById(teacherId);
-      if (!teacher) {
-        return res.status(404).json({
-          success: false,
-          message: 'Teacher not found'
-        });
-      }
-      updateData.teacher = teacherId;
-    }
-    if (room !== undefined) {
-      updateData.room = room?.trim() || undefined;
-    }
-    if (notes !== undefined) updateData.notes = notes;
-    if (isSubstitute !== undefined) updateData.isSubstitute = isSubstitute;
-    if (originalTeacherId !== undefined) {
-      if (originalTeacherId) {
-        const originalTeacher = await Teacher.findById(originalTeacherId);
-        if (!originalTeacher) {
-          return res.status(404).json({
+
+    if (name !== undefined) {
+      // Check if new name conflicts with existing session
+      if (name.trim() !== session.name) {
+        const existingSession = await Session.findOne({ name: name.trim() });
+        if (existingSession) {
+          return res.status(409).json({
             success: false,
-            message: 'Original teacher not found'
+            message: 'Session with this name already exists'
           });
         }
       }
-      updateData.originalTeacher = originalTeacherId || undefined;
+      updateData.name = name.trim();
     }
 
-    // Check for conflicts (excluding current entry)
-    const finalClass = updateData.class || existingTimetable.class;
-    const finalDay = updateData.day || existingTimetable.day;
-    const finalPeriod = updateData.period || existingTimetable.period;
-    const finalTeacher = updateData.teacher || existingTimetable.teacher;
-    const finalRoom = updateData.room !== undefined ? updateData.room : existingTimetable.room;
-
-    // Check class conflict
-    const classConflict = await Timetable.findOne({
-      _id: { $ne: id },
-      class: finalClass,
-      day: finalDay,
-      period: finalPeriod
-    });
-    if (classConflict) {
-      return res.status(400).json({
-        success: false,
-        message: `Class already has a teacher assigned for ${finalDay}, Period ${finalPeriod}`
-      });
-    }
-
-    // Check teacher conflict
-    const teacherConflict = await Timetable.findOne({
-      _id: { $ne: id },
-      teacher: finalTeacher,
-      day: finalDay,
-      period: finalPeriod
-    });
-    if (teacherConflict) {
-      return res.status(400).json({
-        success: false,
-        message: `Teacher is already assigned to another class on ${finalDay}, Period ${finalPeriod}`
-      });
-    }
-
-    // Check room conflict (if room is provided)
-    if (finalRoom && finalRoom.trim()) {
-      const roomConflict = await Timetable.findOne({
-        _id: { $ne: id },
-        room: finalRoom.trim(),
-        day: finalDay,
-        period: finalPeriod
-      });
-      if (roomConflict) {
+    if (startDate !== undefined) {
+      const start = new Date(startDate);
+      if (isNaN(start.getTime())) {
         return res.status(400).json({
           success: false,
-          message: `Room "${finalRoom}" is already booked for ${finalDay}, Period ${finalPeriod}`
+          message: 'Invalid start date format'
+        });
+      }
+      updateData.startDate = start;
+    }
+
+    if (endDate !== undefined) {
+      const end = new Date(endDate);
+      if (isNaN(end.getTime())) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid end date format'
+        });
+      }
+      updateData.endDate = end;
+    }
+
+    // Validate date range if both dates are being updated
+    if (updateData.startDate && updateData.endDate) {
+      if (updateData.endDate <= updateData.startDate) {
+        return res.status(400).json({
+          success: false,
+          message: 'End date must be after start date'
+        });
+      }
+    } else if (updateData.startDate && session.endDate) {
+      if (session.endDate <= updateData.startDate) {
+        return res.status(400).json({
+          success: false,
+          message: 'End date must be after start date'
+        });
+      }
+    } else if (updateData.endDate && session.startDate) {
+      if (updateData.endDate <= session.startDate) {
+        return res.status(400).json({
+          success: false,
+          message: 'End date must be after start date'
         });
       }
     }
 
-    // Update timetable
-    const updatedTimetable = await Timetable.findByIdAndUpdate(
-      id,
+    // If setting this session as active, deactivate all other sessions
+    if (isActive === true && !session.isActive) {
+      await Session.updateMany(
+        { _id: { $ne: sessionId }, isActive: true },
+        { $set: { isActive: false } }
+      );
+      updateData.isActive = true;
+    } else if (isActive === false) {
+      updateData.isActive = false;
+    }
+
+    // Update session
+    const updatedSession = await Session.findByIdAndUpdate(
+      sessionId,
       updateData,
       { new: true, runValidators: true }
-    )
-      .populate('class', 'name')
-      .populate('teacher', 'name')
-      .populate('originalTeacher', 'name');
+    );
 
     res.status(200).json({
       success: true,
-      message: 'Timetable updated successfully',
-      data: {
-        timetable: updatedTimetable
-      }
+      message: 'Session updated successfully',
+      data: updatedSession
     });
 
   } catch (error) {
-    console.error('Update timetable error:', error);
-    
-    if (error.code === 11000) {
-      const field = Object.keys(error.keyPattern)[0];
+    console.error('Update session error:', error);
+    if (error.code === 11000 && error.keyPattern?.name) {
       return res.status(400).json({
         success: false,
-        message: `Conflict detected: ${field === 'room' ? 'Room' : field === 'teacher' ? 'Teacher' : 'Class'} already has an entry for this time slot`
+        message: 'Session name already exists. Please use a different name.'
       });
     }
-
     res.status(500).json({
       success: false,
-      message: 'Error updating timetable',
+      message: 'Internal server error while updating session',
       error: error.message
     });
   }
 };
 
-// DELETE /timetable/:id - Delete a timetable entry
-export const deleteTimetable = async (req, res) => {
+// Delete session
+export const deleteSession = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { sessionId } = req.params;
 
-    if (!id) {
+    if (!sessionId) {
       return res.status(400).json({
         success: false,
-        message: 'Timetable ID is required'
+        message: 'Session ID is required'
       });
     }
 
-    const timetable = await Timetable.findByIdAndDelete(id);
-
-    if (!timetable) {
+    const session = await Session.findById(sessionId);
+    if (!session) {
       return res.status(404).json({
         success: false,
-        message: 'Timetable entry not found'
+        message: 'Session not found'
       });
     }
 
-    res.status(200).json({
-      success: true,
-      message: 'Timetable entry deleted successfully',
-      data: {
-        deletedTimetable: timetable
-      }
-    });
-
-  } catch (error) {
-    console.error('Delete timetable error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error deleting timetable',
-      error: error.message
-    });
-  }
-};
-
-// GET /timetable/:id - Get single timetable entry by ID
-export const getTimetableById = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    if (!id) {
+    // Check if session is active
+    if (session.isActive) {
       return res.status(400).json({
         success: false,
-        message: 'Timetable ID is required'
+        message: 'Cannot delete an active session. Please deactivate it first.'
       });
     }
 
-    const timetable = await Timetable.findById(id)
-      .populate('class', 'name')
-      .populate('teacher', 'name')
-      .populate('originalTeacher', 'name');
+    // TODO: Check if session has associated students or other data
+    // For now, we'll allow deletion but this should be checked
+    // const studentsWithSession = await Student.countDocuments({ session: sessionId });
+    // if (studentsWithSession > 0) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: `Cannot delete session. ${studentsWithSession} student(s) are associated with this session.`
+    //   });
+    // }
 
-    if (!timetable) {
-      return res.status(404).json({
-        success: false,
-        message: 'Timetable entry not found'
-      });
-    }
+    await Session.findByIdAndDelete(sessionId);
 
     res.status(200).json({
       success: true,
-      message: 'Timetable retrieved successfully',
-      data: {
-        timetable
-      }
+      message: 'Session deleted successfully'
     });
 
   } catch (error) {
-    console.error('Get timetable by ID error:', error);
+    console.error('Delete session error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error retrieving timetable',
+      message: 'Internal server error while deleting session',
       error: error.message
     });
   }
 };
+
