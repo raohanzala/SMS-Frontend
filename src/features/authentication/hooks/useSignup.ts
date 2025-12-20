@@ -12,12 +12,12 @@ export function useSignup() {
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
-    const roleRoutes: Record<Role, string> = {
-        admin: '/admin/dashboard',
-        teacher: '/teacher/dashboard',
-        student: '/student/dashboard',
-        parent: '/parent/dashboard',
-    };
+    // const roleRoutes: Record<Role, string> = {
+    //     admin: '/admin/dashboard',
+    //     teacher: '/teacher/dashboard',
+    //     student: '/student/dashboard',
+    //     parent: '/parent/dashboard',
+    // };
 
     const { mutate: signupMutation, isPending: isSignupPending } = useMutation({
         mutationFn: signupApi,
@@ -26,8 +26,8 @@ export function useSignup() {
                 data.message || "Account successfully created! Please verufy the new account from the user's email address."
             );
             dispatch(setCredentials(data.data))
-            const redirectPath = roleRoutes[user?.role as Role] || '/login';
-            navigate(redirectPath)
+            // const redirectPath = roleRoutes[user?.role as Role] || '/login';
+            navigate('/onboarding/create-school')
         },
         onError: (err) => {
             toast.error(

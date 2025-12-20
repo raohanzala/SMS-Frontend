@@ -27,9 +27,9 @@ const SignupPage = () => {
             <div className="mx-auto h-14 w-14 bg-blue-600 rounded-full flex items-center justify-center mb-4">
               <FiBookOpen className="h-7 w-7 text-white" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900">Create Account</h2>
+            <h2 className="text-3xl font-bold text-gray-900">Create School Owner Account</h2>
             <p className="mt-2 text-sm text-gray-600">
-              Join our school management system
+              Sign up to create and manage your school
             </p>
           </div>
 

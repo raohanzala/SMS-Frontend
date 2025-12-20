@@ -2,7 +2,7 @@
 import axiosInstance from "./axiosInstance";
 
 export const signupApi = async (formData) => {
-  const { data } = await axiosInstance.post("/auth/signup", formData, {
+  const { data } = await axiosInstance.post("/auth/signup-owner", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;

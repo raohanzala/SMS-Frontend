@@ -5,7 +5,6 @@ import Button from "@/components/common/Button";
 import { Link } from "react-router-dom";
 import { useSignup } from "../hooks/useSignup";
 import { signupSchema } from "../validation/authentication.validation";
-import EntitySelect from "@/components/common/EntitySelect";
 
 const SignupForm = () => {
   const { signupMutation, isSignupPending } = useSignup();
@@ -15,8 +14,7 @@ const SignupForm = () => {
       name: "",
       email: "",
       password: "",
-      confirmPassword: "",
-      role: "student",
+      confirmPassword: ""
     },
     validationSchema: signupSchema,
     onSubmit: async (formValues) => {
@@ -41,21 +39,6 @@ const SignupForm = () => {
             disabled={formik.isSubmitting}
             placeholder="Enter your email"
             {...formik.getFieldProps("email")}
-          />
-        </FormRowVertical>
-        <FormRowVertical label="Role" name="role">
-          <EntitySelect
-            entity="static"
-            staticOptions={["admin", "teacher", "student", "parent"].map(
-              (role) => ({
-                value: role,
-                label: role.charAt(0).toUpperCase() + role.slice(1),
-              })
-            )}
-            value={formik.values.role}
-            onChange={(role) => formik.setFieldValue("role", role)}
-            placeholder="Select Role"
-            isDisabled={formik.isSubmitting}
           />
         </FormRowVertical>
         <FormRowVertical label="Password" name="password">

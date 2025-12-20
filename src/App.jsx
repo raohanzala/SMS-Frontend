@@ -47,6 +47,11 @@ function App() {
                   <Route path="change-password" element={<ChangePassword />} />
                 </Route>
 
+                {/* Onboarding Routes */}
+                <Route path="/onboarding" element={<PublicLayout />}>
+                  <Route path="create-school" element={<CreateSchool />} />
+                </Route>
+
                 {/* Admin Routes */}
                 <Route path="/admin" element={
                   <ProtectedRoute allowedRoles={['admin']}>
@@ -208,5 +213,7 @@ const ParentTimetableView = React.lazy(() => import('./features/timetable/pages/
 // const ParentResults = React.lazy(() => import('./pages/private/parent/Results'));
 // const ParentMessages = React.lazy(() => import('./pages/private/parent/Messages'));
 // const ParentNotices = React.lazy(() => import('./pages/private/parent/Notices'));
+
+const CreateSchool = React.lazy(() => import('./features/onboarding/pages/CreateSchoolPage'));
 
 export default App;

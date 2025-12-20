@@ -13,6 +13,7 @@ export function useLogin() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const roleRoutes = {
+    school_owner: '/admin/dashboard',
     admin: '/admin/dashboard',
     teacher: '/teacher/dashboard',
     student: '/student/dashboard',
@@ -25,12 +26,12 @@ export function useLogin() {
       queryClient.setQueryData(['user'], data.user);
       dispatch(setCredentials(data.data))
 
-      if (data.isFirstLogin && data.data.user.role !== 'admin') {
+      if (data.isFirstLogin && data.data.user.role !== 'admin' && data.data.user.role !== 'school_owner') {
         navigate('/change-password');
         return;
       }
 
-      const redirectPath = roleRoutes[user?.role] || '/login';
+      const redirectPath = roleRoutes[data.data.user?.role] || '/login';
       navigate(redirectPath)
     },
     onError: (err) => {

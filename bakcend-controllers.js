@@ -1,331 +1,263 @@
-import { Session } from '../models/session.model.js';
-
-
-router.get('/', authenticate, getAllSessions);
-
-// Add new session
-router.post('/', authenticate, addSession);
-
-// Update session
-router.put('/:sessionId', authenticate, updateSession);
-
-// Delete session
-router.delete('/:sessionId', authenticate, deleteSession);
-
-export default router;
-
-
-// Get all sessions
-export const getAllSessions = async (req, res) => {
+export const signupOwner = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
+    const { name, email, password, phone } = req.body;
 
-    const filter = {};
-
-    if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: 'i' } }
-      ];
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name, email, and password are required'
+      });
     }
 
-    const sort = {};
-    sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+    if (!validateEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email address'
+      });
+    }
 
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const normalizedEmail = email.trim().toLowerCase();
 
-    const sessions = await Session.find(filter)
-      .sort(sort)
-      .skip(skip)
-      .limit(parseInt(limit))
-      .select('name startDate endDate isActive createdAt updatedAt');
-
-    const totalSessions = await Session.countDocuments(filter);
-    const totalPages = Math.ceil(totalSessions / parseInt(limit));
-    const hasNextPage = page < totalPages;
-    const hasPrevPage = page > 1;
-
-    res.status(200).json({
-      success: true,
-      message: 'Sessions retrieved successfully',
-      data: {
-        sessions,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages,
-          totalSessions,
-          hasNextPage,
-          hasPrevPage,
-          limit: parseInt(limit)
-        }
-      }
+    // Check if email already exists (globally, since schoolId can be null initially)
+    const existingUser = await User.findOne({ 
+      email: normalizedEmail,
+      schoolId: null // Only check users without a school (new owners)
     });
-
-  } catch (error) {
-    console.error('Get all sessions error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error while retrieving sessions',
-      error: error.message
-    });
-  }
-};
-
-// Add new session
-export const addSession = async (req, res) => {
-  try {
-    const { name, startDate, endDate, isActive } = req.body;
-
-    // Basic validation
-    if (!name || !startDate || !endDate) {
-      return res.status(400).json({
-        success: false,
-        message: 'Session name, start date, and end date are required'
-      });
-    }
-
-    // Validate date format
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid date format. Please provide valid dates.'
-      });
-    }
-
-    // Validate that end date is after start date
-    if (end <= start) {
-      return res.status(400).json({
-        success: false,
-        message: 'End date must be after start date'
-      });
-    }
-
-    // Check if session name already exists
-    const existingSession = await Session.findOne({ name: name.trim() });
-    if (existingSession) {
+    
+    if (existingUser) {
       return res.status(409).json({
         success: false,
-        message: 'Session with this name already exists'
+        message: 'Email already registered'
       });
     }
 
-    // If setting this session as active, deactivate all other sessions
-    if (isActive === true) {
-      await Session.updateMany(
-        { isActive: true },
-        { $set: { isActive: false } }
-      );
+    // Check if owner with this email already exists
+    const existingOwner = await Owner.findOne({ email: normalizedEmail });
+    if (existingOwner) {
+      return res.status(409).json({
+        success: false,
+        message: 'Email already registered'
+      });
     }
 
-    // Create session
-    const newSession = await Session.create({
-      name: name.trim(),
-      startDate: start,
-      endDate: end,
-      isActive: isActive || false
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Create owner user without schoolId (will be set when school is created)
+    const user = await User.create({
+      email: normalizedEmail,
+      password: hashedPassword,
+      role: 'school_owner',
+      schoolId: null, // Will be set when school is created
+      status: 'ACTIVE',
+      isFirstLogin: true
     });
+
+    // Create Owner profile with name
+    const owner = await Owner.create({
+      user: user._id,
+      name: name.trim(),
+      email: normalizedEmail,
+      phone: phone || '',
+      address: address || '',
+      profileImage: req.file?.path || '',
+      schoolId: null, // Will be set when school is created
+      status: 'ACTIVE'
+    });
+
+    // Update User with profile reference
+    user.profile = owner._id;
+    user.roleProfile = 'Owner'; // Note: You may need to add 'Owner' to roleProfile enum
+    await user.save();
+
+    // Generate token without schoolId (will be updated after school creation)
+    const token = generateToken(user._id, user.role, null);
 
     res.status(201).json({
       success: true,
-      message: 'Session created successfully',
-      data: newSession
+      message: 'Owner account created successfully. Please create your school.',
+      data: {
+        user: {
+          id: user._id,
+          email: user.email,
+          role: user.role,
+          isFirstLogin: true
+        },
+        owner: {
+          id: owner._id,
+          name: owner.name,
+          email: owner.email
+        },
+        token
+      }
     });
 
   } catch (error) {
-    console.error('Add session error:', error);
-    if (error.code === 11000 && error.keyPattern?.name) {
-      return res.status(400).json({
-        success: false,
-        message: 'Session name already exists. Please use a different name.'
-      });
+    console.error('Signup owner error:', error);
+    if (error.code === 11000) {
+      if (error.keyPattern?.email) {
+        return res.status(409).json({
+          success: false,
+          message: 'Email already registered'
+        });
+      }
+      if (error.keyPattern?.user) {
+        return res.status(409).json({
+          success: false,
+          message: 'Owner profile already exists for this user'
+        });
+      }
     }
     res.status(500).json({
       success: false,
-      message: 'Internal server error while creating session',
+      message: 'Signup failed',
       error: error.message
     });
   }
 };
 
-// Update session
-export const updateSession = async (req, res) => {
-  try {
-    const { sessionId } = req.params;
-    const { name, startDate, endDate, isActive } = req.body;
 
-    if (!sessionId) {
+export const createSchool = async (req, res) => {
+  try {
+    const { name, code } = req.body;
+    const ownerId = req.user.userId; // Get owner ID from JWT
+
+    // 1. Validation
+    if (!name) {
       return res.status(400).json({
         success: false,
-        message: 'Session ID is required'
+        message: 'School name is required'
       });
     }
 
-    // Check if session exists
-    const session = await Session.findById(sessionId);
-    if (!session) {
+    // 2. Verify user is a school owner
+    if (req.user.role !== 'school_owner') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only school owners can create schools'
+      });
+    }
+
+    // 3. Check if owner already has a school (SaaS rule: one school per owner)
+    const existingSchool = await School.findOne({ ownerId });
+    if (existingSchool) {
+      return res.status(409).json({
+        success: false,
+        message: 'You already have a school. Each owner can only create one school.'
+      });
+    }
+
+    // 4. Verify owner exists
+    const owner = await User.findById(ownerId);
+    if (!owner) {
       return res.status(404).json({
         success: false,
-        message: 'Session not found'
+        message: 'Owner not found'
       });
     }
 
-    // Build update data
-    const updateData = {};
-
-    if (name !== undefined) {
-      // Check if new name conflicts with existing session
-      if (name.trim() !== session.name) {
-        const existingSession = await Session.findOne({ name: name.trim() });
-        if (existingSession) {
-          return res.status(409).json({
-            success: false,
-            message: 'Session with this name already exists'
-          });
-        }
-      }
-      updateData.name = name.trim();
+    // 5. Generate unique school code if not provided
+    let schoolCode = code;
+    if (!schoolCode || !schoolCode.trim()) {
+      // Auto-generate from school name
+      schoolCode = name
+        .replace(/\s+/g, '')
+        .substring(0, 6)
+        .toUpperCase() + Math.floor(100 + Math.random() * 900);
+    } else {
+      schoolCode = schoolCode.trim().toUpperCase();
     }
 
-    if (startDate !== undefined) {
-      const start = new Date(startDate);
-      if (isNaN(start.getTime())) {
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid start date format'
-        });
-      }
-      updateData.startDate = start;
+    // 6. Ensure code uniqueness
+    const codeExists = await School.findOne({ code: schoolCode });
+    if (codeExists) {
+      return res.status(409).json({
+        success: false,
+        message: 'School code already exists. Please choose a different code.'
+      });
     }
 
-    if (endDate !== undefined) {
-      const end = new Date(endDate);
-      if (isNaN(end.getTime())) {
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid end date format'
-        });
+    // 7. Create school
+    const school = await School.create({
+      name: name.trim(),
+      code: schoolCode,
+      ownerId: ownerId,
+      plan: 'FREE',
+      isActive: true,
+      subscription: {
+        status: 'active'
       }
-      updateData.endDate = end;
+    });
+
+    // 8. Attach schoolId to owner user
+    owner.schoolId = school._id;
+    owner.isFirstLogin = false; // Owner has completed onboarding
+    await owner.save();
+
+    // 9. Update Owner profile with schoolId
+    const ownerProfile = await Owner.findOne({ user: ownerId });
+    if (ownerProfile) {
+      ownerProfile.schoolId = school._id;
+      await ownerProfile.save();
     }
 
-    // Validate date range if both dates are being updated
-    if (updateData.startDate && updateData.endDate) {
-      if (updateData.endDate <= updateData.startDate) {
-        return res.status(400).json({
-          success: false,
-          message: 'End date must be after start date'
-        });
-      }
-    } else if (updateData.startDate && session.endDate) {
-      if (session.endDate <= updateData.startDate) {
-        return res.status(400).json({
-          success: false,
-          message: 'End date must be after start date'
-        });
-      }
-    } else if (updateData.endDate && session.startDate) {
-      if (updateData.endDate <= session.startDate) {
-        return res.status(400).json({
-          success: false,
-          message: 'End date must be after start date'
-        });
-      }
-    }
-
-    // If setting this session as active, deactivate all other sessions
-    if (isActive === true && !session.isActive) {
-      await Session.updateMany(
-        { _id: { $ne: sessionId }, isActive: true },
-        { $set: { isActive: false } }
-      );
-      updateData.isActive = true;
-    } else if (isActive === false) {
-      updateData.isActive = false;
-    }
-
-    // Update session
-    const updatedSession = await Session.findByIdAndUpdate(
-      sessionId,
-      updateData,
-      { new: true, runValidators: true }
+    // 10. Generate new token with schoolId included
+    const token = jwt.sign(
+      { userId: owner._id, role: owner.role, schoolId: school._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
     );
 
-    res.status(200).json({
+    // Populate owner profile for response
+    const ownerWithProfile = await Owner.findOne({ user: ownerId })
+      .select('name email phone address profileImage');
+
+    res.status(201).json({
       success: true,
-      message: 'Session updated successfully',
-      data: updatedSession
+      message: 'School created successfully',
+      data: {
+        school: {
+          _id: school._id,
+          name: school.name,
+          code: school.code,
+          plan: school.plan,
+          isActive: school.isActive,
+          ownerId: school.ownerId
+        },
+        owner: {
+          _id: owner._id,
+          email: owner.email,
+          role: owner.role,
+          profile: ownerWithProfile ? {
+            name: ownerWithProfile.name,
+            email: ownerWithProfile.email,
+            phone: ownerWithProfile.phone,
+            address: ownerWithProfile.address
+          } : null
+        },
+        token // Return new token with schoolId
+      }
     });
 
   } catch (error) {
-    console.error('Update session error:', error);
-    if (error.code === 11000 && error.keyPattern?.name) {
-      return res.status(400).json({
-        success: false,
-        message: 'Session name already exists. Please use a different name.'
-      });
+    console.error('Create school error:', error);
+    if (error.code === 11000) {
+      if (error.keyPattern?.code) {
+        return res.status(409).json({
+          success: false,
+          message: 'School code already exists'
+        });
+      }
+      if (error.keyPattern?.ownerId) {
+        return res.status(409).json({
+          success: false,
+          message: 'You already have a school'
+        });
+      }
     }
     res.status(500).json({
       success: false,
-      message: 'Internal server error while updating session',
+      message: 'Internal server error while creating school',
       error: error.message
     });
   }
 };
-
-// Delete session
-export const deleteSession = async (req, res) => {
-  try {
-    const { sessionId } = req.params;
-
-    if (!sessionId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Session ID is required'
-      });
-    }
-
-    const session = await Session.findById(sessionId);
-    if (!session) {
-      return res.status(404).json({
-        success: false,
-        message: 'Session not found'
-      });
-    }
-
-    // Check if session is active
-    if (session.isActive) {
-      return res.status(400).json({
-        success: false,
-        message: 'Cannot delete an active session. Please deactivate it first.'
-      });
-    }
-
-    // TODO: Check if session has associated students or other data
-    // For now, we'll allow deletion but this should be checked
-    // const studentsWithSession = await Student.countDocuments({ session: sessionId });
-    // if (studentsWithSession > 0) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: `Cannot delete session. ${studentsWithSession} student(s) are associated with this session.`
-    //   });
-    // }
-
-    await Session.findByIdAndDelete(sessionId);
-
-    res.status(200).json({
-      success: true,
-      message: 'Session deleted successfully'
-    });
-
-  } catch (error) {
-    console.error('Delete session error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error while deleting session',
-      error: error.message
-    });
-  }
-};
-
