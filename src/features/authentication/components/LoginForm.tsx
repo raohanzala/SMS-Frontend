@@ -40,7 +40,7 @@ const LoginForm = () => {
         <form onSubmit={formik.handleSubmit}>
 
           {/* Email */}
-          <div>
+          <div className='mb-3'>
             <FormRowVertical label="Email address" name='email'>
               <Input
                 type="email"
@@ -63,40 +63,25 @@ const LoginForm = () => {
 
 
           {/* Submit */}
-          <div>
-            <Button fullWidth={true} type='submit' loading={isLoginPending} disabled={isLoginPending}>
+          <div className='mt-6'>
+            <Button fullWidth={true} type='submit' size='lg' loading={isLoginPending} disabled={isLoginPending}>
               Sign in
             </Button>
           </div>
 
-          <div className="flex justify-between items-center text-sm mt-2">
-            <Link to="/forgot-password" className="text-blue-600 hover:underline">
+          <div className="flex justify-between items-center text-sm mt-4">
+            <Link to="/forgot-password" className="text-primary hover:text-primary-dark transition-colors">
               Forgot password?
             </Link>
-            <span className="text-gray-500">
-              Don’t have an account?{" "}
-              <Link to="/register" className="text-blue-600 hover:underline">
+            <span className="text-text-secondary">
+              Don&apos;t have an account?{" "}
+              <Link to="/register" className="text-primary hover:text-primary-dark transition-colors font-medium">
                 Sign up
               </Link>
             </span>
           </div>
         </form>
       </FormikProvider>
-      <div className="mt-8">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">Demo Credentials:</h3>
-        <div className="grid grid-cols-2 gap-2">
-          {demoCredentials.map((cred, index) => (
-            <button
-              key={index}
-              onClick={() => fillDemoCredentials(cred)}
-              className="text-xs p-2 bg-gray-100 hover:bg-gray-200 rounded border text-left"
-            >
-              <div className="font-medium">{cred.role}</div>
-              <div className="text-gray-600">{cred.email}</div>
-            </button>
-          ))}
-        </div>
-      </div>
     </>
   );
 };

@@ -64,7 +64,7 @@ const ClassesTable = ({
   ];
 
   const classesTableData = useMemo(() => 
-    classes.map((item) => ({
+    classes?.map((item) => ({
       ...item,
       onEditClass,
       onDeleteClass,

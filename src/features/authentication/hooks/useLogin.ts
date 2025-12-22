@@ -2,17 +2,15 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { signinApi } from '../../../api/auth';
 import { toast } from 'react-toastify';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { setCredentials } from '../../../store/slices/authSlice';
-import { RootState } from '../../../store/store';
 
 export function useLogin() {
   const queryClient = useQueryClient();
-  const { user } = useSelector((state: RootState) => state.auth)
 
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const roleRoutes = {
+  const roleRoutes: Record<string, string> = {
     school_owner: '/admin/dashboard',
     admin: '/admin/dashboard',
     teacher: '/teacher/dashboard',
@@ -24,14 +22,16 @@ export function useLogin() {
     mutationFn: signinApi,
     onSuccess: (data) => {
       queryClient.setQueryData(['user'], data.user);
+      console.log(data.data)
       dispatch(setCredentials(data.data))
 
-      if (data.isFirstLogin && data.data.user.role !== 'admin' && data.data.user.role !== 'school_owner') {
-        navigate('/change-password');
-        return;
-      }
+      // if (data.isFirstLogin && data.data.user.role !== 'admin' && data.data.user.role !== 'school_owner') {
+      //   navigate('/change-password');
+      //   return;
+      // }
 
-      const redirectPath = roleRoutes[data.data.user?.role] || '/login';
+      const userRole = data.data.user?.role as string;
+      const redirectPath = roleRoutes[userRole] || '/login';
       navigate(redirectPath)
     },
     onError: (err) => {

@@ -6,7 +6,7 @@ export function useDeleteSettings() {
   const queryClient = useQueryClient();
 
   const { mutate: deleteSettingsMutation, isPending: isDeletingSettings } = useMutation({
-    mutationFn: deleteSettingsApi,
+    mutationFn: (settingsId?: string) => deleteSettingsApi(settingsId),
     onSuccess: (data) => {
       toast.success(data.message || 'Settings deleted successfully');
       queryClient.invalidateQueries({ queryKey: ['settings'] });

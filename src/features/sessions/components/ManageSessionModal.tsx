@@ -4,7 +4,7 @@ import { ManageSessionModalProps } from "../types/session-components.types";
 
 const ManageSessionModal = ({ isManageSessionModalOpen, onManageSessionModalClose, sessionToEdit }: ManageSessionModalProps) => {
   return (
-    <Modal isOpen={isManageSessionModalOpen} onClose={onManageSessionModalClose}>
+    <Modal title="Add Session" isOpen={isManageSessionModalOpen} onClose={onManageSessionModalClose}>
       <CreateSessionForm onClose={onManageSessionModalClose} sessionToEdit={sessionToEdit} />
     </Modal>
   );

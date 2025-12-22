@@ -1,263 +1,396 @@
-export const signupOwner = async (req, res) => {
-  try {
-    const { name, email, password, phone } = req.body;
+import mongoose from "mongoose";
 
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Name, email, and password are required'
-      });
-    }
+const levelSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true }, // e.g., "KG", "Primary", "High"
+    classIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Class" }],
 
-    if (!validateEmail(email)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid email address'
-      });
-    }
+    // LEVEL-WISE TIMINGS  
+    timings: {
+      startTime: { type: String, default: null }, // "07:30"
+      endTime: { type: String, default: null },   // "12:30"
 
-    const normalizedEmail = email.trim().toLowerCase();
+      breakTime: {
+        startTime: { type: String, default: null }, // "10:00"
+        duration: { type: Number, default: null },  // in minutes
+      },
 
-    // Check if email already exists (globally, since schoolId can be null initially)
-    const existingUser = await User.findOne({ 
-      email: normalizedEmail,
-      schoolId: null // Only check users without a school (new owners)
-    });
-    
-    if (existingUser) {
-      return res.status(409).json({
-        success: false,
-        message: 'Email already registered'
-      });
-    }
+      periodConfig: {
+        periodDuration: { type: Number, default: null }, // minutes
+        totalPeriods: { type: Number, default: null },
+        breakAfterPeriods: { type: Number, default: null },
+      },
+    },
+  },
+  { _id: true }
+);
 
-    // Check if owner with this email already exists
-    const existingOwner = await Owner.findOne({ email: normalizedEmail });
-    if (existingOwner) {
-      return res.status(409).json({
-        success: false,
-        message: 'Email already registered'
-      });
-    }
+const settingsSchema = new mongoose.Schema(
+  {
+    schoolId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "School",
+      required: true,
+      unique: true,
+      index: true
+    },
+    // FALLBACK if level has no timing
+    defaultSchoolTiming: {
+      startTime: { type: String, required: true, default: "08:00" },
+      endTime: { type: String, required: true, default: "14:00" },
+    },
 
-    const hashedPassword = await bcrypt.hash(password, 12);
+    // FALLBACK if level-specific period config missing
+    defaultPeriodConfig: {
+      periodDuration: { type: Number, required: true, default: 40 },
+      totalPeriods: { type: Number, required: true, default: 7 },
+      breakAfterPeriods: { type: Number, default: 3 },
+      breakDuration: { type: Number, default: 20 },
+    },
 
-    // Create owner user without schoolId (will be set when school is created)
-    const user = await User.create({
-      email: normalizedEmail,
-      password: hashedPassword,
-      role: 'school_owner',
-      schoolId: null, // Will be set when school is created
-      status: 'ACTIVE',
-      isFirstLogin: true
-    });
+    // LEVELS → CLASSES → LEVEL-BASED TIMINGS
+    classLevels: [levelSchema],
 
-    // Create Owner profile with name
-    const owner = await Owner.create({
-      user: user._id,
-      name: name.trim(),
-      email: normalizedEmail,
-      phone: phone || '',
-      address: address || '',
-      profileImage: req.file?.path || '',
-      schoolId: null, // Will be set when school is created
-      status: 'ACTIVE'
-    });
+    // OPTIONAL: class specific overrides
+    classWiseOverrides: [
+      {
+        classId: { type: mongoose.Schema.Types.ObjectId, ref: "Class" },
 
-    // Update User with profile reference
-    user.profile = owner._id;
-    user.roleProfile = 'Owner'; // Note: You may need to add 'Owner' to roleProfile enum
-    await user.save();
+        startTime: { type: String },
+        endTime: { type: String },
 
-    // Generate token without schoolId (will be updated after school creation)
-    const token = generateToken(user._id, user.role, null);
-
-    res.status(201).json({
-      success: true,
-      message: 'Owner account created successfully. Please create your school.',
-      data: {
-        user: {
-          id: user._id,
-          email: user.email,
-          role: user.role,
-          isFirstLogin: true
+        breakTime: {
+          startTime: { type: String },
+          duration: { type: Number },
         },
-        owner: {
-          id: owner._id,
-          name: owner.name,
-          email: owner.email
+
+        periodConfig: {
+          periodDuration: { type: Number },
+          totalPeriods: { type: Number },
+          breakAfterPeriods: { type: Number },
+          breakDuration: { type: Number },
         },
-        token
-      }
-    });
+      },
+    ],
+  },
+  { timestamps: true }
+);
 
-  } catch (error) {
-    console.error('Signup owner error:', error);
-    if (error.code === 11000) {
-      if (error.keyPattern?.email) {
-        return res.status(409).json({
-          success: false,
-          message: 'Email already registered'
-        });
-      }
-      if (error.keyPattern?.user) {
-        return res.status(409).json({
-          success: false,
-          message: 'Owner profile already exists for this user'
-        });
-      }
-    }
-    res.status(500).json({
-      success: false,
-      message: 'Signup failed',
-      error: error.message
-    });
-  }
-};
+export const Settings = mongoose.model("Settings", settingsSchema);
 
 
-export const createSchool = async (req, res) => {
+
+
+import { Settings } from "../models/settings.model.js";
+import { Class } from "../models/class.model.js";
+
+// Get settings (one settings document per school)
+export const getSettings = async (req, res) => {
   try {
-    const { name, code } = req.body;
-    const ownerId = req.user.userId; // Get owner ID from JWT
+    const { settingsId } = req.params;
 
-    // 1. Validation
-    if (!name) {
-      return res.status(400).json({
-        success: false,
-        message: 'School name is required'
-      });
+    // Reusable populate config
+    const populateConfig = [
+      {
+        path: "classLevels.classIds",
+        select: "name",
+      },
+      {
+        path: "classWiseOverrides.classId",
+        select: "name",
+      },
+    ];
+
+    let settings;
+
+    // If settingsId is provided, fetch by ID and verify it belongs to the school
+    if (settingsId) {
+      settings = await Settings.findOne({ 
+        _id: settingsId,
+        schoolId: req.schoolId // 🔑 Tenant isolation
+      }).populate(populateConfig);
+    } else {
+      // Get settings for this school (one per school)
+      settings = await Settings.findOne({ 
+        schoolId: req.schoolId // 🔑 Tenant isolation
+      })
+        .populate(populateConfig)
+        .sort({ createdAt: -1 });
     }
 
-    // 2. Verify user is a school owner
-    if (req.user.role !== 'school_owner') {
-      return res.status(403).json({
-        success: false,
-        message: 'Only school owners can create schools'
-      });
-    }
-
-    // 3. Check if owner already has a school (SaaS rule: one school per owner)
-    const existingSchool = await School.findOne({ ownerId });
-    if (existingSchool) {
-      return res.status(409).json({
-        success: false,
-        message: 'You already have a school. Each owner can only create one school.'
-      });
-    }
-
-    // 4. Verify owner exists
-    const owner = await User.findById(ownerId);
-    if (!owner) {
+    if (!settings) {
       return res.status(404).json({
         success: false,
-        message: 'Owner not found'
+        message: "Settings not found for this school",
       });
     }
 
-    // 5. Generate unique school code if not provided
-    let schoolCode = code;
-    if (!schoolCode || !schoolCode.trim()) {
-      // Auto-generate from school name
-      schoolCode = name
-        .replace(/\s+/g, '')
-        .substring(0, 6)
-        .toUpperCase() + Math.floor(100 + Math.random() * 900);
-    } else {
-      schoolCode = schoolCode.trim().toUpperCase();
-    }
+    return res.status(200).json({
+      success: true,
+      message: "Settings retrieved successfully",
+      data: settings, // Return single object, not array
+    });
+  } catch (error) {
+    console.error("Get settings error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error while retrieving settings",
+      error: error.message,
+    });
+  }
+};
 
-    // 6. Ensure code uniqueness
-    const codeExists = await School.findOne({ code: schoolCode });
-    if (codeExists) {
-      return res.status(409).json({
+// Add new settings (one settings document per school)
+export const addSettings = async (req, res) => {
+  try {
+    const {
+      defaultSchoolTiming,
+      defaultPeriodConfig,
+      classLevels,
+      classWiseOverrides
+    } = req.body;
+
+    // Check if settings already exist for this school
+    const existingSettings = await Settings.findOne({ 
+      schoolId: req.schoolId // 🔑 Tenant isolation
+    });
+    if (existingSettings) {
+      return res.status(400).json({
         success: false,
-        message: 'School code already exists. Please choose a different code.'
+        message: "Settings already exist for this school. Please use PUT /api/settings to update existing settings.",
       });
     }
 
-    // 7. Create school
-    const school = await School.create({
-      name: name.trim(),
-      code: schoolCode,
-      ownerId: ownerId,
-      plan: 'FREE',
-      isActive: true,
-      subscription: {
-        status: 'active'
+    // Required validations
+    if (!defaultSchoolTiming || !defaultPeriodConfig) {
+      return res.status(400).json({
+        success: false,
+        message: "defaultSchoolTiming and defaultPeriodConfig are required",
+      });
+    }
+
+    // Validate Class IDs inside classLevels (must belong to same school)
+    if (classLevels && Array.isArray(classLevels)) {
+      for (const level of classLevels) {
+        if (level.classIds && Array.isArray(level.classIds)) {
+          for (const classId of level.classIds) {
+            const classExists = await Class.findOne({ 
+              _id: classId,
+              schoolId: req.schoolId // 🔑 Tenant isolation
+            });
+            if (!classExists) {
+              return res.status(400).json({
+                success: false,
+                message: `Class with ID ${classId} not found or does not belong to this school`,
+              });
+            }
+          }
+        }
       }
+    }
+
+    // Validate Class IDs inside classWiseOverrides (must belong to same school)
+    if (classWiseOverrides && Array.isArray(classWiseOverrides)) {
+      for (const item of classWiseOverrides) {
+        if (item.classId) {
+          const classExists = await Class.findOne({ 
+            _id: item.classId,
+            schoolId: req.schoolId // 🔑 Tenant isolation
+          });
+          if (!classExists) {
+            return res.status(400).json({
+              success: false,
+              message: `Class with ID ${item.classId} not found or does not belong to this school`,
+            });
+          }
+        }
+      }
+    }
+
+    // Create settings
+    const newSettings = await Settings.create({
+      schoolId: req.schoolId, // 🔑 Tenant isolation
+      defaultSchoolTiming,
+      defaultPeriodConfig,
+      classLevels: classLevels || [],
+      classWiseOverrides: classWiseOverrides || [],
     });
 
-    // 8. Attach schoolId to owner user
-    owner.schoolId = school._id;
-    owner.isFirstLogin = false; // Owner has completed onboarding
-    await owner.save();
-
-    // 9. Update Owner profile with schoolId
-    const ownerProfile = await Owner.findOne({ user: ownerId });
-    if (ownerProfile) {
-      ownerProfile.schoolId = school._id;
-      await ownerProfile.save();
-    }
-
-    // 10. Generate new token with schoolId included
-    const token = jwt.sign(
-      { userId: owner._id, role: owner.role, schoolId: school._id },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    // Populate owner profile for response
-    const ownerWithProfile = await Owner.findOne({ user: ownerId })
-      .select('name email phone address profileImage');
+    // Populate response
+    const populatedSettings = await Settings.findById(newSettings._id)
+      .populate({
+        path: "classLevels.classIds",
+        select: "name",
+      })
+      .populate({
+        path: "classWiseOverrides.classId",
+        select: "name",
+      });
 
     res.status(201).json({
       success: true,
-      message: 'School created successfully',
-      data: {
-        school: {
-          _id: school._id,
-          name: school.name,
-          code: school.code,
-          plan: school.plan,
-          isActive: school.isActive,
-          ownerId: school.ownerId
-        },
-        owner: {
-          _id: owner._id,
-          email: owner.email,
-          role: owner.role,
-          profile: ownerWithProfile ? {
-            name: ownerWithProfile.name,
-            email: ownerWithProfile.email,
-            phone: ownerWithProfile.phone,
-            address: ownerWithProfile.address
-          } : null
-        },
-        token // Return new token with schoolId
-      }
+      message: "Settings created successfully",
+      data: populatedSettings,
     });
-
   } catch (error) {
-    console.error('Create school error:', error);
-    if (error.code === 11000) {
-      if (error.keyPattern?.code) {
-        return res.status(409).json({
-          success: false,
-          message: 'School code already exists'
-        });
-      }
-      if (error.keyPattern?.ownerId) {
-        return res.status(409).json({
-          success: false,
-          message: 'You already have a school'
-        });
-      }
-    }
+    console.error("Add Settings Error:", error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error while creating school',
+      message: "Internal server error while creating settings",
+      error: error.message,
+    });
+  }
+};
+
+
+// Update settings (one settings document per school)
+export const updateSettings = async (req, res) => {
+  try {
+    const { settingsId } = req.params;
+
+    const {
+      defaultSchoolTiming,
+      defaultPeriodConfig,
+      classLevels,
+      classWiseOverrides
+    } = req.body;
+
+    // Find existing settings for this school
+    let existingSettings;
+    if (settingsId) {
+      existingSettings = await Settings.findOne({ 
+        _id: settingsId,
+        schoolId: req.schoolId // 🔑 Tenant isolation
+      });
+    } else {
+      existingSettings = await Settings.findOne({ 
+        schoolId: req.schoolId // 🔑 Tenant isolation
+      });
+    }
+
+    if (!existingSettings) {
+      return res.status(404).json({
+        success: false,
+        message: "Settings not found for this school",
+      });
+    }
+
+    // Validate class IDs in classLevels (must belong to same school)
+    if (classLevels && Array.isArray(classLevels)) {
+      for (const level of classLevels) {
+        if (level.classIds && Array.isArray(level.classIds)) {
+          for (const classId of level.classIds) {
+            const classExists = await Class.findOne({ 
+              _id: classId,
+              schoolId: req.schoolId // 🔑 Tenant isolation
+            });
+            if (!classExists) {
+              return res.status(400).json({
+                success: false,
+                message: `Class with ID ${classId} not found or does not belong to this school`,
+              });
+            }
+          }
+        }
+      }
+    }
+
+    // Validate class IDs in overrides (must belong to same school)
+    if (classWiseOverrides && Array.isArray(classWiseOverrides)) {
+      for (const item of classWiseOverrides) {
+        if (item.classId) {
+          const classExists = await Class.findOne({ 
+            _id: item.classId,
+            schoolId: req.schoolId // 🔑 Tenant isolation
+          });
+          if (!classExists) {
+            return res.status(400).json({
+              success: false,
+              message: `Class with ID ${item.classId} not found or does not belong to this school`,
+            });
+          }
+        }
+      }
+    }
+
+    // Prepare update data
+    const updateData = {};
+    if (defaultSchoolTiming) updateData.defaultSchoolTiming = defaultSchoolTiming;
+    if (defaultPeriodConfig) updateData.defaultPeriodConfig = defaultPeriodConfig;
+    if (classLevels !== undefined) updateData.classLevels = classLevels;
+    if (classWiseOverrides !== undefined) updateData.classWiseOverrides = classWiseOverrides;
+
+    const updatedSettings = await Settings.findByIdAndUpdate(
+      existingSettings._id,
+      updateData,
+      { new: true, runValidators: true }
+    )
+      .populate({
+        path: "classLevels.classIds",
+        select: "name",
+      })
+      .populate({
+        path: "classWiseOverrides.classId",
+        select: "name",
+      });
+
+    res.status(200).json({
+      success: true,
+      message: "Settings updated successfully",
+      data: updatedSettings,
+    });
+  } catch (error) {
+    console.error("Update Settings Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while updating settings",
+      error: error.message,
+    });
+  }
+};
+
+
+// Delete settings (one settings document per school)
+export const deleteSettings = async (req, res) => {
+  try {
+    const { settingsId } = req.params;
+
+    // Find existing settings for this school
+    let settings;
+    if (settingsId) {
+      settings = await Settings.findOne({ 
+        _id: settingsId,
+        schoolId: req.schoolId // 🔑 Tenant isolation
+      });
+    } else {
+      settings = await Settings.findOne({ 
+        schoolId: req.schoolId // 🔑 Tenant isolation
+      });
+    }
+
+    if (!settings) {
+      return res.status(404).json({
+        success: false,
+        message: 'Settings not found for this school'
+      });
+    }
+
+    await Settings.findOneAndDelete({ 
+      _id: settings._id,
+      schoolId: req.schoolId // 🔑 Tenant isolation
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Settings deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete settings error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error while deleting settings',
       error: error.message
     });
   }
 };
+

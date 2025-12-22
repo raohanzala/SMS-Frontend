@@ -35,23 +35,23 @@ const Button = ({
   ...props
 }: ButtonProps) => {
   const baseClasses =
-    'inline-flex items-center h-fit text-nowrap justify-center font-medium rounded transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed';
+    'inline-flex items-center h-fit text-nowrap justify-center font-medium rounded-md transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variants: Record<ButtonVariant, string> = {
     primary:
-      'bg-primary text-white hover:bg-primary/90 shadow-sm hover:shadow-md',
+      'bg-primary text-text-white hover:bg-primary-dark active:bg-primary-darker shadow-primary hover:shadow-md',
     secondary:
-      'bg-gray-100 text-gray-900 hover:bg-gray-200 border border-gray-300',
+      'bg-bg-secondary text-text-primary hover:bg-bg-tertiary border border-border',
     outline:
-      'bg-transparent text-primary border border-primary hover:bg-primary hover:text-white',
+      'bg-transparent text-primary border border-primary hover:bg-primary hover:text-text-white',
     ghost:
-      'bg-transparent text-gray-700 hover:bg-gray-100',
+      'bg-transparent text-text-secondary hover:bg-bg-secondary',
     danger:
-      'bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow-md',
+      'bg-status-error text-text-white hover:bg-status-errorDark shadow-sm hover:shadow-md',
     success:
-      'bg-green-600 text-white hover:bg-green-700 shadow-sm hover:shadow-md',
+      'bg-accent-teal text-text-white hover:bg-accent-tealDark shadow-sm hover:shadow-md',
     warning:
-      'bg-yellow-500 text-white hover:bg-yellow-600 shadow-sm hover:shadow-md',
+      'bg-status-warning text-text-white hover:bg-status-warningDark shadow-sm hover:shadow-md',
   };
 
   const sizes: Record<ButtonSize, string> = {

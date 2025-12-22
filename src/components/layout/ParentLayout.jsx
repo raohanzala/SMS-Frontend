@@ -124,7 +124,7 @@ const ParentLayout = () => {
                     <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
                   </div>
                   <button
-                    onClick={() => dispatch(logout)}
+                    onClick={() => dispatch(logout())}
                     className="flex items-center text-gray-400 hover:text-gray-600"
                   >
                     <FiLogOut className="h-5 w-5" />

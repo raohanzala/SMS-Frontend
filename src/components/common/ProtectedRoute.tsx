@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
-type UserRole = 'admin' | 'teacher' | 'student' | 'parent';
+type UserRole = 'admin' | 'teacher' | 'student' | 'parent' | 'school_owner';
 
 interface User {
   role: UserRole;
@@ -33,6 +33,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }: ProtectedRouteProps) =>
   if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role as UserRole)) {
     const roleRoutes: Record<UserRole, string> = {
       admin: '/admin/dashboard',
+      school_owner: '/admin/dashboard',
       teacher: '/teacher/dashboard',
       student: '/student/dashboard',
       parent: '/parent/dashboard',

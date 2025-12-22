@@ -24,7 +24,8 @@ const TeacherFormPage = () => {
   const { teacher, isTeacherLoading, teacherError } = useTeacher(teacherId);
   const { addTeacherMutation, isAddingTeacher } = useAddTeacher();
   const { updateTeacherMutation, isUpdatingTeacher } = useUpdateTeacher();
-  const {settings: { classLevels = [] } = {}} = useSettings();
+  const {settings} = useSettings();
+  const classLevels = settings?.classLevels || [];
 
   console.log(classLevels)
 

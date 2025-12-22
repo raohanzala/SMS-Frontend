@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import { store } from './store/store';
 import { SettingsProvider } from './contexts/SettingsContext';
+import Spinner from './components/common/Spinner';
 
 // Layout Components
 import PublicLayout from './components/layout/PublicLayout';
@@ -22,7 +23,7 @@ import ChangePassword from './features/authentication/pages/ChangePasswordPage';
 // Protected Route Component
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { ParentNav, studentNav, teacherNav } from './utils/navigationConfig';
-import AdminParentDetails from './pages/private/admin/ParentDetail';
+import ParentDetails from './features/parents/components/ParentDetails';
 import StudentDetail from './pages/private/admin/StudentDetail';
 import TeacherDetail from './pages/private/admin/TeacherDetail';
 import ClassAttendance from './pages/private/admin/ClassAttendance';
@@ -37,7 +38,12 @@ function App() {
         <SettingsProvider>
           <Router>
             <div className="App">
-              <Routes>
+              <Suspense fallback={
+                <div className="min-h-screen flex items-center justify-center bg-bg-secondary">
+                  <Spinner />
+                </div>
+              }>
+                <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<PublicLayout />}>
                   <Route index element={<Navigate to="/login" replace />} />
@@ -54,7 +60,7 @@ function App() {
 
                 {/* Admin Routes */}
                 <Route path="/admin" element={
-                  <ProtectedRoute allowedRoles={['admin']}>
+                  <ProtectedRoute allowedRoles={['admin', 'school_owner']}>
                     <AdminLayout />
                   </ProtectedRoute>
                 }>
@@ -67,7 +73,7 @@ function App() {
                   <Route path="students/:studentId" element={<StudentDetail />} />
                   <Route path="students/:studentId/edit" element={<AdminStudentForm />} />
                   <Route path="parents" element={<AdminParents />} />
-                  <Route path="parents/:parentId" element={<AdminParentDetails />} />
+                  <Route path="parents/:parentId" element={<ParentDetails />} />
                   <Route path="employees" element={<AdminEmployees />} />
                   <Route path="employees/new" element={<AdminEmployeeForm />} />
                   <Route path="employees/:employeeId" element={<EmployeeDetail />} />
@@ -152,7 +158,8 @@ function App() {
 
                 {/* Catch all route */}
                 <Route path="*" element={<Navigate to="/login" replace />} />
-              </Routes>
+                </Routes>
+              </Suspense>
               <ToastContainer position="top-right" autoClose={3000} />
             </div>
           </Router>
@@ -174,6 +181,7 @@ const EmployeeDetail = React.lazy(() => import('./pages/private/admin/EmployeeDe
 const AdminTeachers = React.lazy(() => import('./features/teachers/pages/TeachersPage'));
 const AdminTeacherForm = React.lazy(() => import('./features/teachers/pages/TeacherFormPage'));
 const AdminParents = React.lazy(() => import('./features/parents/pages/ParentsPage'));
+// const AdminParentDetails = React.lazy(() => import('./features/parents/pages/ParentDetail'));
 const AdminClasses = React.lazy(() => import('./features/classes/pages/ClassesPage'));
 const AdminSubjects = React.lazy(() => import('./pages/private/admin/Subjects'));
 const AdminSessions = React.lazy(() => import('./features/sessions/pages/SessionsPage'));

@@ -1,36 +1,51 @@
-import { Suspense, useState } from "react";
+import React, { Suspense, useState } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
-import MobileSidebar from "./MobileSidebar";
 import { Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 import Spinner from "../common/Spinner";
 
-export default function Layout({ navigation }) {
+interface NavigationItem {
+  name: string;
+  href?: string;
+  icon: React.ComponentType<{ className?: string }>;
+  children?: Array<{ name: string; href: string }>;
+}
+
+interface LayoutProps {
+  navigation: NavigationItem[];
+}
+
+export default function Layout({ navigation }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user } = useSelector((state) => state.auth)
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { user } = useSelector((state: RootState) => state.auth)
 
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Mobile Sidebar */}
-      <MobileSidebar
+    <div className="min-h-screen bg-[#F6F6F6]">
+      {/* Responsive Sidebar */}
+      <Sidebar 
+        navigation={navigation} 
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
-        navigation={navigation}
+        isCollapsed={isCollapsed}
+        setIsCollapsed={setIsCollapsed}
       />
 
-      {/* Desktop Sidebar */}
-      <Sidebar navigation={navigation} role={user?.role} />
-
       {/* Main Content */}
-      <div className="lg:pl-64">
+      <div className={`transition-all duration-300 ${isCollapsed ? 'lg:pl-20' : 'lg:pl-72'}`}>
         <Header
           setSidebarOpen={setSidebarOpen}
           user={user}
         />
 
-        <Suspense fallback={<Spinner />}>
+        <Suspense fallback={
+          <div className="flex items-center justify-center min-h-screen">
+            <Spinner />
+          </div>
+        }>
           <main className="py-6">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
               <Outlet />

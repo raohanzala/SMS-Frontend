@@ -1,4 +1,4 @@
-export type UserRole = "admin" | "teacher" | "student" | "parent";
+export type UserRole = "admin" | "teacher" | "student" | "parent" | "school_owner";
 export type Gender = "male" | "female";
 
 export interface User {
@@ -15,6 +15,7 @@ export interface User {
   religion?: string;
   DOB?: string;
   nationalId?: string;
+  schoolId?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

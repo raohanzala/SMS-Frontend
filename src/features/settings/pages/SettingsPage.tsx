@@ -8,18 +8,22 @@ import ErrorMessage from "@/components/common/ErrorMessage";
 import Spinner from "@/components/common/Spinner";
 import { useAddSettings } from "../hooks/useAddSettings";
 import { useUpdateSettings } from "../hooks/useUpdateSettings";
+import { useDeleteSettings } from "../hooks/useDeleteSettings";
 import { useSettings } from "../hooks/useSettings";
 import { settingsSchema } from "../validation/settings.validation";
 import EntitySelect from "@/components/common/EntitySelect";
 import TimePicker from "@/components/common/TimePicker";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { ClassLevel, ClassWiseOverride } from "../types/settings.types";
 
 const SettingsPage = () => {
   const { settings, isSettingsLoading, settingsError } = useSettings();
   const { addSettingsMutation, isAddingSettings } = useAddSettings();
   const { updateSettingsMutation, isUpdatingSettings } = useUpdateSettings();
+  const { deleteSettingsMutation, isDeletingSettings } = useDeleteSettings();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const currentSettings = settings
+  const currentSettings = settings;
   const isEditMode = !!currentSettings;
 
   // Helper function to transform classLevels from backend
@@ -51,7 +55,7 @@ const SettingsPage = () => {
     return overrides.map((override) => ({
       classId:
         typeof override.classId === "object"
-          ? override.classId._id
+          ? override.classId?._id
           : override.classId || "",
       startTime: override.startTime || "",
       endTime: override.endTime || "",
@@ -180,18 +184,27 @@ const SettingsPage = () => {
       if (!isEditMode) {
         addSettingsMutation(payload);
       } else {
-        if (currentSettings?._id) {
-          updateSettingsMutation({
-            settingsId: currentSettings._id,
-            settingsData: payload,
-          });
-        }
+        // Backend accepts PUT /settings or PUT /settings/:settingsId
+        // If settingsId is provided, use it; otherwise backend will find by schoolId
+        updateSettingsMutation({
+          settingsId: currentSettings?._id,
+          settingsData: payload,
+        });
       }
     },
   });
 
   const { errors, values, setFieldValue, getFieldProps, handleSubmit, isSubmitting } = formik;
-  const isLoading = isAddingSettings || isUpdatingSettings || isSubmitting;
+  const isLoading = isAddingSettings || isUpdatingSettings || isDeletingSettings || isSubmitting;
+
+  const handleDelete = () => {
+    const settingsId = currentSettings?._id;
+    deleteSettingsMutation(settingsId, {
+      onSuccess: () => {
+        setShowDeleteModal(false);
+      },
+    });
+  };
 
   if (isSettingsLoading) {
     return (
@@ -214,11 +227,25 @@ const SettingsPage = () => {
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div className="bg-white rounded-lg shadow-sm border p-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">School Settings</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Configure default timings and period configurations, plus level-specific and class-specific overrides
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">School Settings</h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Configure default timings and period configurations, plus level-specific and class-specific overrides
+            </p>
+          </div>
+          {isEditMode && (
+            <Button
+              type="button"
+              variant="danger"
+              onClick={() => setShowDeleteModal(true)}
+              disabled={isLoading}
+              className="flex items-center gap-2"
+            >
+              <FiTrash2 className="w-4 h-4" />
+              Delete Settings
+            </Button>
+          )}
         </div>
       </div>
 
@@ -250,7 +277,7 @@ const SettingsPage = () => {
                 />
               </FormRowVertical>
 
-              <FormRowVertical
+              {/* <FormRowVertical
                 label="End Time"
                 name="defaultSchoolTiming.endTime"
                 error={errors.defaultSchoolTiming?.endTime as string}
@@ -261,7 +288,7 @@ const SettingsPage = () => {
                     setFieldValue("defaultSchoolTiming.endTime", time)
                   }
                 />
-              </FormRowVertical>
+              </FormRowVertical> */}
             </div>
           </div>
 
@@ -356,6 +383,20 @@ const SettingsPage = () => {
           </div>
         </form>
       </FormikProvider>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        title="Delete Settings"
+        message="Are you sure you want to delete these settings? This action cannot be undone. You will need to create new settings afterward."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        confirmButtonVariant="danger"
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        isLoading={isDeletingSettings}
+      />
     </div>
   );
 };
@@ -769,9 +810,10 @@ const OverrideCard = ({
             <EntitySelect
               entity="class"
               value={override.classId}
-              onChange={(classId: string | null) =>
-                setFieldValue(`classWiseOverrides.${index}.classId`, classId || "")
-              }
+              onChange={(value: string | string[] | null) => {
+                const classId = Array.isArray(value) ? value[0] : value;
+                setFieldValue(`classWiseOverrides.${index}.classId`, classId || "");
+              }}
               placeholder="Select class"
               isDisabled={isLoading}
             />

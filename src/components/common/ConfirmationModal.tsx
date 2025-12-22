@@ -1,9 +1,3 @@
-import {
-  FaExclamationTriangle,
-  FaQuestionCircle,
-  FaInfoCircle,
-  FaCheckCircle
-} from 'react-icons/fa'
 import Modal from './Modal'
 import Button from './Button';
 
@@ -40,49 +34,14 @@ const ConfirmationModal = ({
   onCancel,
   isLoading = false,
   type = 'warning',
-  size = 'md',
-  showIcon = true,
   confirmButtonVariant = 'primary',
   cancelButtonVariant = 'outline',
-  className = ''
 }: ConfirmationModalProps) => {
   if (!isOpen) return null;
 
-  const getIcon = () => {
-    switch (type) {
-      case 'danger':
-        return <FaExclamationTriangle className="w-6 h-6 text-red-500" />;
-      case 'info':
-        return <FaInfoCircle className="w-6 h-6 text-blue-500" />;
-      case 'success':
-        return <FaCheckCircle className="w-6 h-6 text-green-500" />;
-      default:
-        return <FaQuestionCircle className="w-6 h-6 text-yellow-500" />;
-    }
-  };
-
-  const getSizeClasses = () => {
-    switch (size) {
-      case 'sm':
-        return 'max-w-sm';
-      case 'lg':
-        return 'max-w-lg';
-      default:
-        return 'max-w-md';
-    }
-  };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} >
-      {/* Header */}
-      <div className="pb-4 border-b border-gray-200">
-        <div className="flex items-center gap-3">
-          {showIcon && getIcon()}
-          <h3 className="text-lg font-semibold text-gray-900">
-            {title}
-          </h3>
-        </div>
-      </div>
+    <Modal title={title} isOpen={isOpen} onClose={onClose} >
 
       <div>
         <p className="py-4 text-gray-600">

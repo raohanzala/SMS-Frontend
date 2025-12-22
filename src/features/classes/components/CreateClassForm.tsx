@@ -12,7 +12,8 @@ import { useSettings } from "@/features/settings/hooks/useSettings";
 const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
   const { addClassMutation, isAddingClass } = useAddClass();
   const { updateClassMutation, isUpdatingClass } = useUpdateClass();
-  const { settings: { classLevels = [] } = {} } = useSettings();
+  const { settings } = useSettings();
+  const classLevels = settings?.classLevels || [];
 
   const isEditMode = !!classToEdit;
   const isClassLoading = isAddingClass || isUpdatingClass;

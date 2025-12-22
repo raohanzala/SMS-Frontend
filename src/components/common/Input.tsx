@@ -12,8 +12,8 @@ const Input = ({ name, type = "text", size = "medium", value, onChange, onBlur, 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
     const sizes: Record<InputSize, string> = {
-      medium: "py-[10px]",
-      large: "py-[12px]",
+      medium: "py-[10px] rounded-lg",
+      large: "py-[12px] rounded-lg",
     };
 
   return (
@@ -22,7 +22,7 @@ const Input = ({ name, type = "text", size = "medium", value, onChange, onBlur, 
         id={name}
         name={name}
         type={type === "password" && isPasswordVisible ? "text" : type}
-        className={`w-full mt-1 text-sm px-4 py-3 border rounded-md ${sizes[size]}`}
+        className={`w-full mt-1 text-sm px-4 py-3 border border-border bg-bg-main text-text-primary placeholder:text-text-tertiary focus:outline-none ${sizes[size]} focus:ring-1 focus:ring-primary`}
         value={value}
         onChange={onChange}
         onBlur={onBlur}
@@ -30,7 +30,7 @@ const Input = ({ name, type = "text", size = "medium", value, onChange, onBlur, 
       />
       {type === "password" && (
         <div
-          className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-700"
+          className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer text-text-tertiary hover:text-text-secondary"
           onClick={() => setIsPasswordVisible((prev) => !prev)}
         >
           {isPasswordVisible ? <IoMdEye size={20} /> : <IoMdEyeOff size={20} />}

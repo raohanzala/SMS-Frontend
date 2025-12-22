@@ -10,7 +10,7 @@ const ManageParentModal = ({
   onParentFormSuccess,
 }: ManageParentModalProps) => {
   return (
-    <Modal isOpen={isManageParentModalOpen} onClose={onManageParentModalClose}>
+    <Modal title="Add Parent" isOpen={isManageParentModalOpen} onClose={onManageParentModalClose}>
       <CreateParentForm
         onManageParentModalClose={onManageParentModalClose}
         parentToEdit={parentToEdit}

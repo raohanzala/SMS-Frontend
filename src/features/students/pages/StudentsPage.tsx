@@ -1,23 +1,20 @@
 import { useCallback, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FiUsers } from "react-icons/fi";
+import { useDeleteStudent } from "../hooks/useDeleteStudent";
+import { useStudents } from "../hooks/useStudents";
+import { Student } from "../types/student.types";
 import ConfirmationModal from "../../../components/common/ConfirmationModal";
 import EmptyState from "../../../components/common/EmptyState";
 import ErrorMessage from "../../../components/common/ErrorMessage";
 import Pagination from "../../../components/common/Pagination";
 import Spinner from "../../../components/common/Spinner";
-// import ManageStudentModal from "../components/ManageStudentModal";
 import StudentsCards from "../components/StudentsCards";
 import StudentsTable from "../components/StudentsTable";
 import StudentsToolbar from "../components/StudentsToolbar";
-import { useDeleteStudent } from "../hooks/useDeleteStudent";
-import { useStudents } from "../hooks/useStudents";
-import { Student } from "../types/student.types";
 
 const StudentsPage = () => {
-  // const [studentToEdit, setStudentToEdit] = useState<Student | null>(null);
   const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
-  // const [isShowManageStudentModal, setIsShowManageStudentModal] = useState(false);
   const [isShowStudentDeleteModal, setIsShowStudentDeleteModal] = useState(false);
 
   const [searchParams] = useSearchParams();
@@ -38,11 +35,6 @@ const StudentsPage = () => {
   const handleShowManageStudentModal = useCallback(() => {
     navigate('/admin/students/new');
   }, [navigate]);
-
-  // const handleCloseManageStudentModal = useCallback(() => {
-  //   setStudentToEdit(null);
-  //   setIsShowManageStudentModal(false);
-  // }, []);
 
   const handleCloseStudentDeleteModal = useCallback(() => {
     setStudentToDelete(null);
@@ -108,9 +100,6 @@ const StudentsPage = () => {
           )}
         </>
       )}
-
-      {/* ManageStudentModal removed in favor of dedicated create/edit pages */}
-
       <ConfirmationModal
         title="Delete Student"
         message="Are you sure you want to delete parent? This action cannot be undone."

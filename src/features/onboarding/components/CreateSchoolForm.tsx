@@ -36,12 +36,12 @@ const CreateSchoolForm = () => {
     <FormikProvider value={formik}>
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Info Banner */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-          <FiInfo className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-blue-800">
+        <div className="bg-accent-cyan bg-opacity-10 border border-accent-cyan border-opacity-30 rounded-lg p-4 flex items-start gap-3">
+          <FiInfo className="h-5 w-5 text-accent-cyan mt-0.5 flex-shrink-0" />
+          <div className="text-sm text-accent-cyanDark">
             <p className="font-medium mb-1">Welcome to your school setup!</p>
             <p>
-              Enter your school details below. A unique school code will be automatically generated if you don't provide one.
+              Enter your school details below. A unique school code will be automatically generated if you don&apos;t provide one.
             </p>
           </div>
         </div>
@@ -75,7 +75,7 @@ const CreateSchoolForm = () => {
               }}
               onBlur={getFieldProps("code").onBlur}
             />
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-text-tertiary">
               Leave empty to auto-generate a unique code
             </p>
           </div>

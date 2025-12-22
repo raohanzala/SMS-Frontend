@@ -4,7 +4,7 @@ import { ManageClassModalProps } from "../types/class-components.interface";
 
 const ManageClassModal = ({ isManageClassModalOpen, onManageClassModalClose, classToEdit }: ManageClassModalProps) => {
   return (
-    <Modal isOpen={isManageClassModalOpen} onClose={onManageClassModalClose}>
+    <Modal title="Add Class" isOpen={isManageClassModalOpen} onClose={onManageClassModalClose}>
       <CreateClassForm onClose={onManageClassModalClose} classToEdit={classToEdit} />
     </Modal>
   );

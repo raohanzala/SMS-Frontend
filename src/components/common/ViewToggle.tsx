@@ -18,7 +18,7 @@ export default function ViewToggle() {
           onClick={() => setParam("view", "table")}
           className={`flex items-center gap-2 px-2 rounded-l py-1.5 text-sm font-medium transition-colors
           ${view === "table"
-              ? "bg-indigo-600 text-white"
+              ? "bg-primary text-white"
               : "bg-white text-gray-700 hover:bg-gray-50"
             }`}
         >
@@ -31,7 +31,7 @@ export default function ViewToggle() {
           onClick={() => setParam("view", "card")}
           className={`flex items-center gap-2 rounded-r px-2 py-1.5 text-sm font-medium transition-colors
           ${view === "card"
-              ? "bg-indigo-600 text-white"
+              ? "bg-primary text-white"
               : "bg-white text-gray-700 hover:bg-gray-50"
             }`}
         >

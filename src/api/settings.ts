@@ -20,15 +20,19 @@ export const updateSettingsApi = async ({
   settingsId,
   settingsData,
 }: {
-  settingsId: string;
+  settingsId?: string;
   settingsData: UpdateSettingsInput;
 }) => {
-  const { data } = await axiosInstance.put(`/settings/${settingsId}`, settingsData);
+  // Backend accepts PUT /settings or PUT /settings/:settingsId
+  const url = settingsId ? `/settings/${settingsId}` : `/settings`;
+  const { data } = await axiosInstance.put(url, settingsData);
   return data;
 };
 
-export const deleteSettingsApi = async (settingsId: string) => {
-  const { data } = await axiosInstance.delete(`/settings/${settingsId}`);
+export const deleteSettingsApi = async (settingsId?: string) => {
+  // Backend accepts DELETE /settings or DELETE /settings/:settingsId
+  const url = settingsId ? `/settings/${settingsId}` : `/settings`;
+  const { data } = await axiosInstance.delete(url);
   return data;
 };
 

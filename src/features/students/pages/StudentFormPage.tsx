@@ -1,20 +1,21 @@
 import { useCallback, useState } from "react";
 import { FormikProvider, useFormik, FieldArray } from "formik";
 import { useNavigate, useParams } from "react-router-dom";
+import { useAddStudent } from "@/features/students/hooks/useAddStudent";
+import { useUpdateStudent } from "@/features/students/hooks/useUpdateStudent";
+import { useStudent } from "@/features/students/hooks/useStudent";
+import { addStudentSchema } from "@/features/students/validations/student.validation";
 import Button from "@/components/common/Button";
 import EntitySelect from "@/components/common/EntitySelect";
 import FormRowVertical from "@/components/common/FormRowVerticle";
 import Input from "@/components/common/Input";
 import Spinner from "@/components/common/Spinner";
 import ErrorMessage from "@/components/common/ErrorMessage";
-import { useAddStudent } from "@/features/students/hooks/useAddStudent";
-import { useUpdateStudent } from "@/features/students/hooks/useUpdateStudent";
-import { useStudent } from "@/features/students/hooks/useStudent";
-import { addStudentSchema } from "@/features/students/validations/student.validation";
 import ManageParentModal from "@/features/parents/components/ManageParentModal";
 import ImageCropperInput from "@/components/common/ImageCropperInput";
 import SearchableSelect from "@/components/common/SearchableSelect";
 import RadioGroup from "@/components/common/RadioGroup";
+import Card from "@/components/common/Card";
 
 const StudentFormPage = () => {
   const [isParentModalOpen, setIsParentModalOpen] = useState(false);
@@ -28,12 +29,6 @@ const StudentFormPage = () => {
   const { updateStudentMutation, isUpdatingStudent } = useUpdateStudent();
 
   const isStudentPending = isAddingStudent || isUpdatingStudent;
-  const currentYear = new Date().getFullYear();
-
-  const sessionOptions = [];
-  for (let year = 2020; year <= currentYear + 1; year++) {
-    sessionOptions.push(`${year}-${year + 1}`);
-  }
 
   const formik = useFormik({
     initialValues: {
@@ -51,23 +46,35 @@ const StudentFormPage = () => {
       nationalId: student?.nationalId || "",
       profileImage: student?.profileImage as File | string | undefined,
       guardians:
-        student?.guardians?.map((g) => ({
-          parent: g.parent?._id || "",
-          relation: g.relation || "Guardian",
-        })) || [],
+        student?.guardians?.map(
+          (g: { parent?: { _id: string }; relation?: string }) => ({
+            parent: g.parent?._id || "",
+            relation: g.relation || "Guardian",
+          })
+        ) || [],
     },
     enableReinitialize: true,
     validationSchema: addStudentSchema,
     onSubmit: async (formValues) => {
-      console.log(formValues);
+      // Transform profileImage - if it's a string (URL), don't include it in update
+      const { profileImage, ...restValues } = formValues;
+      const apiPayload = {
+        ...restValues,
+        ...(typeof profileImage !== "string" && profileImage
+          ? { profileImage }
+          : {}),
+      };
 
       if (!isEditMode) {
-        addStudentMutation(formValues, {
-          onSuccess: () => navigate("/admin/students"),
-        });
+        addStudentMutation(
+          apiPayload as Parameters<typeof addStudentMutation>[0],
+          {
+            onSuccess: () => navigate("/admin/students"),
+          }
+        );
       } else if (studentId) {
         updateStudentMutation(
-          { studentId, updateStudentInput: formValues },
+          { studentId, updateStudentInput: apiPayload },
           { onSuccess: () => navigate("/admin/students") }
         );
       }
@@ -75,8 +82,6 @@ const StudentFormPage = () => {
   });
 
   const { values, errors, handleSubmit, setFieldValue, getFieldProps } = formik;
-
-  console.log(errors, values);
 
   const handleCancel = useCallback(() => navigate(-1), [navigate]);
   const handleParentModalClose = useCallback(
@@ -102,376 +107,449 @@ const StudentFormPage = () => {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
+    <div className="max-w-7xl mx-auto space-y-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">
-          {isEditMode ? "Edit Student" : "Add New Student"}
-        </h2>
-        <div className="flex gap-2">
-          <Button variant="ghost" onClick={handleCancel}>
+        <div>
+          <h2 className="text-3xl font-bold text-text-primary">
+            {isEditMode ? "Edit Student" : "Add New Student"}
+          </h2>
+          <p className="text-sm text-text-secondary mt-2">
+            {isEditMode
+              ? "Update student information and academic details"
+              : "Fill in the details to create a new student profile"}
+          </p>
+        </div>
+
+        <div className="flex items-center justify-end gap-3">
+          <Button
+            variant="outline"
+            type="button"
+            onClick={handleCancel}
+            disabled={isStudentPending}
+          >
             Cancel
           </Button>
-          <Button onClick={() => handleSubmit()} loading={isStudentPending}>
+          <Button
+            type="submit"
+            loading={isStudentPending}
+            disabled={isStudentPending}
+          >
             {isEditMode ? "Update Student" : "Create Student"}
           </Button>
         </div>
       </div>
 
-      {/* Form */}
       <FormikProvider value={formik}>
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSubmit();
           }}
-          className="space-y-6"
+          className="space-y-8"
         >
-          <div className="bg-white rounded-xl shadow p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">
-              Student Information
-            </h3>
+          <Card
+            title="Student Information"
+            description="Basic details and profile information"
+          >
+            <div className="p-8">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                {/* Profile Image */}
+                <div className="flex justify-center lg:justify-start">
+                  <div className="relative">
+                    <ImageCropperInput
+                      value={values.profileImage}
+                      onChange={(file) => setFieldValue("profileImage", file)}
+                      aspect={1}
+                    />
+                  </div>
+                </div>
 
-            <div className="md:col-span-1 flex justify-center md:justify-start">
-              <ImageCropperInput
-                value={values.profileImage}
-                onChange={(file) => setFieldValue("profileImage", file)}
-                aspect={1}
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
-              {/* Profile Image */}
-
-              {/* Student Details */}
-              <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormRowVertical
-                  label="Full Name"
-                  name="name"
-                  error={errors.name}
-                >
-                  <Input
-                    {...getFieldProps("name")}
-                    placeholder="Enter full name"
-                  />
-                </FormRowVertical>
-
-                <FormRowVertical
-                  label="Email"
-                  name="email"
-                  error={errors.email}
-                >
-                  <Input
-                    {...getFieldProps("email")}
-                    placeholder="Enter email"
-                  />
-                </FormRowVertical>
-
-                {!isEditMode && (
-                  <FormRowVertical label="Password" name="password">
+                <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormRowVertical
+                    label="Full Name"
+                    name="name"
+                    error={errors.name}
+                    required
+                  >
                     <Input
-                      {...getFieldProps("password")}
-                      placeholder="Set password"
-                      type="password"
+                      {...getFieldProps("name")}
+                      placeholder="Enter full name"
+                      disabled={isStudentPending}
                     />
                   </FormRowVertical>
-                )}
 
+                  <FormRowVertical
+                    label="Email"
+                    name="email"
+                    error={errors.email}
+                    required
+                  >
+                    <Input
+                      {...getFieldProps("email")}
+                      placeholder="Enter email"
+                      disabled={isStudentPending}
+                    />
+                  </FormRowVertical>
+
+                  {!isEditMode && (
+                    <FormRowVertical
+                      label="Password"
+                      name="password"
+                      error={errors.password}
+                      required
+                    >
+                      <Input
+                        {...getFieldProps("password")}
+                        placeholder="Set password"
+                        type="password"
+                        disabled={isStudentPending}
+                      />
+                    </FormRowVertical>
+                  )}
+
+                  <FormRowVertical
+                    label="Phone"
+                    name="phone"
+                    error={errors.phone}
+                  >
+                    <Input
+                      {...getFieldProps("phone")}
+                      placeholder="Enter phone number"
+                      disabled={isStudentPending}
+                    />
+                  </FormRowVertical>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <Card
+            title="Academic Information"
+            description="Class, session, and enrollment details"
+          >
+            <div className="p-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormRowVertical
-                  label="Phone"
-                  name="phone"
-                  error={errors.phone}
+                  label="Class"
+                  name="classId"
+                  error={errors.classId}
+                  required
+                >
+                  <EntitySelect
+                    entity="class"
+                    value={values.classId}
+                    onChange={(value: string | string[] | null) => {
+                      const classId = Array.isArray(value) ? value[0] : value;
+                      setFieldValue("classId", classId || "");
+                    }}
+                    isDisabled={isStudentPending}
+                  />
+                </FormRowVertical>
+                <FormRowVertical
+                  label="Roll Number"
+                  name="rollNumber"
+                  error={errors.rollNumber}
+                  helperText="Leave empty to auto-generate"
                 >
                   <Input
-                    {...getFieldProps("phone")}
-                    placeholder="Phone number"
+                    {...getFieldProps("rollNumber")}
+                    placeholder="Leave empty to auto-generate"
+                    disabled={isStudentPending}
+                  />
+                </FormRowVertical>
+                <FormRowVertical
+                  label="Session"
+                  name="session"
+                  error={errors.session}
+                >
+                  <EntitySelect
+                    entity="session"
+                    value={values.session}
+                    onChange={(value: string | string[] | null) => {
+                      const session = Array.isArray(value) ? value[0] : value;
+                      setFieldValue("session", session || "");
+                    }}
+                    placeholder="Select Session"
+                    isDisabled={isStudentPending}
+                  />
+                </FormRowVertical>
+                <FormRowVertical
+                  label="Religion"
+                  name="religion"
+                  error={errors.religion}
+                >
+                  <Input
+                    {...getFieldProps("religion")}
+                    placeholder="Enter religion"
+                    disabled={isStudentPending}
                   />
                 </FormRowVertical>
               </div>
             </div>
-          </div>
+          </Card>
 
-          {/* --- Academic Information --- */}
-          <div className="bg-white rounded-xl shadow p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">
-              Academic Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormRowVertical
-                label="Class"
-                name="classId"
-                error={errors.classId}
-              >
-                <EntitySelect
-                  entity="class"
-                  value={values.classId}
-                  onChange={(classId) => setFieldValue("classId", classId)}
-                  isDisabled={isStudentPending}
-                />
-              </FormRowVertical>
-              <FormRowVertical
-                label="Roll Number"
-                name="rollNumber"
-                error={errors.rollNumber}
-              >
-                <Input
-                  {...getFieldProps("rollNumber")}
-                  placeholder="Leave empty to auto-generate"
-                />
-              </FormRowVertical>
-              <FormRowVertical
-                label="Session"
-                name="session"
-                error={errors.session}
-              >
-                <EntitySelect
-                  entity="session"
-                  value={values.session}
-                  onChange={(session) => setFieldValue("session", session)}
-                  placeholder="Select Session"
-                  isDisabled={isStudentPending}
-                />
-              </FormRowVertical>
-              <FormRowVertical label="Religion" name="religion">
-                <Input
-                  {...getFieldProps("religion")}
-                  placeholder="Enter religion"
-                />
-              </FormRowVertical>
-            </div>
-          </div>
-
-          {/* --- Guardians --- */}
-          <div className="bg-white rounded-xl shadow p-6 space-y-4">
+          <Card
+            title="Parent / Guardians"
+            description="Link parents or guardians to this student"
+          >
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-700">
-                Parent / Guardians
-              </h3>
-
-              <div className="flex gap-2">
-                <Button onClick={() => setIsParentModalOpen(true)}>
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsParentModalOpen(true)}
+                  disabled={isStudentPending}
+                >
                   + Add Parent
                 </Button>
 
                 <Button
                   type="button"
-                  variant="secondary"
+                  variant="outline"
                   onClick={() =>
                     setFieldValue("guardians", [
                       ...values.guardians,
                       { parent: "", relation: "" },
                     ])
                   }
+                  disabled={isStudentPending}
                 >
                   + Add Guardian
                 </Button>
               </div>
             </div>
 
-            <FieldArray
-              name="guardians"
-              render={(arrayHelpers) => (
-                <div className="space-y-4">
-                  {values.guardians.map(
-                    (
-                      guardian: { parent: string; relation: string },
-                      index: number
-                    ) => {
-                      const isFatherTaken = values.guardians.some(
-                        (g: { parent: string; relation: string }, i: number) =>
-                          i !== index && g.relation === "Father"
-                      );
-                      const isMotherTaken = values.guardians.some(
-                        (g: { parent: string; relation: string }, i: number) =>
-                          i !== index && g.relation === "Mother"
-                      );
+            <div className="px-8 pb-8">
+              <FieldArray
+                name="guardians"
+                render={(arrayHelpers) => (
+                  <div className="space-y-4">
+                    {values.guardians.map(
+                      (
+                        guardian: { parent: string; relation: string },
+                        index: number
+                      ) => {
+                        const isFatherTaken = values.guardians.some(
+                          (
+                            g: { parent: string; relation: string },
+                            i: number
+                          ) => i !== index && g.relation === "Father"
+                        );
+                        const isMotherTaken = values.guardians.some(
+                          (
+                            g: { parent: string; relation: string },
+                            i: number
+                          ) => i !== index && g.relation === "Mother"
+                        );
 
-                      return (
-                        <div
-                          key={index}
-                          className="p-4 bg-gray-50 border rounded-xl shadow-sm"
-                        >
-                          {/* Parent Select */}
-                          <FormRowVertical
-                            label="Select Parent"
-                            name={`guardians.${index}.parent`}
+                        return (
+                          <div
+                            key={index}
+                            className="p-6 bg-bg-secondary border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow"
                           >
-                            <EntitySelect
-                              entity="parent"
-                              value={guardian.parent}
-                              onChange={(parentId) => {
-                                // Prevent duplicate parents
-                                const alreadyUsed = values.guardians.some(
-                                  (
-                                    g: { parent: string; relation: string },
-                                    i: number
-                                  ) => i !== index && g.parent === parentId
-                                );
-
-                                if (alreadyUsed) {
-                                  alert("This parent is already linked.");
-                                  return;
-                                }
-
-                                setFieldValue(
-                                  `guardians.${index}.parent`,
-                                  parentId
-                                );
-                              }}
-                              isDisabled={isStudentPending}
-                              disableOptions={(option) =>
-                                values.guardians.some(
-                                  (
-                                    g: { parent: string; relation: string },
-                                    i: number
-                                  ) => i !== index && g.parent === option.value
-                                )
-                              }
-                            />
-                          </FormRowVertical>
-
-                          {/* Relation */}
-                          <div className="mt-4">
+                            {/* Parent Select */}
                             <FormRowVertical
-                              label="Relation"
-                              name={`guardians.${index}.relation`}
+                              label="Select Parent"
+                              name={`guardians.${index}.parent`}
                             >
-                              <SearchableSelect
-                                value={guardian.relation}
-                                onChange={(selected) => {
-                                  const relation = selected;
+                              <EntitySelect
+                                entity="parent"
+                                value={guardian.parent}
+                                onChange={(value: string | string[] | null) => {
+                                  const parentId = Array.isArray(value)
+                                    ? value[0]
+                                    : value;
+                                  if (!parentId) return;
 
-                                  // Prevent multiple fathers
-                                  if (relation === "Father" && isFatherTaken) {
-                                    alert(
-                                      "A student can have only one Father."
-                                    );
-                                    return;
-                                  }
+                                  // Prevent duplicate parents
+                                  const alreadyUsed = values.guardians.some(
+                                    (
+                                      g: { parent: string; relation: string },
+                                      i: number
+                                    ) => i !== index && g.parent === parentId
+                                  );
 
-                                  // Prevent multiple mothers
-                                  if (relation === "Mother" && isMotherTaken) {
-                                    alert(
-                                      "A student can have only one Mother."
-                                    );
+                                  if (alreadyUsed) {
+                                    alert("This parent is already linked.");
                                     return;
                                   }
 
                                   setFieldValue(
-                                    `guardians.${index}.relation`,
-                                    relation
+                                    `guardians.${index}.parent`,
+                                    parentId
                                   );
                                 }}
-                                fetchOptions={async (search) => {
-                                  const allRelations = [
-                                    {
-                                      value: "Father",
-                                      label: "Father",
-                                      disabled: isFatherTaken,
-                                    },
-                                    {
-                                      value: "Mother",
-                                      label: "Mother",
-                                      disabled: isMotherTaken,
-                                    },
-                                    { value: "Guardian", label: "Guardian" },
-                                    { value: "Other", label: "Other" },
-                                  ];
-
-                                  // Filter by search
-                                  return allRelations
-                                    .filter((opt) =>
-                                      opt.label
-                                        .toLowerCase()
-                                        .includes(search.toLowerCase())
-                                    )
-                                    .map((opt) => ({
-                                      value: opt.value,
-                                      label:
-                                        opt.label +
-                                        (opt.disabled ? " (Not allowed)" : ""),
-                                      isDisabled: opt.disabled,
-                                    }));
-                                }}
-                                fetchById={async (value) => {
-                                  if (!value) return null;
-
-                                  return {
-                                    value,
-                                    label: value,
-                                  };
-                                }}
-                                placeholder="Search relation..."
-                                isClearable={false}
-                                isMulti={false}
+                                isDisabled={isStudentPending}
                               />
                             </FormRowVertical>
+
+                            {/* Relation */}
+                            <div className="mt-4">
+                              <FormRowVertical
+                                label="Relation"
+                                name={`guardians.${index}.relation`}
+                              >
+                                <SearchableSelect
+                                  value={guardian.relation}
+                                  onChange={(selected) => {
+                                    const relation = selected;
+
+                                    // Prevent multiple fathers
+                                    if (
+                                      relation === "Father" &&
+                                      isFatherTaken
+                                    ) {
+                                      alert(
+                                        "A student can have only one Father."
+                                      );
+                                      return;
+                                    }
+
+                                    // Prevent multiple mothers
+                                    if (
+                                      relation === "Mother" &&
+                                      isMotherTaken
+                                    ) {
+                                      alert(
+                                        "A student can have only one Mother."
+                                      );
+                                      return;
+                                    }
+
+                                    setFieldValue(
+                                      `guardians.${index}.relation`,
+                                      relation
+                                    );
+                                  }}
+                                  fetchOptions={async (search) => {
+                                    const allRelations = [
+                                      {
+                                        value: "Father",
+                                        label: "Father",
+                                        disabled: isFatherTaken,
+                                      },
+                                      {
+                                        value: "Mother",
+                                        label: "Mother",
+                                        disabled: isMotherTaken,
+                                      },
+                                      { value: "Guardian", label: "Guardian" },
+                                      { value: "Other", label: "Other" },
+                                    ];
+
+                                    // Filter by search
+                                    return allRelations
+                                      .filter((opt) =>
+                                        opt.label
+                                          .toLowerCase()
+                                          .includes(search.toLowerCase())
+                                      )
+                                      .map((opt) => ({
+                                        value: opt.value,
+                                        label:
+                                          opt.label +
+                                          (opt.disabled
+                                            ? " (Not allowed)"
+                                            : ""),
+                                        isDisabled: opt.disabled,
+                                      }));
+                                  }}
+                                  fetchById={async (value) => {
+                                    if (!value) return null;
+
+                                    return {
+                                      value,
+                                      label: value,
+                                    };
+                                  }}
+                                  placeholder="Search relation..."
+                                  isClearable={false}
+                                  isMulti={false}
+                                />
+                              </FormRowVertical>
+                            </div>
+
+                            {/* Remove */}
+                            <div className="mt-4 flex justify-end">
+                              <Button
+                                type="button"
+                                variant="danger"
+                                onClick={() => arrayHelpers.remove(index)}
+                                disabled={isStudentPending}
+                              >
+                                Remove Guardian
+                              </Button>
+                            </div>
                           </div>
-
-                          {/* Remove */}
-                          <div className="mt-4 flex justify-end">
-                            <Button
-                              variant="danger"
-                              onClick={() => arrayHelpers.remove(index)}
-                            >
-                              Remove Guardian
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    }
-                  )}
-                </div>
-              )}
-            />
-          </div>
-
-          {/* --- Other Information --- */}
-          <div className="bg-white rounded-xl shadow p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">
-              Other Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormRowVertical
-                label="Address"
-                name="address"
-                error={errors.address}
-              >
-                <Input
-                  {...getFieldProps("address")}
-                  placeholder="Enter address"
-                />
-              </FormRowVertical>
-              <FormRowVertical label="National ID" name="nationalId">
-                <Input {...getFieldProps("nationalId")} placeholder="CNIC" />
-              </FormRowVertical>
-
-              <FormRowVertical
-                label="Gender"
-                name="gender"
-                error={errors.gender}
-              >
-                <RadioGroup
-                  name="gender"
-                  value={values.gender}
-                  onChange={(gender) => setFieldValue("gender", gender)}
-                />
-              </FormRowVertical>
+                        );
+                      }
+                    )}
+                  </div>
+                )}
+              />
             </div>
-          </div>
+          </Card>
 
-          {/* --- Form Buttons --- */}
-          <div className="flex justify-end gap-2">
-            <Button variant="ghost" type="button" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button type="submit" loading={isStudentPending}>
-              {isEditMode ? "Update Student" : "Create Student"}
-            </Button>
-          </div>
+          <Card
+            title="Other Information"
+            description="Additional personal details"
+          >
+            <div className="p-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormRowVertical
+                  label="Address"
+                  name="address"
+                  error={errors.address}
+                >
+                  <Input
+                    {...getFieldProps("address")}
+                    placeholder="Enter address"
+                    disabled={isStudentPending}
+                  />
+                </FormRowVertical>
+                <FormRowVertical
+                  label="National ID"
+                  name="nationalId"
+                  error={errors.nationalId}
+                >
+                  <Input
+                    {...getFieldProps("nationalId")}
+                    placeholder="Enter CNIC"
+                    disabled={isStudentPending}
+                  />
+                </FormRowVertical>
+
+                <FormRowVertical
+                  label="Gender"
+                  name="gender"
+                  error={errors.gender}
+                  required
+                >
+                  <RadioGroup
+                    name="gender"
+                    value={values.gender}
+                    onChange={(gender) => setFieldValue("gender", gender)}
+                  />
+                </FormRowVertical>
+
+                <FormRowVertical
+                  label="Date of Birth"
+                  name="dob"
+                  error={errors.dob}
+                >
+                  <Input
+                    {...getFieldProps("dob")}
+                    type="date"
+                    placeholder="Select date of birth"
+                    disabled={isStudentPending}
+                  />
+                </FormRowVertical>
+              </div>
+            </div>
+          </Card>
         </form>
       </FormikProvider>
 
-      {/* Parent Modal */}
       <ManageParentModal
         parentFormContext="student"
         isManageParentModalOpen={isParentModalOpen}

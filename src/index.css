@@ -1,13 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Sora:wght@100..800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply font-sans;
-}
 
 html {
   font-size: 90%;
+  font-family: 'Inter', sans-serif;
 }
 
 *:disabled {
@@ -23,6 +22,10 @@ textarea:disabled {
 
 input{
   outline: none;
+}
+
+button:hover{
+ background: linear-gradient(138deg, rgba(118, 160, 255, 0.7) 0%, rgba(0, 61, 255, 0.7) 25.08%, #9747ffb3 56.38%, rgba(118, 160, 255, 0.7) 100%), rgb(0, 61, 255)
 }
 
 /* a.active {

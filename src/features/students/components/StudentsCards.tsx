@@ -15,7 +15,6 @@ const StudentsCards = React.memo(
             key={student._id}
             className="flex flex-col relative"
           >
-            {/* ✅ Gender Label */}
             <span
               className={`absolute top-3 right-3 text-xs font-medium flex justify-center pt-[2px] items-center h-6 px-2 rounded-full ${
                 student.gender === "female"

@@ -47,13 +47,6 @@ const CreateTimetablePage = () => {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <Button
-              onClick={handleClose}
-              variant="ghost"
-              startIcon={<FiArrowLeft />}
-            >
-              Back
-            </Button>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">
             {isEditMode ? "Edit Timetable Entry" : "Create Timetable Entry"}

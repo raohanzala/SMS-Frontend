@@ -1,12 +1,34 @@
+import React from "react";
+import { APP_NAME } from "@/utils/constants";
 import { useState, useEffect } from "react";
-import { FiChevronRight } from "react-icons/fi";
+import { ChevronRight, X, ChevronLeft, Menu } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
-export default function Sidebar({ navigation, role }) {
-  const location = useLocation();
-  const [openMenu, setOpenMenu] = useState(null);
+interface NavigationItem {
+  name: string;
+  href?: string;
+  icon: React.ComponentType<{ className?: string }>;
+  children?: Array<{ name: string; href: string }>;
+}
 
-  // Auto-open dropdown on page load if current path is inside its children
+interface SidebarProps {
+  navigation: NavigationItem[];
+  sidebarOpen?: boolean;
+  setSidebarOpen?: (open: boolean) => void;
+  isCollapsed?: boolean;
+  setIsCollapsed?: (collapsed: boolean) => void;
+}
+
+export default function Sidebar({ 
+  navigation, 
+  sidebarOpen = false, 
+  setSidebarOpen,
+  isCollapsed = false,
+  setIsCollapsed
+}: SidebarProps) {
+  const location = useLocation();
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+
   useEffect(() => {
     const match = navigation.find((item) =>
       item.children?.some((child) =>
@@ -18,23 +40,78 @@ export default function Sidebar({ navigation, role }) {
     }
   }, [location.pathname, navigation]);
 
-  const toggleMenu = (name) => {
+  const toggleMenu = (name: string) => {
     setOpenMenu((prev) => (prev === name ? null : name));
   };
 
   return (
-    <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col lg:z-30">
-      <div className="flex flex-col flex-grow bg-white border-r border-gray-200 shadow-sm">
-        {/* Header */}
-        <div className="flex h-16 items-center justify-center px-4 border-b border-gray-200 bg-gray-50">
-          <h1 className="text-lg font-semibold text-gray-800 text-center">
-            {role ? `${role.charAt(0).toUpperCase() + role.slice(1)} Portal` : "Portal"}
-          </h1>
+    <>
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+          onClick={() => setSidebarOpen?.(false)}
+        />
+      )}
+
+      <div
+        className={`fixed inset-y-0 left-0 z-50 flex flex-col transition-all duration-300 ease-in-out lg:translate-x-0 ${
+          isCollapsed ? "w-20" : "w-72"
+        } ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        }`}
+      >
+        <div className="flex flex-col flex-grow bg-[#000033] relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent-purple/10 pointer-events-none"></div>
+          
+          <div className="relative z-10 flex flex-col h-full">
+          <div className={`${isCollapsed ? 'px-2' : 'px-6'} py-6 border-b border-sidebar-border/50`}>
+            <div className={`flex items-center ${isCollapsed ? 'justify-center flex-col gap-3' : 'justify-between gap-3'}`}>
+              {!isCollapsed ? (
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="h-12 w-12 bg-primary rounded-lg flex items-center justify-center shadow-lg flex-shrink-0">
+                    <span className="text-2xl font-bold text-text-white">S</span>
+                  </div>
+                  <div className="min-w-0">
+                    <h1 className="text-xl font-sora font-bold text-text-white leading-tight truncate">
+                      {APP_NAME}
+                    </h1>
+                    <p className="text-xs text-text-white/60 mt-0.5 font-sora truncate">Management Portal</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center w-full">
+                  <div className="h-12 w-12 bg-primary rounded-lg flex items-center justify-center shadow-lg">
+                    <span className="text-2xl font-bold text-text-white">S</span>
+                  </div>
+                </div>
+              )}
+              
+              {/* Desktop Collapse Toggle & Mobile Close Button */}
+              <div className={`flex items-center ${isCollapsed ? 'w-full justify-center' : 'gap-2'}`}>
+                {/* Desktop Collapse Toggle - Always visible on desktop */}
+                <button
+                  onClick={() => setIsCollapsed?.(!isCollapsed)}
+                  className="hidden lg:flex p-2 text-text-white/70 hover:text-text-white hover:bg-white/5 rounded-lg transition-colors"
+                  aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                  title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                >
+                  {isCollapsed ? <Menu className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+                </button>
+                {/* Mobile Close Button */}
+                <button
+                  onClick={() => setSidebarOpen?.(false)}
+                  className="lg:hidden p-2 text-text-white/70 hover:text-text-white hover:bg-white/5 rounded-lg transition-colors"
+                  aria-label="Close sidebar"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 overflow-y-auto">
-          <div className="space-y-1">
+          <nav className="flex-1 px-3 py-6 overflow-y-auto scrollbar-hide">
+            <div className="space-y-2">
             {navigation.map((item) => {
               // Determine active state
               let isActive = false;
@@ -48,43 +125,86 @@ export default function Sidebar({ navigation, role }) {
                 );
               }
 
-              // Dropdown items
+                // Dropdown items - Hide when collapsed
               if (item.children) {
+                  if (isCollapsed) {
+                    // Show only icon when collapsed
+                    return (
+                      <div key={item.name} className="relative group">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!isCollapsed) toggleMenu(item.name);
+                          }}
+                          className={`w-full flex items-center justify-center p-3 rounded-xl transition-all duration-200 ${
+                            isActive
+                              ? "bg-primary text-text-white shadow-lg shadow-primary/20"
+                              : "text-text-white/80 hover:bg-white/5 hover:text-text-white"
+                          }`}
+                          title={item.name}
+                        >
+                          <item.icon
+                            className={`h-5 w-5 transition-colors ${
+                              isActive
+                                ? "text-text-white"
+                                : "text-text-white/70 group-hover:text-accent-purple-light"
+                            }`}
+                          />
+                        </button>
+                        {/* Tooltip for collapsed state */}
+                        {isCollapsed && (
+                          <div className="absolute left-full ml-2 px-3 py-2 bg-text-primary text-text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
+                            {item.name}
+                            {item.children && item.children.length > 0 && (
+                              <div className="mt-2 pt-2 border-t border-text-white/20">
+                                {item.children.map((child) => (
+                                  <div key={child.name} className="text-xs py-1">
+                                    {child.name}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+
                 const isOpen = openMenu === item.name;
 
                 return (
-                  <div key={item.name}>
+                    <div key={item.name} className="space-y-1">
                     <button
                       type="button"
                       onClick={() => toggleMenu(item.name)}
-                      className={`group flex w-full items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                        className={`group flex w-full items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                         isActive
-                          ? "bg-gray-100 text-gray-900 font-semibold"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                            ? "bg-primary text-text-white font-semibold shadow-lg shadow-primary/20"
+                            : "text-text-white/80 hover:bg-white/5 hover:text-text-white"
                       }`}
                     >
-                      <div className="flex items-center">
+                        <div className="flex items-center gap-3">
                         <item.icon
-                          className={`mr-3 h-5 w-5 transition-colors ${
+                            className={`h-5 w-5 transition-colors flex-shrink-0 ${
                             isActive
-                              ? "text-gray-900"
-                              : "text-gray-400 group-hover:text-gray-600"
+                                ? "text-text-white"
+                                : "text-text-white/70 group-hover:text-accent-purple-light"
                           }`}
                         />
-                        <span>{item.name}</span>
+                          <span className="truncate">{item.name}</span>
                       </div>
-                      <FiChevronRight
-                        className={`h-4 w-4 transition-transform duration-200 ${
+                        <ChevronRight
+                          className={`h-4 w-4 transition-all duration-200 flex-shrink-0 ${
                           isOpen ? "rotate-90" : ""
                         } ${
-                          isActive ? "text-gray-700" : "text-gray-400"
+                            isActive ? "text-text-white" : "text-text-white/60 group-hover:text-accent-teal"
                         }`}
                       />
                     </button>
 
                     {/* Dropdown children */}
                     <div
-                      className={`mt-1 ml-4 space-y-1 overflow-hidden transition-all duration-300 ${
+                        className={`ml-4 space-y-1 overflow-hidden transition-all duration-300 ${
                         isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                       }`}
                     >
@@ -94,13 +214,19 @@ export default function Sidebar({ navigation, role }) {
                           <NavLink
                             key={child.name}
                             to={child.href}
-                            className={`block px-3 py-2 text-sm rounded-lg transition-all duration-200 ${
+                              onClick={() => setSidebarOpen?.(false)}
+                              className={`block px-4 py-2.5 text-sm rounded-lg transition-all duration-200 relative ${
                               isChildActive
-                                ? "bg-gray-100 text-gray-900 font-semibold border-l-2 border-gray-400"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                            }`}
-                          >
-                            {child.name}
+                                  ? "bg-primary/20 text-text-white font-semibold border-l-2 border-accent-purple-light pl-3"
+                                  : "text-text-white/70 hover:bg-white/5 hover:text-accent-purple-light hover:pl-4"
+                              }`}
+                            >
+                              <span className="flex items-center gap-2">
+                                {isChildActive && (
+                                  <div className="w-1.5 h-1.5 rounded-full bg-accent-purple-light"></div>
+                                )}
+                                <span className="truncate">{child.name}</span>
+                              </span>
                           </NavLink>
                         );
                       })}
@@ -110,177 +236,89 @@ export default function Sidebar({ navigation, role }) {
               }
 
               // Regular nav items
+                if (!item.href) return null;
+                
+                if (isCollapsed) {
+                  // Show only icon when collapsed
+                  return (
+                    <div key={item.name} className="relative group">
+                      <NavLink
+                        to={item.href}
+                        onClick={() => setSidebarOpen?.(false)}
+                        className={`w-full flex items-center justify-center p-3 rounded-xl transition-all duration-200 relative ${
+                          isActive
+                            ? "bg-primary text-text-white shadow-lg shadow-primary/20"
+                            : "text-text-white/80 hover:bg-white/5 hover:text-text-white"
+                        }`}
+                        title={item.name}
+                      >
+                        {isActive && (
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-accent-purple-light rounded-r-full"></div>
+                        )}
+                        <item.icon
+                          className={`h-5 w-5 transition-colors ${
+                            isActive
+                              ? "text-text-white"
+                              : "text-text-white/70 group-hover:text-accent-teal"
+                          }`}
+                        />
+                        {isActive && (
+                          <div className="absolute bottom-1 right-1 w-2 h-2 rounded-full bg-accent-purple-light"></div>
+                        )}
+                      </NavLink>
+                      {/* Tooltip for collapsed state */}
+                      {isCollapsed && (
+                        <div className="absolute left-full ml-2 px-3 py-2 bg-text-primary text-text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
+                          {item.name}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                
               return (
                 <NavLink
                   key={item.name}
                   to={item.href}
-                  className={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 relative ${
+                    onClick={() => setSidebarOpen?.(false)}
+                    className={`group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 relative ${
                     isActive
-                      ? "bg-gray-100 text-primary font-semibold"
-                      : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                        ? "bg-primary text-text-white font-semibold shadow-lg shadow-primary/20"
+                        : "text-text-white/80 hover:bg-white/5 hover:text-text-white"
                   }`}
                 >
                   {isActive && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-accent-purple-light rounded-r-full"></div>
                   )}
                   <item.icon
-                    className={`mr-3 h-5 w-5 transition-colors ${
+                      className={`h-5 w-5 transition-colors flex-shrink-0 ${
                       isActive
-                        ? "text-primary"
-                        : "text-gray-400 group-hover:text-gray-600"
+                          ? "text-text-white"
+                          : "text-text-white/70 group-hover:text-accent-teal"
                     }`}
                   />
-                  <span>{item.name}</span>
+                    <span className="truncate">{item.name}</span>
+                    {isActive && (
+                      <div className="ml-auto w-2 h-2 rounded-full bg-accent-purple-light flex-shrink-0"></div>
+                    )}
                 </NavLink>
               );
             })}
           </div>
         </nav>
 
-        {/* Footer */}
-        <div className="px-4 py-4 border-t border-gray-200">
-          <div className="text-xs text-gray-500 text-center">
-            © {new Date().getFullYear()} School Management
+          {/* Footer - Matching login page style */}
+          {!isCollapsed && (
+            <div className="px-6 py-4 border-t border-sidebar-border/50">
+              <div className="flex items-center gap-2 text-xs text-text-white/60">
+                <div className="h-1.5 w-1.5 rounded-full bg-accent-purple-light"></div>
+                <span>© {new Date().getFullYear()} {APP_NAME}</span>
+              </div>
+            </div>
+          )}
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
-// import { useEffect, useState } from "react";
-// import { useLocation, NavLink } from "react-router-dom";
-// import { FiChevronDown, FiChevronRight } from "react-icons/fi";
-
-// export default function Sidebar({ navigation, role }) {
-//   const location = useLocation();
-//   const [openMenu, setOpenMenu] = useState(null);
-
-//   // ✅ Auto-open dropdown on page load if current path is inside its children
-//   useEffect(() => {
-//     const match = navigation.find((item) =>
-//       item.children?.some((child) =>
-//         location.pathname.startsWith(child.href)
-//       )
-//     );
-//     if (match) {
-//       setOpenMenu(match.name);
-//     }
-//   }, [location.pathname, navigation]);
-
-//   const toggleMenu = (name) => {
-//     setOpenMenu((prev) => (prev === name ? null : name));
-//   };
-
-//   console.log("navigation:", navigation);
-
-//   return (
-//     <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-//       <div className="flex flex-col flex-grow bg-white border-r border-gray-200">
-//         <div className="flex h-16 items-center justify-center px-4">
-//           <h1 className="text-xl font-bold text-gray-900 uppercase text-center">
-//             {role} Portal
-//           </h1>
-//         </div>
-
-//         <nav className="flex-1 space-y-1 px-2 py-4">
-//           {navigation.map((item) => {
-//             // ✅ Determine active state safely
-//             let isActive = false;
-//             if (item.href) {
-//               isActive = location.pathname.startsWith(item.href);
-//             }
-//             if (item.children) {
-//               isActive = item.children.some((child) =>
-//                 location.pathname.startsWith(child.href)
-//               );
-//             }
-
-//             // ✅ Dropdown items
-//             if (item.children) {
-//               const isOpen = openMenu === item.name;
-
-//               return (
-//                 <div key={item.name}>
-//                   <button
-//                     type="button"
-//                     onClick={() => {
-//                       console.log("Clicked menu:", item.name);
-//                       toggleMenu(item.name)
-//                     }}
-//                     className={`group flex w-full items-center justify-between px-2 py-2 text-sm font-medium rounded-md transition-colors ${isActive
-//                       ? "bg-primary text-white shadow-sm"
-//                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-//                       }`}
-//                   >
-//                     <div className="flex items-center">
-//                       <item.icon
-//                         className={`mr-3 h-5 w-5 transition ${isActive
-//                           ? "text-white"
-//                           : "text-gray-400 group-hover:text-gray-700"
-//                           }`}
-//                       />
-//                       {item.name}
-//                     </div>
-
-//                     {isOpen ? (
-//                       <FiChevronDown
-//                         className={`h-4 w-4 ${isActive ? "text-white" : "text-gray-400"
-//                           }`}
-//                       />
-//                     ) : (
-//                       <FiChevronRight
-//                         className={`h-4 w-4 ${isActive ? "text-white" : "text-gray-400"
-//                           }`}
-//                       />
-//                     )}
-//                   </button>
-
-//                   {isOpen && (
-//                     <div className="ml-8 mt-1 space-y-1">
-//                       {item.children.map((child) => (
-//                         <NavLink
-//                           key={child.name}
-//                           to={child.href}
-//                           className={({ isActive }) =>
-//                             `block px-2 py-1 text-sm rounded-md transition-colors ${isActive
-//                               ? "bg-primary text-white"
-//                               : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-//                             }`
-//                           }
-//                         >
-//                           {child.name}
-//                         </NavLink>
-//                       ))}
-//                     </div>
-//                   )}
-//                 </div>
-//               );
-//             }
-
-//             // ✅ Regular nav items
-//             return (
-//               <NavLink
-//                 key={item.name}
-//                 to={item.href}
-//                 className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${isActive
-//                   ? "bg-primary text-white shadow-sm"
-//                   : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-//                   }`}
-//               >
-//                 <item.icon
-//                   className={`mr-3 h-5 w-5 transition ${isActive
-//                     ? "text-white"
-//                     : "text-gray-400 group-hover:text-gray-700"
-//                     }`}
-//                 />
-//                 {item.name}
-//               </NavLink>
-//             );
-//           })}
-//         </nav>
-//       </div>
-//     </div>
-//   );
-// }
-
-

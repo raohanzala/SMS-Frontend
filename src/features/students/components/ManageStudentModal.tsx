@@ -9,7 +9,7 @@ const ManageStudentModal = ({
 }: ManageStudentModalProps) => {
   return (
     <Modal
-      isOpen={isManageStudentModalOpen}
+      isOpen={true}
       onClose={onManageStudentModalClose}
     >
       <CreateStudentForm

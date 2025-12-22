@@ -1,11 +1,11 @@
+import React from "react";
+import { Student } from "../types/student.types";
+import { formatShortDate } from "@/utils/helpers";
+import { StudentsTableProps } from "../types/student-components.types";
 import ViewButton from "@/components/common/ViewButton";
 import EditButton from "@/components/common/EditButton";
 import DeleteButton from "@/components/common/DeleteButton";
 import Table from "@/components/common/Table";
-import React from "react";
-import { StudentsTableProps } from "../types/student-components.types";
-import { Student } from "../types/student.types";
-import { formatShortDate } from "@/utils/helpers";
 
 const StudentsTable = React.memo(
   ({
