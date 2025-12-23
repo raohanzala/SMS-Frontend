@@ -14,13 +14,13 @@ export interface ManageStudentModalProps {
 export interface StudentsCardsProps {
   students: Student[];
   onEditStudent: (student: Student) => void;
-  onDeleteStudent: (studentId: string) => void;
+  onDeleteStudent: (student: Student) => void;
 }
 
 export interface StudentsTableProps {
   students: Student[];
   onEditStudent: (student: Student) => void;
-  onDeleteStudent: (studentId: string) => void;
+  onDeleteStudent: (student: Student) => void;
   selectedStudents?: Set<string>;
   onToggleSelect?: (studentId: string) => void;
   onSelectAll?: () => void;

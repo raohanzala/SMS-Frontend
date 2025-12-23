@@ -31,12 +31,12 @@ const SearchBar = ({
     } else {
       removeParam(paramKey);
     }
-  }, [debouncedValue]);
+  }, [debouncedValue, paramKey, removeParam, setParam]);
 
   return (
     <div
-      className={`relative flex items-center border rounded-lg px-3 py-[10px] bg-white shadow-sm
-        ${fullWidth ? "w-full" : "sm:w-64 w-72"} ${className}`}
+      className={`relative flex focus-within:ring-1 focus-within:ring-primary items-center border rounded-lg px-3 py-[10px] bg-white shadow-sm
+        ${fullWidth ? "w-full" : "sm:w-80 w-96"} ${className}`}
     >
       <FiSearch className="text-gray-400 mr-2" />
 
@@ -45,7 +45,7 @@ const SearchBar = ({
         value={searchValue || ""}
         onChange={(e) => setSearchValue(e.target.value)}
         placeholder={placeholder}
-        className="flex-1 outline-none border-none focus:outline-none text-sm text-gray-700 placeholder-gray-400 bg-transparent"
+        className="flex-1 outline-none border-none focus:outline-none text-sm text-gray-700 placeholder-gray-400 bg-transparent "
         {...props}
       />
 

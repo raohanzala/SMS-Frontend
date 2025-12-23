@@ -38,26 +38,79 @@ export interface ClassWiseOverride {
   _id?: string;
 }
 
-export interface Settings {
-  _id: string;
-  defaultSchoolTiming: SchoolTiming;
-  defaultPeriodConfig: PeriodConfig;
-  classLevels?: ClassLevel[];
-  classWiseOverrides?: ClassWiseOverride[];
-  createdAt?: string;
-  updatedAt?: string;
+// General Settings
+export interface GeneralSettings {
+  schoolName?: string;
+  timezone?: string;
+  locale?: string;
+  workingDays?: string[];
+  weekendDays?: string[];
 }
 
-export interface AddSettingsInput {
-  defaultSchoolTiming: SchoolTiming;
-  defaultPeriodConfig: PeriodConfig;
-  classLevels?: ClassLevel[];
-  classWiseOverrides?: ClassWiseOverride[];
+// Academic Settings
+export interface AcademicYear {
+  startDate?: string | Date;
+  endDate?: string | Date;
 }
 
-export interface UpdateSettingsInput {
+export interface AcademicSettings {
+  academicYear?: AcademicYear;
+  gradingSystem?: "percentage" | "gpa" | "custom";
+  passPercentage?: number;
+}
+
+// Timetable Settings
+export interface TimetableSettings {
   defaultSchoolTiming?: SchoolTiming;
   defaultPeriodConfig?: PeriodConfig;
   classLevels?: ClassLevel[];
   classWiseOverrides?: ClassWiseOverride[];
+}
+
+// Attendance Settings
+export interface AttendanceSettings {
+  autoMarkAbsentAfter?: number;
+  allowLateEntry?: boolean;
+  lateAfterMinutes?: number;
+}
+
+// Branding Settings
+export interface BrandingSettings {
+  logo?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  theme?: "light" | "dark";
+}
+
+// Complete Settings
+export interface Settings {
+  _id: string;
+  schoolId?: string;
+  general?: GeneralSettings;
+  academic?: AcademicSettings;
+  timetable?: TimetableSettings;
+  attendance?: AttendanceSettings;
+  branding?: BrandingSettings;
+  createdAt?: string;
+  updatedAt?: string;
+  createdBy?: string;
+  updatedBy?: string;
+  version?: number;
+}
+
+// Input types for API
+export interface AddSettingsInput {
+  general?: GeneralSettings;
+  academic?: AcademicSettings;
+  timetable?: TimetableSettings;
+  attendance?: AttendanceSettings;
+  branding?: BrandingSettings;
+}
+
+export interface UpdateSettingsInput {
+  general?: GeneralSettings;
+  academic?: AcademicSettings;
+  timetable?: TimetableSettings;
+  attendance?: AttendanceSettings;
+  branding?: BrandingSettings;
 }

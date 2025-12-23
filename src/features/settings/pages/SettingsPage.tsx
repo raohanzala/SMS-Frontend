@@ -1,210 +1,161 @@
-import { FormikProvider, useFormik, FieldArray } from "formik";
-import { FiPlus, FiTrash2, FiSave, FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { useState } from "react";
-import FormRowVertical from "@/components/common/FormRowVerticle";
-import Button from "@/components/common/Button";
-import Input from "@/components/common/Input";
-import ErrorMessage from "@/components/common/ErrorMessage";
+import { FiSettings, FiBook, FiClock, FiUserCheck, FiImage } from "react-icons/fi";
 import Spinner from "@/components/common/Spinner";
-import { useAddSettings } from "../hooks/useAddSettings";
-import { useUpdateSettings } from "../hooks/useUpdateSettings";
-import { useDeleteSettings } from "../hooks/useDeleteSettings";
+import ErrorMessage from "@/components/common/ErrorMessage";
 import { useSettings } from "../hooks/useSettings";
-import { settingsSchema } from "../validation/settings.validation";
-import EntitySelect from "@/components/common/EntitySelect";
-import TimePicker from "@/components/common/TimePicker";
-import ConfirmationModal from "@/components/common/ConfirmationModal";
-import { ClassLevel, ClassWiseOverride } from "../types/settings.types";
+import GeneralSettingsSection from "../components/GeneralSettingsSection";
+import AcademicSettingsSection from "../components/AcademicSettingsSection";
+import TimetableSettingsSection from "../components/TimetableSettingsSection";
+import AttendanceSettingsSection from "../components/AttendanceSettingsSection";
+import BrandingSettingsSection from "../components/BrandingSettingsSection";
+
+type SettingsSection = "general" | "academic" | "timetable" | "attendance" | "branding";
+
+const SETTINGS_SECTIONS = [
+  { id: "general", label: "General", icon: <FiSettings className="w-4 h-4" /> },
+  { id: "academic", label: "Academic", icon: <FiBook className="w-4 h-4" /> },
+  { id: "timetable", label: "Timetable", icon: <FiClock className="w-4 h-4" /> },
+  { id: "attendance", label: "Attendance", icon: <FiUserCheck className="w-4 h-4" /> },
+  { id: "branding", label: "Branding", icon: <FiImage className="w-4 h-4" /> },
+];
 
 const SettingsPage = () => {
-  const { settings, isSettingsLoading, settingsError } = useSettings();
-  const { addSettingsMutation, isAddingSettings } = useAddSettings();
-  const { updateSettingsMutation, isUpdatingSettings } = useUpdateSettings();
-  const { deleteSettingsMutation, isDeletingSettings } = useDeleteSettings();
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-  const currentSettings = settings;
-  const isEditMode = !!currentSettings;
-
-  // Helper function to transform classLevels from backend
-  const transformClassLevels = (levels: any[] = []) => {
-    return levels.map((level) => ({
-      name: level.name || "",
-      classIds:
-        level.classIds && level.classIds.length > 0 && typeof level.classIds[0] === "object"
-          ? level.classIds.map((c: any) => c._id || c).filter(Boolean)
-          : (level.classIds as string[]) || [],
-      timings: level.timings || {
-        startTime: null,
-        endTime: null,
-        breakTime: {
-          startTime: null,
-          duration: null,
-        },
-        periodConfig: {
-          periodDuration: null,
-          totalPeriods: null,
-          breakAfterPeriods: null,
-        },
-      },
-    }));
-  };
-
-  // Helper function to transform classWiseOverrides from backend
-  const transformClassWiseOverrides = (overrides: any[] = []) => {
-    return overrides.map((override) => ({
-      classId:
-        typeof override.classId === "object"
-          ? override.classId?._id
-          : override.classId || "",
-      startTime: override.startTime || "",
-      endTime: override.endTime || "",
-      breakTime: override.breakTime || {
-        startTime: null,
-        duration: null,
-      },
-      periodConfig: override.periodConfig || {
-        periodDuration: null,
-        totalPeriods: null,
-        breakAfterPeriods: null,
-        breakDuration: null,
-      },
-    }));
-  };
-
-  const formik = useFormik({
-    initialValues: {
+  // const { isSettingsLoading, settingsError } = useSettings();
+  const isSettingsLoading = false;
+  const settingsError = null;
+  const settings = {
+    _id: "665f1a9d8c9a0c12ab123456",
+    schoolId: "665f1a1b2c3d4e5f6a789012",
+  
+    general: {
+      schoolName: "Bright Future Public School",
+      timezone: "Asia/Karachi",
+      locale: "en-PK",
+      workingDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      weekendDays: ["Saturday", "Sunday"]
+    },
+  
+    academic: {
+      academicYear: "2024-2025",
+      gradingSystem: "percentage",
+      passPercentage: 40
+    },
+  
+    timetable: {
       defaultSchoolTiming: {
-        startTime: currentSettings?.defaultSchoolTiming?.startTime || "08:00",
-        endTime: currentSettings?.defaultSchoolTiming?.endTime || "14:00",
+        startTime: "08:00",
+        endTime: "14:00"
       },
+  
       defaultPeriodConfig: {
-        periodDuration: currentSettings?.defaultPeriodConfig?.periodDuration || 40,
-        totalPeriods: currentSettings?.defaultPeriodConfig?.totalPeriods || 7,
-        breakAfterPeriods: currentSettings?.defaultPeriodConfig?.breakAfterPeriods || null,
-        breakDuration: currentSettings?.defaultPeriodConfig?.breakDuration || 20,
+        periodDuration: 40,
+        totalPeriods: 7,
+        breakAfterPeriods: 3,
+        breakDuration: 20
       },
-      classLevels: transformClassLevels(currentSettings?.classLevels),
-      classWiseOverrides: transformClassWiseOverrides(currentSettings?.classWiseOverrides),
-    },
-    validationSchema: settingsSchema,
-    enableReinitialize: true,
-    onSubmit: async (formValues) => {
-      const payload = {
-        defaultSchoolTiming: {
-          startTime: formValues.defaultSchoolTiming.startTime,
-          endTime: formValues.defaultSchoolTiming.endTime,
+  
+      classLevels: [
+        {
+          _id: "665f1b001111111111111111",
+          name: "Primary",
+          classIds: [
+            {
+              _id: "665f1b2a2222222222222222",
+              name: "Class 1-A"
+            },
+            {
+              _id: "665f1b2a3333333333333333",
+              name: "Class 2-A"
+            }
+          ],
+          timings: {
+            startTime: "08:00",
+            endTime: "12:30",
+            breakTime: {
+              startTime: "10:00",
+              duration: 20
+            },
+            periodConfig: {
+              periodDuration: 35,
+              totalPeriods: 6,
+              breakAfterPeriods: 3
+            }
+          }
         },
-        defaultPeriodConfig: {
-          periodDuration: Number(formValues.defaultPeriodConfig.periodDuration),
-          totalPeriods: Number(formValues.defaultPeriodConfig.totalPeriods),
-          ...(formValues.defaultPeriodConfig.breakAfterPeriods && {
-            breakAfterPeriods: Number(formValues.defaultPeriodConfig.breakAfterPeriods),
-          }),
-          ...(formValues.defaultPeriodConfig.breakDuration && {
-            breakDuration: Number(formValues.defaultPeriodConfig.breakDuration),
-          }),
-        },
-        classLevels:
-          formValues.classLevels.length > 0
-            ? formValues.classLevels.map((level) => ({
-                name: level.name,
-                classIds: level.classIds,
-                ...(level.timings && Object.keys(level.timings).length > 0 && {
-                  timings: {
-                    ...(level.timings.startTime && { startTime: level.timings.startTime }),
-                    ...(level.timings.endTime && { endTime: level.timings.endTime }),
-                    ...(level.timings.breakTime &&
-                      (level.timings.breakTime.startTime || level.timings.breakTime.duration) && {
-                        breakTime: {
-                          ...(level.timings.breakTime.startTime && {
-                            startTime: level.timings.breakTime.startTime,
-                          }),
-                          ...(level.timings.breakTime.duration && {
-                            duration: Number(level.timings.breakTime.duration),
-                          }),
-                        },
-                      }),
-                    ...(level.timings.periodConfig &&
-                      Object.values(level.timings.periodConfig).some((v) => v !== null) && {
-                        periodConfig: {
-                          ...(level.timings.periodConfig.periodDuration && {
-                            periodDuration: Number(level.timings.periodConfig.periodDuration),
-                          }),
-                          ...(level.timings.periodConfig.totalPeriods && {
-                            totalPeriods: Number(level.timings.periodConfig.totalPeriods),
-                          }),
-                          ...(level.timings.periodConfig.breakAfterPeriods && {
-                            breakAfterPeriods: Number(level.timings.periodConfig.breakAfterPeriods),
-                          }),
-                        },
-                      }),
-                  },
-                }),
-              }))
-            : undefined,
-        classWiseOverrides:
-          formValues.classWiseOverrides.length > 0
-            ? formValues.classWiseOverrides.map((override) => ({
-                classId: override.classId,
-                ...(override.startTime && { startTime: override.startTime }),
-                ...(override.endTime && { endTime: override.endTime }),
-                ...(override.breakTime &&
-                  (override.breakTime.startTime || override.breakTime.duration) && {
-                    breakTime: {
-                      ...(override.breakTime.startTime && {
-                        startTime: override.breakTime.startTime,
-                      }),
-                      ...(override.breakTime.duration && {
-                        duration: Number(override.breakTime.duration),
-                      }),
-                    },
-                  }),
-                ...(override.periodConfig &&
-                  Object.values(override.periodConfig).some((v) => v !== null) && {
-                    periodConfig: {
-                      ...(override.periodConfig.periodDuration && {
-                        periodDuration: Number(override.periodConfig.periodDuration),
-                      }),
-                      ...(override.periodConfig.totalPeriods && {
-                        totalPeriods: Number(override.periodConfig.totalPeriods),
-                      }),
-                      ...(override.periodConfig.breakAfterPeriods && {
-                        breakAfterPeriods: Number(override.periodConfig.breakAfterPeriods),
-                      }),
-                      ...(override.periodConfig.breakDuration && {
-                        breakDuration: Number(override.periodConfig.breakDuration),
-                      }),
-                    },
-                  }),
-              }))
-            : undefined,
-      };
-
-      if (!isEditMode) {
-        addSettingsMutation(payload);
-      } else {
-        // Backend accepts PUT /settings or PUT /settings/:settingsId
-        // If settingsId is provided, use it; otherwise backend will find by schoolId
-        updateSettingsMutation({
-          settingsId: currentSettings?._id,
-          settingsData: payload,
-        });
-      }
+        {
+          _id: "665f1b004444444444444444",
+          name: "High",
+          classIds: [
+            {
+              _id: "665f1b2a5555555555555555",
+              name: "Class 9-A"
+            },
+            {
+              _id: "665f1b2a6666666666666666",
+              name: "Class 10-A"
+            }
+          ],
+          timings: {
+            startTime: "08:30",
+            endTime: "14:00",
+            breakTime: {
+              startTime: "11:00",
+              duration: 30
+            },
+            periodConfig: {
+              periodDuration: 45,
+              totalPeriods: 7,
+              breakAfterPeriods: 4
+            }
+          }
+        }
+      ],
+  
+      classWiseOverrides: [
+        {
+          _id: "665f1c001234567890abcdef",
+          classId: {
+            _id: "665f1b2a7777777777777777",
+            name: "Class 5-B"
+          },
+          startTime: "09:00",
+          endTime: "13:00",
+          breakTime: {
+            startTime: "11:00",
+            duration: 15
+          },
+          periodConfig: {
+            periodDuration: 40,
+            totalPeriods: 6,
+            breakAfterPeriods: 3,
+            breakDuration: 15
+          }
+        }
+      ]
     },
-  });
-
-  const { errors, values, setFieldValue, getFieldProps, handleSubmit, isSubmitting } = formik;
-  const isLoading = isAddingSettings || isUpdatingSettings || isDeletingSettings || isSubmitting;
-
-  const handleDelete = () => {
-    const settingsId = currentSettings?._id;
-    deleteSettingsMutation(settingsId, {
-      onSuccess: () => {
-        setShowDeleteModal(false);
-      },
-    });
-  };
+  
+    attendance: {
+      autoMarkAbsentAfter: 15,
+      allowLateEntry: true,
+      lateAfterMinutes: 10
+    },
+  
+    branding: {
+      logo: "https://cdn.yourapp.com/schools/bright-future/logo.png",
+      primaryColor: "#2563EB",
+      secondaryColor: "#F59E0B",
+      theme: "light"
+    },
+  
+    version: 3,
+    createdBy: "665f18f88888888888888888",
+    updatedBy: "665f18f99999999999999999",
+  
+    createdAt: "2024-06-10T08:12:45.123Z",
+    updatedAt: "2024-07-02T11:34:22.456Z"
+  }
+  
+  const [activeSection, setActiveSection] = useState<SettingsSection>("general");
 
   if (isSettingsLoading) {
     return (
@@ -223,754 +174,57 @@ const SettingsPage = () => {
     );
   }
 
-  return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">School Settings</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Configure default timings and period configurations, plus level-specific and class-specific overrides
-            </p>
-          </div>
-          {isEditMode && (
-            <Button
-              type="button"
-              variant="danger"
-              onClick={() => setShowDeleteModal(true)}
-              disabled={isLoading}
-              className="flex items-center gap-2"
-            >
-              <FiTrash2 className="w-4 h-4" />
-              Delete Settings
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {/* Settings Form */}
-      <FormikProvider value={formik}>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSubmit(e);
-          }}
-          className="space-y-6"
-        >
-          {/* Default School Timing Section */}
-          <div className="bg-white p-6 rounded-lg border shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6 pb-3 border-b">
-              Default School Timing (Fallback)
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormRowVertical
-                label="Start Time"
-                name="defaultSchoolTiming.startTime"
-                error={errors.defaultSchoolTiming?.startTime as string}
-              >
-                <TimePicker
-                  value={values.defaultSchoolTiming.startTime}
-                  onChange={(time) =>
-                    setFieldValue("defaultSchoolTiming.startTime", time)
-                  }
-                />
-              </FormRowVertical>
-
-              {/* <FormRowVertical
-                label="End Time"
-                name="defaultSchoolTiming.endTime"
-                error={errors.defaultSchoolTiming?.endTime as string}
-              >
-                <TimePicker
-                  value={values.defaultSchoolTiming.endTime}
-                  onChange={(time) =>
-                    setFieldValue("defaultSchoolTiming.endTime", time)
-                  }
-                />
-              </FormRowVertical> */}
-            </div>
-          </div>
-
-          {/* Default Period Configuration Section */}
-          <div className="bg-white p-6 rounded-lg border shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6 pb-3 border-b">
-              Default Period Configuration (Fallback)
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <FormRowVertical
-                label="Period Duration (minutes)"
-                name="defaultPeriodConfig.periodDuration"
-                error={errors.defaultPeriodConfig?.periodDuration as string}
-              >
-                <Input
-                  type="number"
-                  placeholder="e.g. 40"
-                  min="1"
-                  {...getFieldProps("defaultPeriodConfig.periodDuration")}
-                />
-              </FormRowVertical>
-
-              <FormRowVertical
-                label="Total Periods"
-                name="defaultPeriodConfig.totalPeriods"
-                error={errors.defaultPeriodConfig?.totalPeriods as string}
-              >
-                <Input
-                  type="number"
-                  placeholder="e.g. 7"
-                  min="1"
-                  {...getFieldProps("defaultPeriodConfig.totalPeriods")}
-                />
-              </FormRowVertical>
-
-              <FormRowVertical
-                label="Break After Periods (Optional)"
-                name="defaultPeriodConfig.breakAfterPeriods"
-                error={errors.defaultPeriodConfig?.breakAfterPeriods as string}
-              >
-                <Input
-                  type="number"
-                  placeholder="e.g. 3"
-                  min="1"
-                  {...getFieldProps("defaultPeriodConfig.breakAfterPeriods")}
-                />
-              </FormRowVertical>
-
-              <FormRowVertical
-                label="Break Duration (minutes, Optional)"
-                name="defaultPeriodConfig.breakDuration"
-                error={errors.defaultPeriodConfig?.breakDuration as string}
-              >
-                <Input
-                  type="number"
-                  placeholder="e.g. 20"
-                  min="0"
-                  {...getFieldProps("defaultPeriodConfig.breakDuration")}
-                />
-              </FormRowVertical>
-            </div>
-          </div>
-
-          {/* Class Levels Section */}
-          <ClassLevelsSection
-            values={values}
-            errors={errors}
-            setFieldValue={setFieldValue}
-            getFieldProps={getFieldProps}
-            isLoading={isLoading}
-          />
-
-          {/* Class Wise Overrides Section */}
-          <ClassWiseOverridesSection
-            values={values}
-            errors={errors}
-            setFieldValue={setFieldValue}
-            getFieldProps={getFieldProps}
-            isLoading={isLoading}
-          />
-
-          {/* Submit Button */}
-          <div className="bg-white p-6 rounded-lg border shadow-sm flex justify-end gap-4">
-            <Button
-              type="submit"
-              loading={isLoading}
-              className="flex items-center gap-2"
-            >
-              <FiSave className="w-4 h-4" />
-              {isEditMode ? "Update Settings" : "Save Settings"}
-            </Button>
-          </div>
-        </form>
-      </FormikProvider>
-
-      {/* Delete Confirmation Modal */}
-      <ConfirmationModal
-        title="Delete Settings"
-        message="Are you sure you want to delete these settings? This action cannot be undone. You will need to create new settings afterward."
-        confirmText="Delete"
-        cancelText="Cancel"
-        type="danger"
-        confirmButtonVariant="danger"
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={handleDelete}
-        isLoading={isDeletingSettings}
-      />
-    </div>
-  );
-};
-
-// Class Levels Section Component
-const ClassLevelsSection = ({ values, errors, setFieldValue, getFieldProps, isLoading }: any) => {
-  const [expandedLevels, setExpandedLevels] = useState<Set<number>>(new Set());
-
-  const toggleLevel = (index: number) => {
-    const newExpanded = new Set(expandedLevels);
-    if (newExpanded.has(index)) {
-      newExpanded.delete(index);
-    } else {
-      newExpanded.add(index);
+  const renderActiveSection = () => {
+    switch (activeSection) {
+      case "general":
+        return <GeneralSettingsSection settings={settings} />;
+      case "academic":
+        return <AcademicSettingsSection settings={settings} />;
+      case "timetable":
+        return <TimetableSettingsSection settings={settings} />;
+      case "attendance":
+        return <AttendanceSettingsSection settings={settings} />;
+      case "branding":
+        return <BrandingSettingsSection settings={settings} />;
+      default:
+        return <GeneralSettingsSection settings={settings} />;
     }
-    setExpandedLevels(newExpanded);
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg border shadow-sm">
-      <div className="flex items-center justify-between mb-6 pb-3 border-b">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">Class Levels (Optional)</h3>
-          <p className="text-sm text-gray-500 mt-1">
-            Configure levels with classes and level-specific timings/period configs
-          </p>
-        </div>
-        <FieldArray name="classLevels">
-          {(arrayHelpers: any) => (
-            <Button
-              type="button"
-              onClick={() =>
-                arrayHelpers.push({
-                  name: "",
-                  classIds: [],
-                  timings: {
-                    startTime: null,
-                    endTime: null,
-                    breakTime: { startTime: null, duration: null },
-                    periodConfig: {
-                      periodDuration: null,
-                      totalPeriods: null,
-                      breakAfterPeriods: null,
-                    },
-                  },
-                })
-              }
-              variant="secondary"
-              className="flex items-center gap-2"
-              disabled={isLoading}
-            >
-              <FiPlus className="w-4 h-4" />
-              Add Level
-            </Button>
-          )}
-        </FieldArray>
+    <div className="max-w-7xl mx-auto">
+      {/* Page Header */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-text-primary mb-2">School Settings</h1>
+        <p className="text-sm text-text-secondary">
+          Configure your school settings across different sections
+        </p>
       </div>
 
-      <FieldArray name="classLevels">
-        {(arrayHelpers: any) => (
-          <div className="space-y-4">
-            {values.classLevels.length === 0 && (
-              <p className="text-sm text-gray-500 text-center py-4">
-                No class levels configured. Click &quot;Add Level&quot; to create one.
-              </p>
-            )}
-            {values.classLevels.map((level: ClassLevel, index: number) => (
-              <LevelCard
-                key={index}
-                level={level}
-                index={index}
-                errors={errors}
-                setFieldValue={setFieldValue}
-                getFieldProps={getFieldProps}
-                isLoading={isLoading}
-                onRemove={() => arrayHelpers.remove(index)}
-                isExpanded={expandedLevels.has(index)}
-                onToggle={() => toggleLevel(index)}
-              />
+      <div className="bg-white rounded-2xl border shadow-sm mb-6 overflow-hidden">
+        <div className="border-b border-border">
+          <nav className="flex overflow-x-auto scrollbar-hide" aria-label="Settings Tabs">
+            {SETTINGS_SECTIONS.map((section) => (
+              <button
+                key={section.id}
+                onClick={() => setActiveSection(section.id as SettingsSection)}
+                className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-all whitespace-nowrap border-b-2 ${
+                  activeSection === section.id
+                    ? "border-primary text-primary bg-primary/5"
+                    : "border-transparent text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
+                }`}
+              >
+                {section.icon}
+                <span>{section.label}</span>
+              </button>
             ))}
-          </div>
-        )}
-      </FieldArray>
-    </div>
-  );
-};
-
-// Level Card Component
-const LevelCard = ({
-  level,
-  index,
-  errors,
-  setFieldValue,
-  getFieldProps,
-  isLoading,
-  onRemove,
-  isExpanded,
-  onToggle,
-}: any) => {
-  return (
-    <div className="border rounded-lg overflow-hidden">
-      <div className="p-4 bg-gray-50 border-b flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Button
-            type="button"
-            variant="secondary"
-            className="p-1"
-            onClick={onToggle}
-          >
-            {isExpanded ? (
-              <FiChevronUp className="w-4 h-4" />
-            ) : (
-              <FiChevronDown className="w-4 h-4" />
-            )}
-          </Button>
-          <h4 className="font-medium text-gray-700">
-            Level {index + 1}: {level.name || "Unnamed Level"}
-          </h4>
+          </nav>
         </div>
-        <Button
-          type="button"
-          onClick={onRemove}
-          variant="danger"
-          className="p-2"
-          disabled={isLoading}
-        >
-          <FiTrash2 className="w-4 h-4" />
-        </Button>
       </div>
 
-      {isExpanded && (
-        <div className="p-5 space-y-4">
-          <FormRowVertical
-            label="Level Name"
-            name={`classLevels.${index}.name`}
-            error={(errors.classLevels as any)?.[index]?.name as string}
-          >
-            <Input
-              type="text"
-              placeholder="e.g. KG, Primary, High"
-              {...getFieldProps(`classLevels.${index}.name`)}
-              disabled={isLoading}
-            />
-          </FormRowVertical>
-
-          <FormRowVertical
-            label="Select Classes"
-            name={`classLevels.${index}.classIds`}
-            error={(errors.classLevels as any)?.[index]?.classIds as string}
-          >
-            <EntitySelect
-              entity="class"
-              value={level.classIds}
-              onChange={(classIds: string | string[] | null) => {
-                setFieldValue(
-                  `classLevels.${index}.classIds`,
-                  Array.isArray(classIds) ? classIds : [classIds].filter(Boolean)
-                );
-              }}
-              isMulti={true}
-              placeholder="Select classes for this level"
-              isDisabled={isLoading}
-            />
-          </FormRowVertical>
-
-          {/* Level Timings */}
-          <div className="mt-4 pt-4 border-t">
-            <h5 className="text-sm font-semibold text-gray-700 mb-3">
-              Level-Specific Timings (Optional)
-            </h5>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormRowVertical label="Start Time (Optional)" name={`classLevels.${index}.timings.startTime`}>
-                <TimePicker
-                  value={level.timings?.startTime || ""}
-                  onChange={(time: string) =>
-                    setFieldValue(`classLevels.${index}.timings.startTime`, time || null)
-                  }
-                />
-              </FormRowVertical>
-              <FormRowVertical label="End Time (Optional)" name={`classLevels.${index}.timings.endTime`}>
-                <TimePicker
-                  value={level.timings?.endTime || ""}
-                  onChange={(time: string) =>
-                    setFieldValue(`classLevels.${index}.timings.endTime`, time || null)
-                  }
-                />
-              </FormRowVertical>
-            </div>
-
-            {/* Break Time */}
-            <div className="mt-4 pt-4 border-t">
-              <h6 className="text-xs font-medium text-gray-600 mb-3">Break Time (Optional)</h6>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormRowVertical label="Break Start Time" name={`classLevels.${index}.timings.breakTime.startTime`}>
-                  <TimePicker
-                    value={level.timings?.breakTime?.startTime || ""}
-                    onChange={(time: string) =>
-                      setFieldValue(`classLevels.${index}.timings.breakTime.startTime`, time || null)
-                    }
-                  />
-                </FormRowVertical>
-                <FormRowVertical label="Break Duration (minutes)" name={`classLevels.${index}.timings.breakTime.duration`}>
-                  <Input
-                    type="number"
-                    placeholder="e.g. 15"
-                    min="0"
-                    value={level.timings?.breakTime?.duration || ""}
-                    onChange={(e: any) =>
-                      setFieldValue(
-                        `classLevels.${index}.timings.breakTime.duration`,
-                        e.target.value ? Number(e.target.value) : null
-                      )
-                    }
-                    disabled={isLoading}
-                  />
-                </FormRowVertical>
-              </div>
-            </div>
-
-            {/* Level Period Config */}
-            <div className="mt-4 pt-4 border-t">
-              <h6 className="text-xs font-medium text-gray-600 mb-3">
-                Level-Specific Period Configuration (Optional)
-              </h6>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormRowVertical label="Period Duration" name={`classLevels.${index}.timings.periodConfig.periodDuration`}>
-                  <Input
-                    type="number"
-                    placeholder="e.g. 45"
-                    min="1"
-                    value={level.timings?.periodConfig?.periodDuration || ""}
-                    onChange={(e: any) =>
-                      setFieldValue(
-                        `classLevels.${index}.timings.periodConfig.periodDuration`,
-                        e.target.value ? Number(e.target.value) : null
-                      )
-                    }
-                    disabled={isLoading}
-                  />
-                </FormRowVertical>
-                <FormRowVertical label="Total Periods" name={`classLevels.${index}.timings.periodConfig.totalPeriods`}>
-                  <Input
-                    type="number"
-                    placeholder="e.g. 8"
-                    min="1"
-                    value={level.timings?.periodConfig?.totalPeriods || ""}
-                    onChange={(e: any) =>
-                      setFieldValue(
-                        `classLevels.${index}.timings.periodConfig.totalPeriods`,
-                        e.target.value ? Number(e.target.value) : null
-                      )
-                    }
-                    disabled={isLoading}
-                  />
-                </FormRowVertical>
-                <FormRowVertical label="Break After Periods" name={`classLevels.${index}.timings.periodConfig.breakAfterPeriods`}>
-                  <Input
-                    type="number"
-                    placeholder="e.g. 4"
-                    min="1"
-                    value={level.timings?.periodConfig?.breakAfterPeriods || ""}
-                    onChange={(e: any) =>
-                      setFieldValue(
-                        `classLevels.${index}.timings.periodConfig.breakAfterPeriods`,
-                        e.target.value ? Number(e.target.value) : null
-                      )
-                    }
-                    disabled={isLoading}
-                  />
-                </FormRowVertical>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Class Wise Overrides Section Component
-const ClassWiseOverridesSection = ({ values, errors, setFieldValue, getFieldProps, isLoading }: any) => {
-  const [expandedOverrides, setExpandedOverrides] = useState<Set<number>>(new Set());
-
-  const toggleOverride = (index: number) => {
-    const newExpanded = new Set(expandedOverrides);
-    if (newExpanded.has(index)) {
-      newExpanded.delete(index);
-    } else {
-      newExpanded.add(index);
-    }
-    setExpandedOverrides(newExpanded);
-  };
-
-  return (
-    <div className="bg-white p-6 rounded-lg border shadow-sm">
-      <div className="flex items-center justify-between mb-6 pb-3 border-b">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Class-Wise Overrides (Optional)</h3>
-          <p className="text-sm text-gray-500 mt-1">
-            Override timings and period configuration for specific classes
-          </p>
-        </div>
-        <FieldArray name="classWiseOverrides">
-          {(arrayHelpers: any) => (
-            <Button
-              type="button"
-              onClick={() =>
-                arrayHelpers.push({
-                  classId: "",
-                  startTime: "",
-                  endTime: "",
-                  breakTime: { startTime: null, duration: null },
-                  periodConfig: {
-                    periodDuration: null,
-                    totalPeriods: null,
-                    breakAfterPeriods: null,
-                    breakDuration: null,
-                  },
-                })
-              }
-              variant="secondary"
-              className="flex items-center gap-2"
-              disabled={isLoading}
-            >
-              <FiPlus className="w-4 h-4" />
-              Add Override
-            </Button>
-          )}
-        </FieldArray>
+        {renderActiveSection()}
       </div>
-
-      <FieldArray name="classWiseOverrides">
-        {(arrayHelpers: any) => (
-          <div className="space-y-4">
-            {values.classWiseOverrides.length === 0 && (
-              <p className="text-sm text-gray-500 text-center py-4">
-                No class-wise overrides configured. Click &quot;Add Override&quot; to create one.
-              </p>
-            )}
-            {values.classWiseOverrides.map((override: ClassWiseOverride, index: number) => (
-              <OverrideCard
-                key={index}
-                override={override}
-                index={index}
-                errors={errors}
-                setFieldValue={setFieldValue}
-                getFieldProps={getFieldProps}
-                isLoading={isLoading}
-                onRemove={() => arrayHelpers.remove(index)}
-                isExpanded={expandedOverrides.has(index)}
-                onToggle={() => toggleOverride(index)}
-              />
-            ))}
-          </div>
-        )}
-      </FieldArray>
-    </div>
-  );
-};
-
-// Override Card Component
-const OverrideCard = ({
-  override,
-  index,
-  errors,
-  setFieldValue,
-  getFieldProps,
-  isLoading,
-  onRemove,
-  isExpanded,
-  onToggle,
-}: any) => {
-  return (
-    <div className="border rounded-lg overflow-hidden">
-      <div className="p-4 bg-gray-50 border-b flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Button
-            type="button"
-            variant="secondary"
-            className="p-1"
-            onClick={onToggle}
-          >
-            {isExpanded ? (
-              <FiChevronUp className="w-4 h-4" />
-            ) : (
-              <FiChevronDown className="w-4 h-4" />
-            )}
-          </Button>
-          <h4 className="font-medium text-gray-700">
-            Override {index + 1}
-          </h4>
-        </div>
-        <Button
-          type="button"
-          onClick={onRemove}
-          variant="danger"
-          className="p-2"
-          disabled={isLoading}
-        >
-          <FiTrash2 className="w-4 h-4" />
-        </Button>
-      </div>
-
-      {isExpanded && (
-        <div className="p-5 space-y-4">
-          <FormRowVertical
-            label="Select Class"
-            name={`classWiseOverrides.${index}.classId`}
-            error={(errors.classWiseOverrides as any)?.[index]?.classId as string}
-          >
-            <EntitySelect
-              entity="class"
-              value={override.classId}
-              onChange={(value: string | string[] | null) => {
-                const classId = Array.isArray(value) ? value[0] : value;
-                setFieldValue(`classWiseOverrides.${index}.classId`, classId || "");
-              }}
-              placeholder="Select class"
-              isDisabled={isLoading}
-            />
-          </FormRowVertical>
-
-          {/* Class Override Timings */}
-          <div className="mt-4 pt-4 border-t">
-            <h5 className="text-sm font-semibold text-gray-700 mb-3">
-              Class-Specific Timings (Optional)
-            </h5>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormRowVertical
-                label="Start Time (Optional)"
-                name={`classWiseOverrides.${index}.startTime`}
-              >
-                <TimePicker
-                  value={override.startTime || ""}
-                  onChange={(time: string) =>
-                    setFieldValue(`classWiseOverrides.${index}.startTime`, time || "")
-                  }
-                />
-              </FormRowVertical>
-              <FormRowVertical
-                label="End Time (Optional)"
-                name={`classWiseOverrides.${index}.endTime`}
-              >
-                <TimePicker
-                  value={override.endTime || ""}
-                  onChange={(time: string) =>
-                    setFieldValue(`classWiseOverrides.${index}.endTime`, time || "")
-                  }
-                />
-              </FormRowVertical>
-            </div>
-
-            {/* Break Time */}
-            <div className="mt-4 pt-4 border-t">
-              <h6 className="text-xs font-medium text-gray-600 mb-3">Break Time (Optional)</h6>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormRowVertical
-                  label="Break Start Time"
-                  name={`classWiseOverrides.${index}.breakTime.startTime`}
-                >
-                  <TimePicker
-                    value={override.breakTime?.startTime || ""}
-                    onChange={(time: string) =>
-                      setFieldValue(
-                        `classWiseOverrides.${index}.breakTime.startTime`,
-                        time || null
-                      )
-                    }
-                  />
-                </FormRowVertical>
-                <FormRowVertical
-                  label="Break Duration (minutes)"
-                  name={`classWiseOverrides.${index}.breakTime.duration`}
-                >
-                  <Input
-                    type="number"
-                    placeholder="e.g. 15"
-                    min="0"
-                    value={override.breakTime?.duration || ""}
-                    onChange={(e: any) =>
-                      setFieldValue(
-                        `classWiseOverrides.${index}.breakTime.duration`,
-                        e.target.value ? Number(e.target.value) : null
-                      )
-                    }
-                    disabled={isLoading}
-                  />
-                </FormRowVertical>
-              </div>
-            </div>
-          </div>
-
-          {/* Class Override Period Config */}
-          <div className="mt-4 pt-4 border-t">
-            <h6 className="text-xs font-medium text-gray-600 mb-3">
-              Class-Specific Period Configuration (Optional)
-            </h6>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <FormRowVertical
-                label="Period Duration"
-                name={`classWiseOverrides.${index}.periodConfig.periodDuration`}
-              >
-                <Input
-                  type="number"
-                  placeholder="e.g. 45"
-                  min="1"
-                  value={override.periodConfig?.periodDuration || ""}
-                  onChange={(e: any) =>
-                    setFieldValue(
-                      `classWiseOverrides.${index}.periodConfig.periodDuration`,
-                      e.target.value ? Number(e.target.value) : null
-                    )
-                  }
-                  disabled={isLoading}
-                />
-              </FormRowVertical>
-              <FormRowVertical
-                label="Total Periods"
-                name={`classWiseOverrides.${index}.periodConfig.totalPeriods`}
-              >
-                <Input
-                  type="number"
-                  placeholder="e.g. 8"
-                  min="1"
-                  value={override.periodConfig?.totalPeriods || ""}
-                  onChange={(e: any) =>
-                    setFieldValue(
-                      `classWiseOverrides.${index}.periodConfig.totalPeriods`,
-                      e.target.value ? Number(e.target.value) : null
-                    )
-                  }
-                  disabled={isLoading}
-                />
-              </FormRowVertical>
-              <FormRowVertical
-                label="Break After Periods"
-                name={`classWiseOverrides.${index}.periodConfig.breakAfterPeriods`}
-              >
-                <Input
-                  type="number"
-                  placeholder="e.g. 4"
-                  min="1"
-                  value={override.periodConfig?.breakAfterPeriods || ""}
-                  onChange={(e: any) =>
-                    setFieldValue(
-                      `classWiseOverrides.${index}.periodConfig.breakAfterPeriods`,
-                      e.target.value ? Number(e.target.value) : null
-                    )
-                  }
-                  disabled={isLoading}
-                />
-              </FormRowVertical>
-              <FormRowVertical
-                label="Break Duration"
-                name={`classWiseOverrides.${index}.periodConfig.breakDuration`}
-              >
-                <Input
-                  type="number"
-                  placeholder="e.g. 20"
-                  min="0"
-                  value={override.periodConfig?.breakDuration || ""}
-                  onChange={(e: any) =>
-                    setFieldValue(
-                      `classWiseOverrides.${index}.periodConfig.breakDuration`,
-                      e.target.value ? Number(e.target.value) : null
-                    )
-                  }
-                  disabled={isLoading}
-                />
-              </FormRowVertical>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

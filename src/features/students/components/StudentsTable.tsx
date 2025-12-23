@@ -106,14 +106,14 @@ const StudentsTable = React.memo(
         header: "Actions",
         render: (
           row: Student & {
-            onEditStudent: (row: Student) => void;
-            onDeleteStudent: (id: string) => void;
+            onEditStudent: (student: Student) => void;
+            onDeleteStudent: (student: Student) => void;
           }
         ) => (
           <div className="flex justify-end space-x-2">
             <ViewButton navigateTo={`/admin/students/${row._id}`} />
             <EditButton onClick={() => row?.onEditStudent?.(row)} />
-            <DeleteButton onClick={() => row?.onDeleteStudent?.(row._id)} />
+            <DeleteButton onClick={() => row?.onDeleteStudent?.(row)} />
           </div>
         ),
         width: "150px",

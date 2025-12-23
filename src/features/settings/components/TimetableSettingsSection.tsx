@@ -4,23 +4,23 @@ import { useState } from "react";
 import FormRowVertical from "@/components/common/FormRowVerticle";
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
-import ErrorMessage from "@/components/common/ErrorMessage";
-import Spinner from "@/components/common/Spinner";
+import Card from "@/components/common/Card";
 import { useAddSettings } from "../hooks/useAddSettings";
 import { useUpdateSettings } from "../hooks/useUpdateSettings";
-import { useSettings } from "../hooks/useSettings";
 import { settingsSchema } from "../validation/settings.validation";
 import EntitySelect from "@/components/common/EntitySelect";
 import TimePicker from "@/components/common/TimePicker";
-import { ClassLevel, ClassWiseOverride } from "../types/settings.types";
+import { Settings, ClassLevel, ClassWiseOverride } from "../types/settings.types";
 
-const SettingsPage = () => {
-  const { settings, isSettingsLoading, settingsError } = useSettings();
+interface TimetableSettingsSectionProps {
+  settings: Settings | null;
+}
+
+const TimetableSettingsSection = ({ settings }: TimetableSettingsSectionProps) => {
   const { addSettingsMutation, isAddingSettings } = useAddSettings();
   const { updateSettingsMutation, isUpdatingSettings } = useUpdateSettings();
-
-  const currentSettings = settings && settings.length > 0 ? settings[0] : null;
-  const isEditMode = !!currentSettings;
+  const isEditMode = !!settings;
+  const isLoading = isAddingSettings || isUpdatingSettings;
 
   // Helper function to transform classLevels from backend
   const transformClassLevels = (levels: any[] = []) => {
@@ -51,7 +51,7 @@ const SettingsPage = () => {
     return overrides.map((override) => ({
       classId:
         typeof override.classId === "object"
-          ? override.classId._id
+          ? override.classId?._id
           : override.classId || "",
       startTime: override.startTime || "",
       endTime: override.endTime || "",
@@ -71,171 +71,148 @@ const SettingsPage = () => {
   const formik = useFormik({
     initialValues: {
       defaultSchoolTiming: {
-        startTime: currentSettings?.defaultSchoolTiming?.startTime || "08:00",
-        endTime: currentSettings?.defaultSchoolTiming?.endTime || "14:00",
+        startTime: settings?.timetable?.defaultSchoolTiming?.startTime || "08:00",
+        endTime: settings?.timetable?.defaultSchoolTiming?.endTime || "14:00",
       },
       defaultPeriodConfig: {
-        periodDuration: currentSettings?.defaultPeriodConfig?.periodDuration || 40,
-        totalPeriods: currentSettings?.defaultPeriodConfig?.totalPeriods || 7,
-        breakAfterPeriods: currentSettings?.defaultPeriodConfig?.breakAfterPeriods || null,
-        breakDuration: currentSettings?.defaultPeriodConfig?.breakDuration || 20,
+        periodDuration: settings?.timetable?.defaultPeriodConfig?.periodDuration || 40,
+        totalPeriods: settings?.timetable?.defaultPeriodConfig?.totalPeriods || 7,
+        breakAfterPeriods: settings?.timetable?.defaultPeriodConfig?.breakAfterPeriods || null,
+        breakDuration: settings?.timetable?.defaultPeriodConfig?.breakDuration || 20,
       },
-      classLevels: transformClassLevels(currentSettings?.classLevels),
-      classWiseOverrides: transformClassWiseOverrides(currentSettings?.classWiseOverrides),
+      classLevels: transformClassLevels(settings?.timetable?.classLevels),
+      classWiseOverrides: transformClassWiseOverrides(settings?.timetable?.classWiseOverrides),
     },
     validationSchema: settingsSchema,
     enableReinitialize: true,
     onSubmit: async (formValues) => {
       const payload = {
-        defaultSchoolTiming: {
-          startTime: formValues.defaultSchoolTiming.startTime,
-          endTime: formValues.defaultSchoolTiming.endTime,
-        },
-        defaultPeriodConfig: {
-          periodDuration: Number(formValues.defaultPeriodConfig.periodDuration),
-          totalPeriods: Number(formValues.defaultPeriodConfig.totalPeriods),
-          ...(formValues.defaultPeriodConfig.breakAfterPeriods && {
-            breakAfterPeriods: Number(formValues.defaultPeriodConfig.breakAfterPeriods),
-          }),
-          ...(formValues.defaultPeriodConfig.breakDuration && {
-            breakDuration: Number(formValues.defaultPeriodConfig.breakDuration),
-          }),
-        },
-        classLevels:
-          formValues.classLevels.length > 0
-            ? formValues.classLevels.map((level) => ({
-                name: level.name,
-                classIds: level.classIds,
-                ...(level.timings && Object.keys(level.timings).length > 0 && {
-                  timings: {
-                    ...(level.timings.startTime && { startTime: level.timings.startTime }),
-                    ...(level.timings.endTime && { endTime: level.timings.endTime }),
-                    ...(level.timings.breakTime &&
-                      (level.timings.breakTime.startTime || level.timings.breakTime.duration) && {
-                        breakTime: {
-                          ...(level.timings.breakTime.startTime && {
-                            startTime: level.timings.breakTime.startTime,
-                          }),
-                          ...(level.timings.breakTime.duration && {
-                            duration: Number(level.timings.breakTime.duration),
-                          }),
-                        },
-                      }),
-                    ...(level.timings.periodConfig &&
-                      Object.values(level.timings.periodConfig).some((v) => v !== null) && {
-                        periodConfig: {
-                          ...(level.timings.periodConfig.periodDuration && {
-                            periodDuration: Number(level.timings.periodConfig.periodDuration),
-                          }),
-                          ...(level.timings.periodConfig.totalPeriods && {
-                            totalPeriods: Number(level.timings.periodConfig.totalPeriods),
-                          }),
-                          ...(level.timings.periodConfig.breakAfterPeriods && {
-                            breakAfterPeriods: Number(level.timings.periodConfig.breakAfterPeriods),
-                          }),
-                        },
-                      }),
-                  },
-                }),
-              }))
-            : undefined,
-        classWiseOverrides:
-          formValues.classWiseOverrides.length > 0
-            ? formValues.classWiseOverrides.map((override) => ({
-                classId: override.classId,
-                ...(override.startTime && { startTime: override.startTime }),
-                ...(override.endTime && { endTime: override.endTime }),
-                ...(override.breakTime &&
-                  (override.breakTime.startTime || override.breakTime.duration) && {
-                    breakTime: {
-                      ...(override.breakTime.startTime && {
-                        startTime: override.breakTime.startTime,
-                      }),
-                      ...(override.breakTime.duration && {
-                        duration: Number(override.breakTime.duration),
-                      }),
+        timetable: {
+          defaultSchoolTiming: {
+            startTime: formValues.defaultSchoolTiming.startTime,
+            endTime: formValues.defaultSchoolTiming.endTime,
+          },
+          defaultPeriodConfig: {
+            periodDuration: Number(formValues.defaultPeriodConfig.periodDuration),
+            totalPeriods: Number(formValues.defaultPeriodConfig.totalPeriods),
+            ...(formValues.defaultPeriodConfig.breakAfterPeriods && {
+              breakAfterPeriods: Number(formValues.defaultPeriodConfig.breakAfterPeriods),
+            }),
+            ...(formValues.defaultPeriodConfig.breakDuration && {
+              breakDuration: Number(formValues.defaultPeriodConfig.breakDuration),
+            }),
+          },
+          classLevels:
+            formValues.classLevels.length > 0
+              ? formValues.classLevels.map((level) => ({
+                  name: level.name,
+                  classIds: level.classIds,
+                  ...(level.timings && Object.keys(level.timings).length > 0 && {
+                    timings: {
+                      ...(level.timings.startTime && { startTime: level.timings.startTime }),
+                      ...(level.timings.endTime && { endTime: level.timings.endTime }),
+                      ...(level.timings.breakTime &&
+                        (level.timings.breakTime.startTime || level.timings.breakTime.duration) && {
+                          breakTime: {
+                            ...(level.timings.breakTime.startTime && {
+                              startTime: level.timings.breakTime.startTime,
+                            }),
+                            ...(level.timings.breakTime.duration && {
+                              duration: Number(level.timings.breakTime.duration),
+                            }),
+                          },
+                        }),
+                      ...(level.timings.periodConfig &&
+                        Object.values(level.timings.periodConfig).some((v) => v !== null) && {
+                          periodConfig: {
+                            ...(level.timings.periodConfig.periodDuration && {
+                              periodDuration: Number(level.timings.periodConfig.periodDuration),
+                            }),
+                            ...(level.timings.periodConfig.totalPeriods && {
+                              totalPeriods: Number(level.timings.periodConfig.totalPeriods),
+                            }),
+                            ...(level.timings.periodConfig.breakAfterPeriods && {
+                              breakAfterPeriods: Number(level.timings.periodConfig.breakAfterPeriods),
+                            }),
+                          },
+                        }),
                     },
                   }),
-                ...(override.periodConfig &&
-                  Object.values(override.periodConfig).some((v) => v !== null) && {
-                    periodConfig: {
-                      ...(override.periodConfig.periodDuration && {
-                        periodDuration: Number(override.periodConfig.periodDuration),
-                      }),
-                      ...(override.periodConfig.totalPeriods && {
-                        totalPeriods: Number(override.periodConfig.totalPeriods),
-                      }),
-                      ...(override.periodConfig.breakAfterPeriods && {
-                        breakAfterPeriods: Number(override.periodConfig.breakAfterPeriods),
-                      }),
-                      ...(override.periodConfig.breakDuration && {
-                        breakDuration: Number(override.periodConfig.breakDuration),
-                      }),
-                    },
-                  }),
-              }))
-            : undefined,
+                }))
+              : undefined,
+          classWiseOverrides:
+            formValues.classWiseOverrides.length > 0
+              ? formValues.classWiseOverrides.map((override) => ({
+                  classId: override.classId,
+                  ...(override.startTime && { startTime: override.startTime }),
+                  ...(override.endTime && { endTime: override.endTime }),
+                  ...(override.breakTime &&
+                    (override.breakTime.startTime || override.breakTime.duration) && {
+                      breakTime: {
+                        ...(override.breakTime.startTime && {
+                          startTime: override.breakTime.startTime,
+                        }),
+                        ...(override.breakTime.duration && {
+                          duration: Number(override.breakTime.duration),
+                        }),
+                      },
+                    }),
+                  ...(override.periodConfig &&
+                    Object.values(override.periodConfig).some((v) => v !== null) && {
+                      periodConfig: {
+                        ...(override.periodConfig.periodDuration && {
+                          periodDuration: Number(override.periodConfig.periodDuration),
+                        }),
+                        ...(override.periodConfig.totalPeriods && {
+                          totalPeriods: Number(override.periodConfig.totalPeriods),
+                        }),
+                        ...(override.periodConfig.breakAfterPeriods && {
+                          breakAfterPeriods: Number(override.periodConfig.breakAfterPeriods),
+                        }),
+                        ...(override.periodConfig.breakDuration && {
+                          breakDuration: Number(override.periodConfig.breakDuration),
+                        }),
+                      },
+                    }),
+                }))
+              : undefined,
+        },
       };
 
       if (!isEditMode) {
         addSettingsMutation(payload);
       } else {
-        if (currentSettings?._id) {
-          updateSettingsMutation({
-            settingsId: currentSettings._id,
-            settingsData: payload,
-          });
-        }
+        updateSettingsMutation({
+          settingsId: settings?._id,
+          settingsData: payload,
+        });
       }
     },
   });
 
   const { errors, values, setFieldValue, getFieldProps, handleSubmit, isSubmitting } = formik;
-  const isLoading = isAddingSettings || isUpdatingSettings || isSubmitting;
-
-  if (isSettingsLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <Spinner />
-      </div>
-    );
-  }
-
-  if (settingsError) {
-    return (
-      <ErrorMessage
-        message={settingsError.message || "Failed to load settings"}
-        onRetry={() => window.location.reload()}
-      />
-    );
-  }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">School Settings</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Configure default timings and period configurations, plus level-specific and class-specific overrides
-          </p>
-        </div>
-      </div>
-
-      {/* Settings Form */}
+    <Card
+      title="Timetable Settings"
+      description="Configure default timings and period configurations, plus level-specific and class-specific overrides"
+    >
       <FormikProvider value={formik}>
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSubmit(e);
           }}
-          className="space-y-6"
+          className="px-8 py-6 space-y-6"
         >
           {/* Default School Timing Section */}
-          <div className="bg-white p-6 rounded-lg border shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6 pb-3 border-b">
+          <div className="bg-gray-50 p-6 rounded-lg border">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Default School Timing (Fallback)
             </h3>
+            <p className="text-xs text-gray-500 mb-4">
+              Used as fallback when no level-specific or class-specific timing is configured
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormRowVertical
                 label="Start Time"
@@ -266,10 +243,13 @@ const SettingsPage = () => {
           </div>
 
           {/* Default Period Configuration Section */}
-          <div className="bg-white p-6 rounded-lg border shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6 pb-3 border-b">
+          <div className="bg-gray-50 p-6 rounded-lg border">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Default Period Configuration (Fallback)
             </h3>
+            <p className="text-xs text-gray-500 mb-4">
+              Used as fallback when no level-specific or class-specific period config is configured
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <FormRowVertical
                 label="Period Duration (minutes)"
@@ -344,19 +324,19 @@ const SettingsPage = () => {
           />
 
           {/* Submit Button */}
-          <div className="bg-white p-6 rounded-lg border shadow-sm flex justify-end gap-4">
+          <div className="flex justify-end pt-4 border-t border-border">
             <Button
               type="submit"
-              loading={isLoading}
+              loading={isLoading || isSubmitting}
               className="flex items-center gap-2"
             >
               <FiSave className="w-4 h-4" />
-              {isEditMode ? "Update Settings" : "Save Settings"}
+              {isEditMode ? "Update Timetable Settings" : "Save Timetable Settings"}
             </Button>
           </div>
         </form>
       </FormikProvider>
-    </div>
+    </Card>
   );
 };
 
@@ -375,8 +355,8 @@ const ClassLevelsSection = ({ values, errors, setFieldValue, getFieldProps, isLo
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg border shadow-sm">
-      <div className="flex items-center justify-between mb-6 pb-3 border-b">
+    <div className="bg-gray-50 p-6 rounded-lg border">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Class Levels (Optional)</h3>
           <p className="text-sm text-gray-500 mt-1">
@@ -456,7 +436,7 @@ const LevelCard = ({
   onToggle,
 }: any) => {
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="border rounded-lg overflow-hidden bg-white">
       <div className="p-4 bg-gray-50 border-b flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Button
@@ -650,8 +630,8 @@ const ClassWiseOverridesSection = ({ values, errors, setFieldValue, getFieldProp
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg border shadow-sm">
-      <div className="flex items-center justify-between mb-6 pb-3 border-b">
+    <div className="bg-gray-50 p-6 rounded-lg border">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Class-Wise Overrides (Optional)</h3>
           <p className="text-sm text-gray-500 mt-1">
@@ -729,7 +709,7 @@ const OverrideCard = ({
   onToggle,
 }: any) => {
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="border rounded-lg overflow-hidden bg-white">
       <div className="p-4 bg-gray-50 border-b flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Button
@@ -769,9 +749,10 @@ const OverrideCard = ({
             <EntitySelect
               entity="class"
               value={override.classId}
-              onChange={(classId: string | null) =>
-                setFieldValue(`classWiseOverrides.${index}.classId`, classId || "")
-              }
+              onChange={(value: string | string[] | null) => {
+                const classId = Array.isArray(value) ? value[0] : value;
+                setFieldValue(`classWiseOverrides.${index}.classId`, classId || "");
+              }}
               placeholder="Select class"
               isDisabled={isLoading}
             />
@@ -933,4 +914,5 @@ const OverrideCard = ({
   );
 };
 
-export default SettingsPage;
+export default TimetableSettingsSection;
+

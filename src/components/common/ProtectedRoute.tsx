@@ -26,7 +26,7 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children, allowedRoles = [] }: ProtectedRouteProps) => {
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth)
 
-  if (!isAuthenticated) {
+  if (isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 

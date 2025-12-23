@@ -7,7 +7,6 @@ const axiosInstance = axios.create({
   baseURL: `${backendUrl}/api`,
 });
 
-// ✅ REQUEST INTERCEPTOR – attach token correctly
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = store.getState().auth.token || localStorage.getItem('token');
@@ -19,7 +18,6 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ✅ RESPONSE INTERCEPTOR – handle token expiry globally
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {

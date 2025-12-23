@@ -57,8 +57,8 @@ const StudentsCards = React.memo(
     
             {/* Guardians Info */}
             <div className="mt-2">
-              {student.guardians.length > 0 ? (
-                student.guardians.map((guardian) => (
+              {student?.guardians && student?.guardians?.length > 0 ? (
+                student?.guardians?.map((guardian) => (
                   <div key={guardian._id} className="flex flex-col">
                     <span className="text-sm font-medium text-gray-900">
                       {guardian.parent?.name}
@@ -91,7 +91,7 @@ const StudentsCards = React.memo(
             <div className="mt-4 flex justify-end space-x-2">
               <ViewButton navigateTo={`/admin/students/${student._id}`} />
               <EditButton onClick={() => onEditStudent(student)} />
-              <DeleteButton onClick={() => onDeleteStudent(student._id)} />
+              <DeleteButton onClick={() => onDeleteStudent(student)} />
             </div>
           </SelectableCard>
         ))}

@@ -14,7 +14,7 @@ import StudentsTable from "../components/StudentsTable";
 import StudentsToolbar from "../components/StudentsToolbar";
 
 const StudentsPage = () => {
-  const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
+  const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
   const [isShowStudentDeleteModal, setIsShowStudentDeleteModal] = useState(false);
 
   const [searchParams] = useSearchParams();
@@ -27,8 +27,8 @@ const StudentsPage = () => {
     navigate(`/admin/students/${studentToEdit._id}/edit`);
   }, [navigate]);
 
-  const handleDeleteStudent = useCallback((studentId: string) => {
-    setStudentToDelete(studentId);
+  const handleDeleteStudent = useCallback((student: Student) => {
+    setStudentToDelete(student);
     setIsShowStudentDeleteModal(true);
   }, []);
 
@@ -43,7 +43,7 @@ const StudentsPage = () => {
 
   const handleConfirmStudentDelete = useCallback(() => {
     if (studentToDelete) {
-      deleteStudentMutation(studentToDelete, {
+      deleteStudentMutation(studentToDelete._id, {
         onSuccess: () => {
           setIsShowStudentDeleteModal(false);
           setStudentToDelete(null);
@@ -102,17 +102,13 @@ const StudentsPage = () => {
       )}
       <ConfirmationModal
         title="Delete Student"
-        message="Are you sure you want to delete parent? This action cannot be undone."
+        message={`Are you sure you want to delete ${studentToDelete?.name}? This action cannot be undone.`}
         confirmText="Delete"
-        cancelText="Cancel"
         type="danger"
         isOpen={isShowStudentDeleteModal}
         onClose={handleCloseStudentDeleteModal}
-        onConfirm={handleConfirmStudentDelete}
-        isLoading={isDeletingStudent}
-      />
+        onConfirm={handleConfirmStudentDelete}  
+        isLoading={isDeletingStudent} />
     </div>
   );
 };
-
-export default StudentsPage;
