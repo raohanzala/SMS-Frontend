@@ -81,7 +81,7 @@ const PromotionPanel = ({
           disabled={disabled || selectedStudentIds.length === 0 || !targetSessionId || (!useAutoPromotion && targetClassIds.length === 0)}
           startIcon={<FiArrowRight />}
           fullWidth
-          size="lg"
+          
         >
           Promote {selectedStudentIds.length} Student{selectedStudentIds.length !== 1 ? "s" : ""}
         </Button>

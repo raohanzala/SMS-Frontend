@@ -13,7 +13,7 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
   const { addClassMutation, isAddingClass } = useAddClass();
   const { updateClassMutation, isUpdatingClass } = useUpdateClass();
   const { settings } = useSettings();
-  const classLevels = settings?.classLevels || [];
+  const classLevels = settings?.timetable?.classLevels || [];
 
   const isEditMode = !!classToEdit;
   const isClassLoading = isAddingClass || isUpdatingClass;
@@ -57,6 +57,7 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
           handleSubmit(e);
         }}
       >
+        <div className="space-y-4">
         <FormRowVertical
           label="Class Teacher"
           name="classTeacherId"
@@ -106,10 +107,10 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
             {...getFieldProps("monthlyFee")}
           />
         </FormRowVertical>
-
+        </div>
         {/* Submit Button */}
-        <div className="mt-5">
-          <Button fullWidth={true} type="submit" loading={isClassLoading}>
+        <div className="mt-6">
+          <Button fullWidth={true} type="submit" loading={isClassLoading} >
             {!isEditMode ? "Add Class" : "Update Class"}
           </Button>
         </div>

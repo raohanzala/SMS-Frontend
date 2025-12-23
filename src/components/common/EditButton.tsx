@@ -1,4 +1,4 @@
-import { FiEdit } from "react-icons/fi";
+import { Edit } from "lucide-react";
 import Tooltip from "./Tooltip";
 
 interface EditButtonProps {
@@ -12,7 +12,7 @@ const EditButton = ({ onClick }: EditButtonProps) => {
         onClick={onClick}
         className="p-1 text-green-600 hover:text-green-900 transition-colors"
       >
-        <FiEdit className="h-4 w-4" />
+        <Edit className="h-4 w-4" />
       </button>
     </Tooltip>
   );

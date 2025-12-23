@@ -74,6 +74,56 @@ function SearchableSelect({
     }
   };
 
+  const customStyles = {
+    control: (provided: any, state: any) => ({
+      ...provided,
+      borderColor: '#E5E7EB', // same as Input border
+      color: '#1C1C1C', // text-text-primary
+      minHeight: '40px',
+      borderRadius: '0.5rem', // rounded-lg
+      padding: '0 4px', // px-4
+      boxShadow: 'none',
+      '&:hover': {
+        borderColor: '#1E59FF',
+      },
+    }),
+    placeholder: (provided: any) => ({
+      ...provided,
+      fontSize: '14px',
+      fontWeight: '400',
+      lineHeight: '20px',
+      padding: '0 0px',
+      color: '#9ca3af', // placeholder text-text-tertiary
+    }),
+    menu: (provided: any) => ({
+      ...provided,
+      borderRadius: '0.5rem',
+      boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
+      border: '0.5px solid #E5E7EB',
+    }),
+    option: (provided: any, state: any) => ({
+      ...provided,
+      backgroundColor: state.isFocused ? '#E0F2FF' : 'white',
+      color: '#1C1C1C',
+      padding: '8px 12px',
+      cursor: 'pointer',
+    }),
+    multiValue: (provided: any) => ({
+      ...provided,
+      backgroundColor: '#E0F2FF',
+      borderRadius: '0.25rem',
+    }),
+    multiValueLabel: (provided: any) => ({
+      ...provided,
+      color: '#2563EB',
+    }),
+    multiValueRemove: (provided: any) => ({
+      ...provided,
+      color: '#2563EB',
+      ':hover': { backgroundColor: '#2563EB', color: 'white' },
+    }),
+  };
+
   return (
     <div className="mt-1">
       <AsyncSelect
@@ -87,6 +137,7 @@ function SearchableSelect({
         onChange={handleChange}
         isDisabled={isDisabled}
         placeholder={placeholder}
+        styles={customStyles}
       />
     </div>
   );

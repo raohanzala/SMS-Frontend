@@ -26,10 +26,6 @@ const TimetableSettingsSection = ({ settings }: TimetableSettingsSectionProps) =
   const transformClassLevels = (levels: any[] = []) => {
     return levels.map((level) => ({
       name: level.name || "",
-      classIds:
-        level.classIds && level.classIds.length > 0 && typeof level.classIds[0] === "object"
-          ? level.classIds.map((c: any) => c._id || c).filter(Boolean)
-          : (level.classIds as string[]) || [],
       timings: level.timings || {
         startTime: null,
         endTime: null,
@@ -106,7 +102,6 @@ const TimetableSettingsSection = ({ settings }: TimetableSettingsSectionProps) =
             formValues.classLevels.length > 0
               ? formValues.classLevels.map((level) => ({
                   name: level.name,
-                  classIds: level.classIds,
                   ...(level.timings && Object.keys(level.timings).length > 0 && {
                     timings: {
                       ...(level.timings.startTime && { startTime: level.timings.startTime }),
@@ -370,7 +365,6 @@ const ClassLevelsSection = ({ values, errors, setFieldValue, getFieldProps, isLo
               onClick={() =>
                 arrayHelpers.push({
                   name: "",
-                  classIds: [],
                   timings: {
                     startTime: null,
                     endTime: null,
@@ -478,26 +472,6 @@ const LevelCard = ({
               placeholder="e.g. KG, Primary, High"
               {...getFieldProps(`classLevels.${index}.name`)}
               disabled={isLoading}
-            />
-          </FormRowVertical>
-
-          <FormRowVertical
-            label="Select Classes"
-            name={`classLevels.${index}.classIds`}
-            error={(errors.classLevels as any)?.[index]?.classIds as string}
-          >
-            <EntitySelect
-              entity="class"
-              value={level.classIds}
-              onChange={(classIds: string | string[] | null) => {
-                setFieldValue(
-                  `classLevels.${index}.classIds`,
-                  Array.isArray(classIds) ? classIds : [classIds].filter(Boolean)
-                );
-              }}
-              isMulti={true}
-              placeholder="Select classes for this level"
-              isDisabled={isLoading}
             />
           </FormRowVertical>
 

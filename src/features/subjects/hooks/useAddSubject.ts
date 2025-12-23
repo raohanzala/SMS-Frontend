@@ -1,6 +1,7 @@
 import { addSubjectApi } from "@/api/subjects";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-toastify";
+import { toastSuccess } from "@/utils/helpers";
+import { toastError } from "@/utils/helpers";
 
 export function useAddSubject() {
   const queryClient = useQueryClient();
@@ -8,15 +9,11 @@ export function useAddSubject() {
   const { mutate: addSubjectMutation, isPending: isAddingSubject } =
     useMutation({
       mutationFn: addSubjectApi,
-      onSuccess: () => {
-        toast.success("New subject successfully created");
+      onSuccess: (data) => {
+        toastSuccess(data.message || "New subject successfully created");
         queryClient.invalidateQueries({ queryKey: ["subjects"] });
       },
-      onError: (err: { message?: string }) =>
-        toast.error(
-          err.message ||
-          "Failed to create subject"
-        ),
+      onError: (err) => toastError(err)
     });
 
   return { isAddingSubject, addSubjectMutation };

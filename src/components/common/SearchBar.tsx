@@ -1,7 +1,7 @@
 import { useDebounce } from "@/hooks/useDebounce";
 import { useQueryParams } from "@/hooks/useQueryParams";
 import { useEffect, useState, InputHTMLAttributes } from "react";
-import { FiSearch, FiX } from "react-icons/fi";
+import { Search, X } from "lucide-react";
 
 interface SearchBarProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'placeholder'> {
   placeholder?: string;
@@ -31,14 +31,14 @@ const SearchBar = ({
     } else {
       removeParam(paramKey);
     }
-  }, [debouncedValue, paramKey, removeParam, setParam]);
+  }, [debouncedValue]);
 
   return (
     <div
       className={`relative flex focus-within:ring-1 focus-within:ring-primary items-center border rounded-lg px-3 py-[10px] bg-white shadow-sm
         ${fullWidth ? "w-full" : "sm:w-80 w-96"} ${className}`}
     >
-      <FiSearch className="text-gray-400 mr-2" />
+      <Search className="text-gray-400 w-4 h-4 mr-2" />
 
       <input
         type="text"
@@ -55,7 +55,7 @@ const SearchBar = ({
           onClick={() => setSearchValue("")}
           className="ml-2 text-gray-400 hover:text-gray-600"
         >
-          <FiX />
+          <X className="w-4 h-4" />
         </button>
       )}
     </div>

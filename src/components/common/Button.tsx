@@ -1,5 +1,5 @@
 import { ReactNode, ButtonHTMLAttributes } from 'react';
-import { FiLoader } from 'react-icons/fi';
+import { Loader } from 'lucide-react';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success' | 'warning';
 type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -39,11 +39,11 @@ const Button = ({
 
   const variants: Record<ButtonVariant, string> = {
     primary:
-      'bg-primary text-text-white hover:bg-primary-dark active:bg-primary-darker shadow-primary hover:shadow-md',
+      'bg-primary text-text-white gradient-primary active:bg-primary-darker shadow-primary hover:shadow-md',
     secondary:
       'bg-bg-secondary text-text-primary hover:bg-bg-tertiary border border-border',
     outline:
-      'bg-transparent text-primary border border-primary hover:bg-primary hover:text-text-white',
+      'bg-transparent text-text-primary border border-border hover:bg-bg-secondary hover:border-border',
     ghost:
       'bg-transparent text-text-secondary hover:bg-bg-secondary',
     danger:
@@ -69,7 +69,7 @@ const Button = ({
   const classes = `${baseClasses} ${variantClass} ${sizeClass} ${widthClass} ${className}`;
 
   const renderLoaderOrIcon = () => {
-    if (loading) return <FiLoader className="animate-spin" />;
+    if (loading) return <Loader className="animate-spin" />;
     return icon;
   };
 

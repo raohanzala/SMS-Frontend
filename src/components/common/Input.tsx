@@ -1,5 +1,5 @@
 import { useState, InputHTMLAttributes } from "react";
-import { IoMdEye, IoMdEyeOff } from "react-icons/io";
+import { Eye, EyeOff } from "lucide-react";
 
 type InputSize = "medium" | "large";
 
@@ -33,7 +33,7 @@ const Input = ({ name, type = "text", size = "medium", value, onChange, onBlur, 
           className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer text-text-tertiary hover:text-text-secondary"
           onClick={() => setIsPasswordVisible((prev) => !prev)}
         >
-          {isPasswordVisible ? <IoMdEye size={20} /> : <IoMdEyeOff size={20} />}
+          {isPasswordVisible ? <Eye size={20} /> : <EyeOff size={20} />}
         </div>
       )}
     </div>

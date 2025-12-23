@@ -1,6 +1,6 @@
 import { deleteSubjectApi } from "@/api/subjects";
+import { toastError, toastSuccess } from "@/utils/helpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-toastify";
 
 export function useDeleteSubject() {
   const queryClient = useQueryClient();
@@ -8,13 +8,13 @@ export function useDeleteSubject() {
   const { isPending: isDeletingSubject, mutate: deleteSubjectMutation } = useMutation({
     mutationFn: deleteSubjectApi,
 
-    onSuccess: () => {
-      toast.success('Subject successfully deleted');
+    onSuccess: (data) => {
+      toastSuccess(data.message || "Subject successfully deleted");
       queryClient.invalidateQueries({
         queryKey: ["subjects"],
       });
     },
-    onError: (err: { message?: string }) => toast.error(err?.message || "Failed to delete subject")
+    onError: (err) => toastError(err)
   });
 
   return { isDeletingSubject, deleteSubjectMutation };

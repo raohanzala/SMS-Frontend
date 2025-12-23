@@ -26,7 +26,7 @@ const TeacherFormPage = () => {
   const { addTeacherMutation, isAddingTeacher } = useAddTeacher();
   const { updateTeacherMutation, isUpdatingTeacher } = useUpdateTeacher();
   const {settings} = useSettings();
-  const classLevels = settings?.classLevels || [];
+  const classLevels = settings?.timetable?.classLevels || [];
 
   console.log(classLevels)
 
@@ -48,7 +48,7 @@ const TeacherFormPage = () => {
       nationalId: teacher?.nationalId || "",
       salary: teacher?.salary || { amount: 0, currency: "PKR" },
       profileImage: teacher?.profileImage as File | undefined,
-      levelsIds: teacher?.levelsIds || [],
+      levelsIds: teacher?.levels?.map(level => level._id) || [],
     }),
     [teacher]
   );

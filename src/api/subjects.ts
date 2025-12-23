@@ -22,11 +22,8 @@ export const updateSubjectApi = async ({
   return data;
 };
 
-export const deleteSubjectApi = async ({ className, subjectName }) => {
-  console.log(className, subjectName);
-  const { data } = await axiosInstance.delete(
-    `/subjects/class/${className}/subject/${subjectName}`
-  );
+export const deleteSubjectApi = async ({ classId, subjectName }: { classId: string, subjectName: string }) => {
+  const { data } = await axiosInstance.delete(`/subjects/class/${classId}/subject/${subjectName}`);
   return data;
 };
 

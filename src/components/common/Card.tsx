@@ -9,7 +9,7 @@ interface CardProps {
 const Card = ({ children, title, description }: CardProps) => {
   return (
     <div className="bg-bg-main rounded-2xl border shadow-sm overflow-hidden">
-      {(title || description) && <div className="px-8 py-4 border-b">
+      {(title || description) && <div className={`px-8 py-4 border-b ${title ? "border-b-border" : ""}`}>
         {title && <h3 className="text-xl font-semibold text-text-primary">
           {title}
         </h3>}

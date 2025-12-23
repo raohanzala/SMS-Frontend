@@ -276,6 +276,7 @@ const CreateTimetableForm = ({
           <Button
             fullWidth={true}
             type="submit"
+            
             loading={isCreatingTimetable || isUpdatingTimetable}
           >
             {!isEditMode ? "Add Timetable Entry" : "Update Timetable Entry"}

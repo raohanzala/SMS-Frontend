@@ -2,8 +2,8 @@ import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+// import { ToastContainer } from 'react-toastify';
+// import 'react-toastify/dist/ReactToastify.css';
 
 import { store } from './store/store';
 import { SettingsProvider } from './contexts/SettingsContext';
@@ -28,6 +28,7 @@ import StudentDetail from './pages/private/admin/StudentDetail';
 import TeacherDetail from './pages/private/admin/TeacherDetail';
 import ClassAttendance from './pages/private/admin/ClassAttendance';
 import EmployeesAttendance from './pages/private/admin/EmployeesAttendance';
+import { Toaster } from 'sonner';
 // Create a client
 const queryClient = new QueryClient();
 
@@ -160,7 +161,9 @@ function App() {
                 <Route path="*" element={<Navigate to="/login" replace />} />
                 </Routes>
               </Suspense>
-              <ToastContainer position="top-right" autoClose={3000} />
+              {/* <ToastContainer position="top-right" autoClose={3000} /> */}
+              <Toaster position="top-right" richColors />
+
             </div>
           </Router>
         </SettingsProvider>

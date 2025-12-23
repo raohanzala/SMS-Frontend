@@ -88,7 +88,7 @@ const CreateSchoolForm = () => {
             type="submit"
             loading={isCreatingSchool}
             disabled={isCreatingSchool}
-            size="lg"
+            
             // startIcon={<FiSchool className="h-5 w-5" />}
           >
             Create School

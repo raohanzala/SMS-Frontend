@@ -1,5 +1,8 @@
 import { useCallback, useState } from "react";
 import { FiBookOpen } from "react-icons/fi";
+import { useDeleteSubject } from "../hooks/useDeleteSubject";
+import { useSubjects } from "../hooks/useSubjects";
+import { Subject } from "../types/subject.types";
 import ConfirmationModal from "../../../components/common/ConfirmationModal";
 import EmptyState from "../../../components/common/EmptyState";
 import ErrorMessage from "../../../components/common/ErrorMessage";
@@ -8,26 +11,23 @@ import Spinner from "../../../components/common/Spinner";
 import ManageSubjectModal from "../components/ManageSubjectModal";
 import SubjectsCards from "../components/SubjectsCards";
 import SubjectsToolbar from "../components/SubjectsToolbar";
-import { useDeleteSubject } from "../hooks/useDeleteSubject";
-import { useSubjects } from "../hooks/useSubjects";
-import { Subject } from "../types/subject.types";
 
 const SubjectsPage = () => {
   const [subjectToEdit, setSubjectToEdit] = useState<Subject | null>(null);
-  const [subjectToDelete, setSubjectToDelete] = useState<string | null>(null);
+  const [subjectToDelete, setSubjectToDelete] = useState<Subject | null>(null);
   const [isShowManageSubjectModal, setIsShowManageSubjectModal] = useState(false);
   const [isShowSubjectDeleteModal, setIsShowSubjectDeleteModal] = useState(false);
 
   const { pagination, subjects, subjectsError, isSubjectsLoading } = useSubjects();
   const { deleteSubjectMutation, isDeletingSubject } = useDeleteSubject();
 
-  const handleEditSubject = useCallback((subjectToEdit: Subject) => {
-    setSubjectToEdit(subjectToEdit);
+  const handleEditSubject = useCallback((subject: Subject) => {
+    setSubjectToEdit(subject);
     setIsShowManageSubjectModal(true);
   }, []);
 
-  const handleDeleteSubject = useCallback((subjectId: string) => {
-    setSubjectToDelete(subjectId);
+  const handleDeleteSubject = useCallback((subject: Subject) => {
+    setSubjectToDelete(subject);
     setIsShowSubjectDeleteModal(true);
   }, []);
 
@@ -47,7 +47,7 @@ const SubjectsPage = () => {
 
   const handleConfirmSubjectDelete = useCallback(() => {
     if (subjectToDelete) {
-      deleteSubjectMutation(subjectToDelete, {
+      deleteSubjectMutation({classId: subjectToDelete.class._id, subjectName: subjectToDelete.name}, {
         onSuccess: () => {
           setIsShowSubjectDeleteModal(false);
           setSubjectToDelete(null);

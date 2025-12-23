@@ -24,7 +24,6 @@ export interface LevelTimings {
 
 export interface ClassLevel {
   name: string;
-  classIds: string[];
   timings?: LevelTimings;
   _id?: string;
 }

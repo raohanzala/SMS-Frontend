@@ -62,7 +62,7 @@ const SubjectsCards = React.memo(
               <div className="mt-4 flex justify-end space-x-2">
                 <ViewButton navigateTo={`/admin/subjects/${subject._id}`} />
                 <EditButton onClick={() => onEditSubject(subject)} />
-                <DeleteButton onClick={() => onDeleteSubject({subjectName : subject.name, className : subject.class})} />
+                <DeleteButton onClick={() => onDeleteSubject(subject)} />
               </div>
             </SelectableCard>
           );

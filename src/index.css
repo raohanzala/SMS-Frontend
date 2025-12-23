@@ -24,7 +24,7 @@ input{
   outline: none;
 }
 
-button:hover{
+.gradient-primary:hover{
  background: linear-gradient(138deg, rgba(118, 160, 255, 0.7) 0%, rgba(0, 61, 255, 0.7) 25.08%, #9747ffb3 56.38%, rgba(118, 160, 255, 0.7) 100%), rgb(0, 61, 255)
 }
 

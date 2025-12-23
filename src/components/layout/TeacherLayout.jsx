@@ -1,34 +1,33 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import {
-  FiHome,
-  FiClipboard,
-  FiBookOpen,
-  FiBarChart2,
-  FiCalendar,
-  FiMessageSquare,
-  FiMenu,
-  FiX,
-  FiLogOut,
-  FiBell,
-} from 'react-icons/fi';
+  Home,
+  Clipboard,
+  BookOpen,
+  BarChart2,
+  Calendar,
+  MessageSquare,
+  Menu,
+  X,
+  LogOut,
+  Bell,
+} from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '@/store/slices/authSlice';
+import { logout } from '@/store/slices/authSlice';  
 
 const TeacherLayout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  // const { user, logout } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);  
   const { user } = useSelector((state) => state.auth)
   const dispatch = useDispatch()
   const location = useLocation();
 
   const navigation = [
-    { name: 'Dashboard', href: '/teacher/dashboard', icon: FiHome },
-    { name: 'Attendance', href: '/teacher/attendance', icon: FiClipboard },
-    { name: 'Homework', href: '/teacher/homework', icon: FiBookOpen },
-    { name: 'Marks', href: '/teacher/marks', icon: FiBarChart2 },
-    { name: 'Timetable', href: '/teacher/timetable', icon: FiCalendar },
-    { name: 'Messages', href: '/teacher/messages', icon: FiMessageSquare },
+    { name: 'Dashboard', href: '/teacher/dashboard', icon: Home },
+    { name: 'Attendance', href: '/teacher/attendance', icon: Clipboard },
+    { name: 'Homework', href: '/teacher/homework', icon: BookOpen },
+    { name: 'Marks', href: '/teacher/marks', icon: BarChart2 },
+    { name: 'Timetable', href: '/teacher/timetable', icon: Calendar },
+    { name: 'Messages', href: '/teacher/messages', icon: MessageSquare },
   ];
 
   return (
@@ -43,7 +42,7 @@ const TeacherLayout = () => {
               onClick={() => setSidebarOpen(false)}
               className="text-gray-400 hover:text-gray-600"
             >
-              <FiX className="h-6 w-6" />
+              <X className="h-6 w-6" />
             </button>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
@@ -104,7 +103,7 @@ const TeacherLayout = () => {
             className="-m-2.5 p-2.5 text-gray-700 lg:hidden"
             onClick={() => setSidebarOpen(true)}
           >
-            <FiMenu className="h-6 w-6" />
+            <Menu className="h-6 w-6" />
           </button>
 
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
@@ -112,7 +111,7 @@ const TeacherLayout = () => {
             <div className="flex items-center gap-x-4 lg:gap-x-6">
               {/* Notifications */}
               <button className="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500">
-                <FiBell className="h-6 w-6" />
+                <Bell className="h-6 w-6" />
               </button>
 
               {/* Profile dropdown */}
@@ -131,7 +130,7 @@ const TeacherLayout = () => {
                     onClick={() => dispatch(logout())}
                     className="flex items-center text-gray-400 hover:text-gray-600"
                   >
-                    <FiLogOut className="h-5 w-5" />
+                    <LogOut className="h-5 w-5" />
                   </button>
                 </div>
               </div>

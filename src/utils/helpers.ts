@@ -1,4 +1,4 @@
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 export const formatShortDate = (isoDate: string): string => {
   if (!isoDate) return '';

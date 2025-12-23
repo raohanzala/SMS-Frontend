@@ -1,4 +1,4 @@
-import { FiEye } from "react-icons/fi";
+import { Eye } from "lucide-react";
 import Tooltip from "./Tooltip";
 import { useNavigate } from "react-router-dom";
 
@@ -14,7 +14,7 @@ const ViewButton = ({ navigateTo }: ViewButtonProps) => {
         onClick={() => navigate(navigateTo)}
         className="p-1 text-blue-600 hover:text-blue-900 transition-colors"
       >
-        <FiEye className="h-4 w-4" />
+        <Eye className="h-4 w-4" />
       </button>
     </Tooltip >
   );

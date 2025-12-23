@@ -1,4 +1,4 @@
-import { FiX } from "react-icons/fi";
+import { X } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
 export default function MobileSidebar({ sidebarOpen, setSidebarOpen, navigation }) {
@@ -14,7 +14,7 @@ export default function MobileSidebar({ sidebarOpen, setSidebarOpen, navigation 
         <div className="flex h-16 items-center justify-between px-4">
           <h1 className="text-xl font-bold text-gray-900">Parent Portal</h1>
           <button onClick={() => setSidebarOpen(false)} className="text-gray-400 hover:text-gray-600">
-            <FiX className="h-6 w-6" />
+            <X className="h-6 w-6" />
           </button>
         </div>
         <nav className="flex-1 space-y-1 px-2 py-4">

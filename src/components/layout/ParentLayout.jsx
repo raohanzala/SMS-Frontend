@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import {
-  FiHome,
-  FiDollarSign,
-  FiBarChart2,
-  FiMessageSquare,
-  FiBell,
-  FiMenu,
-  FiX,
-  FiLogOut,
-} from 'react-icons/fi';
+  Home,
+  DollarSign,
+  BarChart2,
+  MessageSquare,
+  Bell,
+  Menu,
+  X,
+  LogOut,
+} from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '@/store/slices/authSlice';
 
@@ -20,11 +20,11 @@ const ParentLayout = () => {
   const location = useLocation();
 
   const navigation = [
-    { name: 'Dashboard', href: '/parent/dashboard', icon: FiHome },
-    { name: 'Fees', href: '/parent/fees', icon: FiDollarSign },
-    { name: 'Results', href: '/parent/results', icon: FiBarChart2 },
-    { name: 'Messages', href: '/parent/messages', icon: FiMessageSquare },
-    { name: 'Notices', href: '/parent/notices', icon: FiBell },
+    { name: 'Dashboard', href: '/parent/dashboard', icon: Home },
+    { name: 'Fees', href: '/parent/fees', icon: DollarSign },
+    { name: 'Results', href: '/parent/results', icon: BarChart2 },
+    { name: 'Messages', href: '/parent/messages', icon: MessageSquare },
+    { name: 'Notices', href: '/parent/notices', icon: Bell },
   ];
 
   return (
@@ -39,7 +39,7 @@ const ParentLayout = () => {
               onClick={() => setSidebarOpen(false)}
               className="text-gray-400 hover:text-gray-600"
             >
-              <FiX className="h-6 w-6" />
+              <X className="h-6 w-6" />
             </button>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
@@ -100,7 +100,7 @@ const ParentLayout = () => {
             className="-m-2.5 p-2.5 text-gray-700 lg:hidden"
             onClick={() => setSidebarOpen(true)}
           >
-            <FiMenu className="h-6 w-6" />
+            <Menu className="h-6 w-6" />
           </button>
 
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
@@ -108,7 +108,7 @@ const ParentLayout = () => {
             <div className="flex items-center gap-x-4 lg:gap-x-6">
               {/* Notifications */}
               <button className="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500">
-                <FiBell className="h-6 w-6" />
+                <Bell className="h-6 w-6" />
               </button>
 
               {/* Profile dropdown */}
@@ -127,7 +127,7 @@ const ParentLayout = () => {
                     onClick={() => dispatch(logout())}
                     className="flex items-center text-gray-400 hover:text-gray-600"
                   >
-                    <FiLogOut className="h-5 w-5" />
+                    <LogOut className="h-5 w-5" />
                   </button>
                 </div>
               </div>

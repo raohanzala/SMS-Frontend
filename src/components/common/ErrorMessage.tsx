@@ -1,4 +1,4 @@
-import { FiAlertTriangle } from "react-icons/fi";
+import { AlertTriangle } from "lucide-react";
 
 interface ErrorMessageProps {
   message?: string;
@@ -8,7 +8,7 @@ interface ErrorMessageProps {
 export default function ErrorMessage({ message = "Something went wrong", onRetry }: ErrorMessageProps) {
   return (
     <div className="flex flex-col items-center justify-center py-10 px-4 bg-red-50 border border-red-200 rounded-lg text-center">
-      <FiAlertTriangle className="w-10 h-10 text-red-500 mb-3" />
+      <AlertTriangle className="w-10 h-10 text-red-500 mb-3" />
       <h3 className="text-lg font-medium text-red-700">{message}</h3>
       {onRetry && (
         <button

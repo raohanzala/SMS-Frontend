@@ -1,6 +1,6 @@
 import { updateSubjectApi } from "@/api/subjects";
+import { toastError, toastSuccess } from "@/utils/helpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
 
 export function useUpdateSubject() {
   const queryClient = useQueryClient();
@@ -9,14 +9,12 @@ export function useUpdateSubject() {
     mutationFn: updateSubjectApi,
 
     onSuccess: (data) => {
-      toast.success(data.message || "Subject successfully updated");
+      toastSuccess(data.message || "Subject successfully updated");
       queryClient.invalidateQueries({
         queryKey: ["subjects"],
       });
     },
-    onError: (err: { message?: string; response?: { data?: { message?: string } } }) => {
-      toast.error(err?.response?.data?.message || err.message || "Failed to update subject");
-    },
+    onError: (err) => toastError(err)
   });
 
   return { isUpdatingSubject, updateSubjectMutation };

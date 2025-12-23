@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router-dom";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PaginationData {
   currentPage: number;
@@ -68,7 +68,7 @@ export default function Pagination({ pagination }: PaginationProps) {
               className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50"
             >
               <span className="sr-only">Previous</span>
-              <FiChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-5 w-5" />
             </button>
 
             {/* Page numbers */}
@@ -92,7 +92,7 @@ export default function Pagination({ pagination }: PaginationProps) {
               className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50"
             >
               <span className="sr-only">Next</span>
-              <FiChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-5 w-5" />
             </button>
           </nav>
         </div>

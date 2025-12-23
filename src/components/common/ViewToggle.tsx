@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { FiGrid, FiList } from "react-icons/fi";
+import { Grid, List } from "lucide-react";
 import Tooltip from "./Tooltip";
 import { useQueryParams } from "@/hooks/useQueryParams";
 
@@ -22,7 +22,7 @@ export default function ViewToggle() {
               : "bg-white text-gray-700 hover:bg-gray-50"
             }`}
         >
-          <FiList className="w-4 h-4" />
+          <List className="w-4 h-4" />
         </button>
       </Tooltip>
 
@@ -35,7 +35,7 @@ export default function ViewToggle() {
               : "bg-white text-gray-700 hover:bg-gray-50"
             }`}
         >
-          <FiGrid className="w-4 h-4" />
+          <Grid className="w-4 h-4" />
         </button>
       </Tooltip>
     </div>

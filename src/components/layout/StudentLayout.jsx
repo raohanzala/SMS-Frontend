@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import {
-  FiHome,
-  FiBookOpen,
-  FiClipboard,
-  FiBarChart2,
-  FiBell,
-  FiUser,
-  FiMenu,
-  FiX,
-  FiLogOut,
-} from 'react-icons/fi';
+  Home,
+  BookOpen,
+  Clipboard,
+  BarChart2,
+  Bell,
+  User,
+  Menu,
+  X,
+  LogOut,
+} from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '@/store/slices/authSlice';
 
@@ -21,12 +21,12 @@ const StudentLayout = () => {
   const location = useLocation();
 
   const navigation = [
-    { name: 'Dashboard', href: '/student/dashboard', icon: FiHome },
-    { name: 'Homework', href: '/student/homework', icon: FiBookOpen },
-    { name: 'Attendance', href: '/student/attendance', icon: FiClipboard },
-    { name: 'Results', href: '/student/results', icon: FiBarChart2 },
-    { name: 'Notices', href: '/student/notices', icon: FiBell },
-    { name: 'Profile', href: '/student/profile', icon: FiUser },
+    { name: 'Dashboard', href: '/student/dashboard', icon: Home },
+    { name: 'Homework', href: '/student/homework', icon: BookOpen },
+    { name: 'Attendance', href: '/student/attendance', icon: Clipboard },
+    { name: 'Results', href: '/student/results', icon: BarChart2 },
+    { name: 'Notices', href: '/student/notices', icon: Bell },
+    { name: 'Profile', href: '/student/profile', icon: User },
   ];
 
   return (
@@ -41,7 +41,7 @@ const StudentLayout = () => {
               onClick={() => setSidebarOpen(false)}
               className="text-gray-400 hover:text-gray-600"
             >
-              <FiX className="h-6 w-6" />
+              <X className="h-6 w-6" />
             </button>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
@@ -102,7 +102,7 @@ const StudentLayout = () => {
             className="-m-2.5 p-2.5 text-gray-700 lg:hidden"
             onClick={() => setSidebarOpen(true)}
           >
-            <FiMenu className="h-6 w-6" />
+            <Menu className="h-6 w-6" />
           </button>
 
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
@@ -110,7 +110,7 @@ const StudentLayout = () => {
             <div className="flex items-center gap-x-4 lg:gap-x-6">
               {/* Notifications */}
               <button className="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500">
-                <FiBell className="h-6 w-6" />
+                <Bell className="h-6 w-6" />
               </button>
 
               {/* Profile dropdown */}
@@ -129,7 +129,7 @@ const StudentLayout = () => {
                     onClick={() => dispatch(logout())}
                     className="flex items-center text-gray-400 hover:text-gray-600"
                   >
-                    <FiLogOut className="h-5 w-5" />
+                    <LogOut className="h-5 w-5" />
                   </button>
                 </div>
               </div>

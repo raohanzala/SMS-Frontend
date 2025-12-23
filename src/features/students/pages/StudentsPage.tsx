@@ -112,3 +112,5 @@ const StudentsPage = () => {
     </div>
   );
 };
+
+export default StudentsPage;

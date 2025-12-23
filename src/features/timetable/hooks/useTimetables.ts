@@ -20,11 +20,11 @@ function transformTimetableData(
       day.periods.forEach((period) => {
         const subjectId =
           typeof period.subjectId === "object"
-            ? period.subjectId
-            : { _id: period.subjectId, name: "" };
+            ? period?.subjectId
+            : { _id: period?.subjectId, name: "" };
         const teacherId =
           typeof period.teacherId === "object"
-            ? period.teacherId
+            ? period?.teacherId
             : { _id: period.teacherId, name: "" };
         const originalTeacher =
           period.originalTeacherId && typeof period.originalTeacherId === "object"
@@ -52,7 +52,7 @@ function transformTimetableData(
           period: period.period,
           startTime: period.startTime,
           endTime: period.endTime,
-          subject: typeof subjectId === "object" ? subjectId.name : subjectId,
+          subject: typeof subjectId === "object" ? subjectId?.name : subjectId,
           subjectId: subjectId,
           teacher: teacherId,
           room: period.room,

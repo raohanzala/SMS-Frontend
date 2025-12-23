@@ -63,8 +63,8 @@ const CreateSubjectForm = ({
           e.preventDefault();
           handleSubmit(e);
         }}
-        className="space-y-4"
       >
+        <div className="space-y-4">
         <FormRowVertical label="Class" name="classId" error={errors.classId}>
           <EntitySelect
             entity="class"
@@ -107,10 +107,13 @@ const CreateSubjectForm = ({
           />
         </FormRowVertical>
 
-        <div>
+        </div>
+
+        <div className="mt-6">
           <Button
             fullWidth
             type="submit"
+            
             disabled={isLoadingSubject}
             loading={isLoadingSubject}
           >
