@@ -11,6 +11,7 @@ import { useEmployee } from "@/features/employees/hooks/useEmployee";
 import { addEmployeeSchema } from "@/features/employees/validations/employee.validation";
 import ImageCropperInput from "@/components/common/ImageCropperInput";
 import EntitySelect from "@/components/common/EntitySelect";
+import Card from "@/components/common/Card";
 
 const EmployeeFormPage = () => {
   const navigate = useNavigate();
@@ -83,11 +84,18 @@ const EmployeeFormPage = () => {
     <div className="space-y-6">
       {/* HEADER */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">
+        <div>
+        <h2 className="text-3xl font-bold text-text-primary">
           {isEditMode ? "Edit Employee" : "Add New Employee"}
         </h2>
+        <p className="text-sm text-text-secondary mt-2">
+            {isEditMode
+              ? "Update employee information and academic details"
+              : "Fill in the details to create a new employee profile"}
+        </p>
+        </div>
         <div className="flex gap-2">
-          <Button variant="ghost" onClick={handleCancel}>Cancel</Button>
+          <Button variant="outline" onClick={handleCancel}>Cancel</Button>
           <Button onClick={() => handleSubmit()} loading={isEmployeePending}>
             {isEditMode ? "Update Employee" : "Create Employee"}
           </Button>
@@ -95,7 +103,6 @@ const EmployeeFormPage = () => {
       </div>
 
       {/* FORM CARD */}
-      <div className="bg-white rounded-xl shadow p-5">
         <FormikProvider value={formik}>
           <form
             onSubmit={(e) => {
@@ -104,23 +111,45 @@ const EmployeeFormPage = () => {
             }}
             className="space-y-6"
           >
-            <div className="md:col-span-1 flex justify-center md:justify-start">
-              <ImageCropperInput
-                value={values.profileImage}
-                onChange={(file) => setFieldValue("profileImage", file)}
-                aspect={1}
-              />
-            </div>
+            <Card title="Employee Information" description="Basic details and profile information">
+              <div className="p-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                  {/* Profile Image */}
+                  <div className="flex justify-center lg:justify-start">
+                    <div className="relative">
+                      <ImageCropperInput
+                        value={values.profileImage}
+                        onChange={(file) => setFieldValue("profileImage", file)}
+                        aspect={1}
+                      />
+                    </div>
+                  </div>
 
-            {/* 1️⃣ BASIC INFORMATION */}
-            <section>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormRowVertical label="Full Name" name="name" error={errors.name}>
-                  <Input {...getFieldProps("name")} placeholder="Enter full name" disabled={isEmployeePending} />
+              <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormRowVertical 
+                  label="Full Name" 
+                  name="name" 
+                  error={errors.name}
+                  required
+                >
+                  <Input 
+                    {...getFieldProps("name")} 
+                    placeholder="Enter full name" 
+                    disabled={isEmployeePending} 
+                  />
                 </FormRowVertical>
 
-                <FormRowVertical label="Email" name="email" error={errors.email}>
-                  <Input {...getFieldProps("email")} placeholder="Enter email" disabled={isEmployeePending} />
+                <FormRowVertical 
+                  label="Email" 
+                  name="email" 
+                  error={errors.email}
+                  required
+                >
+                  <Input 
+                    {...getFieldProps("email")} 
+                    placeholder="Enter email" 
+                    disabled={isEmployeePending} 
+                  />
                 </FormRowVertical>
 
                 <FormRowVertical label="Phone" name="phone" error={errors.phone}>
@@ -145,31 +174,23 @@ const EmployeeFormPage = () => {
                   />
                 </FormRowVertical>
               </div>
-            </section>
 
-            {/* 2️⃣ PERSONAL DETAILS */}
-            <section>
-              <FormRowVertical label="Address" name="address" error={errors.address}>
-                <Input {...getFieldProps("address")} placeholder="Enter address" disabled={isEmployeePending} />
-              </FormRowVertical>
+                </div>
+              </div>
+            </Card>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormRowVertical label="Gender" name="gender" error={errors.gender}>
-                  <div className="flex gap-4">
-                    {["male", "female"].map((g) => (
-                      <label key={g} className="flex items-center gap-2">
-                        <input
-                          type="radio"
-                          name="gender"
-                          value={g}
-                          checked={values.gender === g}
-                          onChange={() => setFieldValue("gender", g)}
-                          disabled={isEmployeePending}
-                        />
-                        {g.charAt(0).toUpperCase() + g.slice(1)}
-                      </label>
-                    ))}
-                  </div>
+
+
+            {/* 3️⃣ WORK DETAILS */}
+            <Card title="Employment Information" description="Job-related and professional details">
+            <div className="p-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormRowVertical label="Experience" name="experience">
+                  <Input {...getFieldProps("experience")} placeholder="Enter experience" disabled={isEmployeePending} />
+                </FormRowVertical>
+
+                <FormRowVertical label="Education" name="education">
+                  <Input {...getFieldProps("education")} placeholder="Enter education" disabled={isEmployeePending} />
                 </FormRowVertical>
 
                 <FormRowVertical label="Date of Joining" name="dateOfJoining">
@@ -180,43 +201,13 @@ const EmployeeFormPage = () => {
                     disabled={isEmployeePending}
                   />
                 </FormRowVertical>
-
-                <FormRowVertical label="Date of Birth" name="dob">
-                  <Input
-                    type="date"
-                    value={values.dob || ""}
-                    onChange={(e) => setFieldValue("dob", e.target.value)}
-                    disabled={isEmployeePending}
-                  />
-                </FormRowVertical>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormRowVertical label="Husband Name" name="husband">
-                  <Input {...getFieldProps("husband")} placeholder="Optional" disabled={isEmployeePending} />
-                </FormRowVertical>
-
-                <FormRowVertical label="Religion" name="religion">
-                  <Input {...getFieldProps("religion")} placeholder="Enter religion" disabled={isEmployeePending} />
-                </FormRowVertical>
-              </div>
-            </section>
-
-            {/* 3️⃣ WORK DETAILS */}
-            <section>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormRowVertical label="Experience" name="experience">
-                  <Input {...getFieldProps("experience")} placeholder="Enter experience" disabled={isEmployeePending} />
-                </FormRowVertical>
-
-                <FormRowVertical label="Education" name="education">
-                  <Input {...getFieldProps("education")} placeholder="Enter education" disabled={isEmployeePending} />
-                </FormRowVertical>
-              </div>
-            </section>
+            </div>
+            </Card>
 
             {/* 4️⃣ SALARY */}
-            <section>
+            <Card title="Salary Information" description="Compensation and payment details">
+            <div className="p-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormRowVertical label="Amount" name="salary.amount">
                   <Input
@@ -232,18 +223,62 @@ const EmployeeFormPage = () => {
                   />
                 </FormRowVertical>
               </div>
-            </section>
-
-            {/* ACTION BUTTONS */}
-            <div className="flex justify-end gap-2">
-              <Button variant="ghost" onClick={handleCancel}>Cancel</Button>
-              <Button type="submit" loading={isEmployeePending}>
-                {isEditMode ? "Update Employee" : "Create Employee"}
-              </Button>
             </div>
+            </Card>
+
+            {/* 2️⃣ PERSONAL DETAILS */}
+            <Card
+              title="Other Information"
+              description="Additional personal or administrative details"
+            >
+              <div className="p-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormRowVertical label="Date of Birth" name="dob">
+                    <Input
+                      type="date"
+                      value={values.dob || ""}
+                      onChange={(e) => setFieldValue("dob", e.target.value)}
+                      disabled={isEmployeePending}
+                   />
+                 </FormRowVertical>
+
+                <FormRowVertical label="Address" name="address" error={errors.address}>
+                  <Input {...getFieldProps("address")} placeholder="Enter address" disabled={isEmployeePending} />
+                </FormRowVertical>
+
+                  <FormRowVertical label="Religion" name="religion">
+                    <Input {...getFieldProps("religion")} placeholder="Enter religion" disabled={isEmployeePending} />
+                 </FormRowVertical>
+          
+                  <FormRowVertical label="Husband Name" name="husband">
+                    <Input {...getFieldProps("husband")} placeholder="Optional" disabled={isEmployeePending} />
+                  </FormRowVertical>
+
+                  <FormRowVertical label="Gender" name="gender" error={errors.gender}>
+                    <div className="flex gap-4">
+                      {["male", "female"].map((g) => (
+                        <label key={g} className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="gender"
+                            value={g}
+                            checked={values.gender === g}
+                            onChange={() => setFieldValue("gender", g)}
+                            disabled={isEmployeePending}
+                          />
+                            {g.charAt(0).toUpperCase() + g.slice(1)}
+                        </label>
+                      ))}
+                    </div>
+                  </FormRowVertical>
+          
+                </div>
+          
+             </div>
+          
+            </Card>
           </form>
         </FormikProvider>
-      </div>
     </div>
   );
 };

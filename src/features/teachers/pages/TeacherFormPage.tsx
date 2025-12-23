@@ -15,6 +15,7 @@ import { addTeacherSchema } from "../validations/teacher.validation";
 import ImageCropperInput from "@/components/common/ImageCropperInput";
 import EntitySelect from "@/components/common/EntitySelect";
 import { useSettings } from "@/features/settings/hooks/useSettings";
+import Card from "@/components/common/Card";
 
 const TeacherFormPage = () => {
   const navigate = useNavigate();
@@ -101,14 +102,22 @@ const TeacherFormPage = () => {
   const toErr = (e: unknown): string | undefined => (typeof e === "string" ? e : undefined);
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-7xl mx-auto space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">
+        <div>
+        <h2 className="text-3xl font-bold text-text-primary">
           {isEditMode ? "Edit Teacher" : "Add New Teacher"}
         </h2>
+        <p className="text-sm text-text-secondary mt-2">
+            {isEditMode
+              ? "Update teacher information and academic details"
+              : "Fill in the details to create a new teacher profile"}
+          </p>
+          </div>
+
         <div className="flex gap-2">
-          <Button variant="ghost" onClick={handleCancel}>
+          <Button variant="outline" onClick={handleCancel}>
             Cancel
           </Button>
           <Button onClick={() => handleSubmit()} loading={isBusy}>
@@ -118,92 +127,72 @@ const TeacherFormPage = () => {
       </div>
 
       {/* Form Container */}
-      <div className="bg-white rounded-xl shadow p-5">
         <FormikProvider value={formik}>
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleSubmit(e);
             }}
-            className="space-y-6"
+            className="space-y-8"
           >
-             <div className="md:col-span-1 flex justify-center md:justify-start">
-              <ImageCropperInput
-                value={values.profileImage}
-                onChange={(file) => setFieldValue("profileImage", file)}
-                aspect={1}
-              />
-            </div>
-            {/* Section 1: Basic Info */}
-            <h3 className="text-lg font-medium text-gray-700">Basic Info</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormRowVertical label="Full Name" name="name" error={toErr(errors.name)}>
-                <Input type="text" placeholder="Enter full name" disabled={isBusy} {...getFieldProps("name")} />
-              </FormRowVertical>
-
-              <FormRowVertical label="Email Address" name="email" error={toErr(errors.email)}>
-                <Input type="email" placeholder="Enter email" disabled={isBusy} {...getFieldProps("email")} />
-              </FormRowVertical>
-
-              <FormRowVertical label="Phone" name="phone" error={toErr(errors.phone)}>
-                <Input type="text" placeholder="Enter phone" disabled={isBusy} {...getFieldProps("phone")} />
-              </FormRowVertical>
-
-              <FormRowVertical label="Gender" name="gender" error={toErr(errors.gender)}>
-                <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="male"
-                      checked={values.gender === "male"}
-                      onChange={() => setFieldValue("gender", "male")}
-                      disabled={isBusy}
+          <Card 
+            title="Teacher Information" 
+            description="Basic details and profile information"
+          >
+            <div className="p-8">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                {/* Profile image */}
+                <div className="flex justify-center lg:justify-start">
+                  <div className="relative">
+                    <ImageCropperInput
+                      value={values.profileImage}
+                      onChange={(file) => setFieldValue("profileImage", file)}
+                      aspect={1}
                     />
-                    Male
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="female"
-                      checked={values.gender === "female"}
-                      onChange={() => setFieldValue("gender", "female")}
-                      disabled={isBusy}
-                    />
-                    Female
-                  </label>
+                  </div>
                 </div>
-              </FormRowVertical>
+
+                { /* Section 1: Basic Info */}
+                <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormRowVertical 
+                    label="Full Name" 
+                    name="name" 
+                    error={toErr(errors.name)}
+                    required
+                  >
+                    <Input 
+                      type="text" 
+                      placeholder="Enter full name" 
+                      disabled={isBusy} {...getFieldProps("name")} 
+                    />
+                  </FormRowVertical>
+
+                  <FormRowVertical 
+                    label="Email"
+                    name="email" 
+                    error={toErr(errors.email)}
+                    required
+                  >
+                    <Input 
+                      type="email" 
+                      placeholder="Enter email" 
+                      disabled={isBusy} {...getFieldProps("email")} 
+                    />
+                  </FormRowVertical>
+
+                  <FormRowVertical label="Phone" name="phone" error={toErr(errors.phone)}>
+                    <Input type="text" placeholder="Enter phone" disabled={isBusy} {...getFieldProps("phone")} />
+                  </FormRowVertical>
+                </div>
+
+              </div>
             </div>
+          </Card>
 
-            {/* Section 2: Personal Info */}
-            <h3 className="text-lg font-medium text-gray-700">Personal Info</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormRowVertical label="Address" name="address" error={toErr(errors.address)}>
-                <Input type="text" placeholder="Enter address" disabled={isBusy} {...getFieldProps("address")} />
-              </FormRowVertical>
-
-              <FormRowVertical label="Religion" name="religion" error={toErr(errors.religion)}>
-                <Input type="text" placeholder="Enter religion" disabled={isBusy} {...getFieldProps("religion")} />
-              </FormRowVertical>
-
-              <FormRowVertical label="Date of Birth" name="dob" error={toErr(errors.dob)}>
-                <Input
-                  type="date"
-                  value={values.dob || ""}
-                  onChange={(e) => setFieldValue("dob", e.target.value)}
-                  disabled={isBusy}
-                />
-              </FormRowVertical>
-
-              <FormRowVertical label="National ID" name="nationalId" error={toErr(errors.nationalId)}>
-                <Input type="text" placeholder="Enter CNIC" disabled={isBusy} {...getFieldProps("nationalId")} />
-              </FormRowVertical>
-            </div>
 
             {/* Section 3: Professional Info */}
-            <h3 className="text-lg font-medium text-gray-700">Professional Info</h3>
+            <Card title="Professional Information" description="Teaching roles, subjects, and class assignments">
+              <div className="p-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <FormRowVertical label="Education" name="education" error={toErr(errors.education)}>
                 <Input type="text" placeholder="Enter education" disabled={isBusy} {...getFieldProps("education")} />
@@ -225,8 +214,6 @@ const TeacherFormPage = () => {
                   disabled={isBusy}
                 />
               </FormRowVertical>
-            </div>
-
             <FormRowVertical label="Teacher Level" name="levelsIds" error={toErr(errors.levelsIds)}>
               <EntitySelect
                 entity="static"
@@ -238,8 +225,13 @@ const TeacherFormPage = () => {
                 isDisabled={isBusy}
               />
             </FormRowVertical>
+            </div>
+            </div>
+            </Card>
+
             {/* Section 5: Salary */}
-            <h3 className="text-lg font-medium text-gray-700">Salary</h3>
+            <Card title="Salary & Employment Details" description="Compensation and employment-related information">
+              <div className="p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormRowVertical label="Salary Amount" name="salary.amount" error={toErr(errors.salary?.amount)}>
                 <Input
@@ -268,19 +260,76 @@ const TeacherFormPage = () => {
                 />
               </FormRowVertical>
             </div>
+            </div>
+            </Card>
+
+            {/* Section 6: Other informations */}
+            <Card title="Other Information" description="Additional personal or administrative details">
+              <div className="p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormRowVertical label="Date of Birth" name="dob" error={toErr(errors.dob)}>
+                <Input
+                  type="date"
+                  value={values.dob || ""}
+                  onChange={(e) => setFieldValue("dob", e.target.value)}
+                  disabled={isBusy}
+                />
+              </FormRowVertical>
+
+              <FormRowVertical label="Address" name="address" error={toErr(errors.address)}>
+                <Input type="text" placeholder="Enter address" disabled={isBusy} {...getFieldProps("address")} />
+              </FormRowVertical>
+
+              <FormRowVertical label="Religion" name="religion" error={toErr(errors.religion)}>
+                <Input type="text" placeholder="Enter religion" disabled={isBusy} {...getFieldProps("religion")} />
+              </FormRowVertical>
+
+              <FormRowVertical label="National ID" name="nationalId" error={toErr(errors.nationalId)}>
+                <Input type="text" placeholder="Enter CNIC" disabled={isBusy} {...getFieldProps("nationalId")} />
+              </FormRowVertical>
+
+              <FormRowVertical label="Gender" name="gender" error={toErr(errors.gender)}>
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="male"
+                      checked={values.gender === "male"}
+                      onChange={() => setFieldValue("gender", "male")}
+                      disabled={isBusy}
+                    />
+                    Male
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="female"
+                      checked={values.gender === "female"}
+                      onChange={() => setFieldValue("gender", "female")}
+                      disabled={isBusy}
+                    />
+                    Female
+                  </label>
+                </div>
+
+              </FormRowVertical>
+              </div>
+            </div>
+          </Card>
 
             {/* Actions */}
-            <div className="flex justify-end gap-2">
+            {/* <div className="flex justify-end gap-2">
               <Button variant="ghost" type="button" onClick={handleCancel}>
                 Cancel
               </Button>
               <Button type="submit" loading={isBusy}>
                 {isEditMode ? "Update Teacher" : "Create Teacher"}
               </Button>
-            </div>
+            </div> */}
           </form>
         </FormikProvider>
-      </div>
     </div>
   );
 };
