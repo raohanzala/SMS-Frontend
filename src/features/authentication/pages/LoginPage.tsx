@@ -1,5 +1,5 @@
 import LoginForm from "@/features/authentication/components/LoginForm";
-import { FiCheck } from "react-icons/fi";
+import { Check } from "lucide-react";
 
 const LoginPage = () => {
   return (
@@ -39,11 +39,11 @@ const LoginPage = () => {
           {/* Feature Highlights */}
           <div className="flex flex-wrap gap-3 mb-8">
             <div className="flex items-center gap-2 px-4 py-2 border border-accent-teal/50 rounded-lg bg-accent-teal/10 backdrop-blur-sm">
-              <FiCheck className="h-4 w-4 text-accent-teal" />
+              <Check className="h-4 w-4 text-accent-teal" />
               <span className="text-sm text-text-white">Auto Attendance</span>
             </div>
             <div className="flex items-center gap-2 px-4 py-2 border border-accent-teal/50 rounded-lg bg-accent-teal/10 backdrop-blur-sm">
-              <FiCheck className="h-4 w-4 text-accent-teal" />
+              <Check className="h-4 w-4 text-accent-teal" />
               <span className="text-sm text-text-white">Live Analytics</span>
             </div>
           </div>
