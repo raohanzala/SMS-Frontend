@@ -81,7 +81,7 @@ const Button = ({
       onClick={onClick}
       {...props}
     >
-      {startIcon && <span className="">{startIcon}</span>}
+      {startIcon && <span className="mr-2">{startIcon}</span>}
 
       {!startIcon && iconPosition === 'left' && renderLoaderOrIcon() && (
         <span className="mr-2">{renderLoaderOrIcon()}</span>

@@ -32,8 +32,8 @@ const EmployeeFormPage = () => {
       email: employee?.email || "",
       phone: employee?.phone || "",
       address: employee?.address || "",
-      gender: employee?.gender || "male",
-      designation: employee?.designation || "teacher",
+      gender: employee?.gender || "",
+      designation: employee?.designation || "",
       experience: employee?.experience || "",
       education: employee?.education || "",
       husband: employee?.husband || "",
@@ -156,15 +156,15 @@ const EmployeeFormPage = () => {
                   <Input {...getFieldProps("phone")} placeholder="Enter phone number" disabled={isEmployeePending} />
                 </FormRowVertical>
 
-                <FormRowVertical label="Designation" name="designation" error={errors.designation}>
+                <FormRowVertical label="Designation" name="designation" error={errors.designation} required>
                   <EntitySelect
                     entity="static"
                     staticOptions={[
-                      { value: "teacher", label: "Teacher" },
                       { value: "principal", label: "Principal" },
                       { value: "accountant", label: "Accountant" },
                       { value: "management", label: "Management" },
                       { value: "admin", label: "Admin" },
+                      { value: "hr", label: "HR" },
                       { value: "other", label: "Other" },
                     ]}
                     value={values.designation}
@@ -254,7 +254,7 @@ const EmployeeFormPage = () => {
                     <Input {...getFieldProps("husband")} placeholder="Optional" disabled={isEmployeePending} />
                   </FormRowVertical>
 
-                  <FormRowVertical label="Gender" name="gender" error={errors.gender}>
+                  <FormRowVertical label="Gender" name="gender" error={errors.gender} required>
                     <div className="flex gap-4">
                       {["male", "female"].map((g) => (
                         <label key={g} className="flex items-center gap-2">

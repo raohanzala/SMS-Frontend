@@ -1,34 +1,54 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../store/store";
-import CreateSchoolForm from "../components/CreateSchoolForm";
-import { CheckCircle, Check, School } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useSearchParams, Navigate } from "react-router-dom";
+import SetPasswordForm from "../components/SetPasswordForm";
+import { Lock, Check, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
+import ErrorMessage from "@/components/common/ErrorMessage";
+import Spinner from "@/components/common/Spinner";
 
-const CreateSchoolPage = () => {
-  const navigate = useNavigate();
-  const { user } = useSelector((state: RootState) => state.auth);
+const SetPasswordPage = () => {
+  const [searchParams] = useSearchParams();
+  const [token, setToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Redirect if user is not a school owner or already has a school
   useEffect(() => {
-    if (!user) {
-      navigate("/login");
-      return;
+    const tokenParam = searchParams.get("token");
+    if (tokenParam) {
+      setToken(tokenParam);
     }
+    setIsLoading(false);
+  }, [searchParams]);
 
-    if (user.role !== "school_owner") {
-      navigate("/login");
-      return;
-    }
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Spinner />
+      </div>
+    );
+  }
 
-    // If user already has a schoolId, redirect to dashboard
-    if (user.schoolId) {
-      navigate("/admin/dashboard");
-    }
-  }, [user, navigate]);
-
-  if (!user || user.role !== "school_owner") {
-    return null;
+  if (!token) {
+    return (
+      <div className="flex min-h-screen bg-bg-main">
+        <div className="flex-1 flex items-center justify-center p-8 lg:p-16">
+          <div className="w-full max-w-md">
+            <ErrorMessage
+              message="Invalid or missing invite token. Please check your email for the correct invite link."
+              onRetry={() => window.location.href = "/login"}
+            />
+            <div className="mt-6 text-center">
+              <Link
+                to="/login"
+                className="inline-flex items-center text-sm font-medium text-primary hover:text-primary-dark transition-colors"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Sign In
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -47,64 +67,37 @@ const CreateSchoolPage = () => {
             <span className="text-2xl font-bold text-text-white">SchoolPro</span>
           </div>
 
-          {/* Progress Steps */}
-          <div className="mb-8">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="flex items-center gap-2">
-                <div className="h-10 w-10 rounded-full bg-bg-main bg-opacity-20 flex items-center justify-center border-2 border-accent-teal">
-                  <CheckCircle className="h-5 w-5 text-accent-teal" />
-                </div>
-                <div>
-                  <p className="text-xs text-text-white text-opacity-70">Step 1</p>
-                  <p className="text-sm font-medium text-text-white">Account Created</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center border-2 border-primary">
-                  <School className="h-5 w-5 text-text-white" />
-                </div>
-                <div>
-                  <p className="text-xs text-text-white text-opacity-70">Step 2</p>
-                  <p className="text-sm font-medium text-text-white">Create Your School</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Headline with Purple Gradient */}
           <h1 className="text-5xl font-bold font-sora text-nowrap mb-6 leading-tight">
-            <span className="text-text-white">Almost There.</span>
+            <span className="text-text-white">Welcome Aboard.</span>
             <br />
-            <span className="bg-gradient-to-r from-primary via-primary to-accent-purple bg-clip-text text-transparent">Create Your School</span>
+            <span className="bg-gradient-to-r from-primary via-primary to-accent-purple bg-clip-text text-transparent">Set Your Password</span>
             <span className="text-text-white">&gt;</span>
           </h1>
 
           {/* Sub-headline */}
           <p className="text-xl text-text-white text-opacity-90 mb-8 leading-relaxed">
-            Complete your school setup to start managing everything.
+            You&apos;ve been invited to join our school management system.
           </p>
 
           {/* Description */}
           <p className="text-base text-text-white text-opacity-80 mb-10 leading-relaxed">
-            You&apos;re almost there! Create your school profile to start managing students, teachers, attendance, and all aspects of your educational institution.
+            Create a secure password to activate your account and start managing your school activities. Your password should be strong and unique.
           </p>
 
           {/* Feature Highlights */}
           <div className="flex flex-wrap gap-3 mb-8">
             <div className="flex items-center gap-2 px-4 py-2 border border-accent-teal/50 rounded-lg bg-accent-teal/10 backdrop-blur-sm">
               <Check className="h-4 w-4 text-accent-teal" />
-              <span className="text-sm text-text-white">Manage Students</span>
+              <span className="text-sm text-text-white">Secure Account</span>
             </div>
             <div className="flex items-center gap-2 px-4 py-2 border border-accent-teal/50 rounded-lg bg-accent-teal/10 backdrop-blur-sm">
               <Check className="h-4 w-4 text-accent-teal" />
-              <span className="text-sm text-text-white">Track Attendance</span>
+              <span className="text-sm text-text-white">Instant Access</span>
             </div>
             <div className="flex items-center gap-2 px-4 py-2 border border-accent-teal/50 rounded-lg bg-accent-teal/10 backdrop-blur-sm">
               <Check className="h-4 w-4 text-accent-teal" />
-              <span className="text-sm text-text-white">Organize Timetables</span>
+              <span className="text-sm text-text-white">Full Features</span>
             </div>
           </div>
 
@@ -112,21 +105,17 @@ const CreateSchoolPage = () => {
           <div className="flex items-center gap-6 text-sm text-text-white text-opacity-80">
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-accent-teal"></div>
-              <span>Quick Setup</span>
+              <span>Password Security</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-accent-teal"></div>
-              <span>Full Control</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-accent-teal"></div>
-              <span>24/7 Support</span>
+              <span>Auto Login</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Right Side - Create School Form */}
+      {/* Right Side - Set Password Form */}
       <div className="flex-1 flex items-center justify-center bg-bg-main p-8 lg:p-16">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
@@ -140,16 +129,26 @@ const CreateSchoolPage = () => {
           <div className="text-left mb-8">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                <School className="h-6 w-6 text-primary" />
+                <Lock className="h-6 w-6 text-primary" />
               </div>
             </div>
-            <h2 className="text-3xl font-bold text-text-primary mb-2">Create Your School</h2>
+            <h2 className="text-3xl font-bold text-text-primary mb-2">Set Your Password</h2>
             <p className="text-sm text-text-secondary">
-              Complete your school setup to get started
+              Create a secure password to activate your account and get started.
             </p>
           </div>
 
-          <CreateSchoolForm />
+          <SetPasswordForm token={token} />
+
+          <div className="mt-6">
+            <Link
+              to="/login"
+              className="inline-flex items-center text-sm font-medium text-primary hover:text-primary-dark transition-colors"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Sign In
+            </Link>
+          </div>
 
           {/* Footer */}
           <p className="mt-8 text-center text-xs text-text-tertiary">
@@ -161,4 +160,5 @@ const CreateSchoolPage = () => {
   );
 };
 
-export default CreateSchoolPage;
+export default SetPasswordPage;
+

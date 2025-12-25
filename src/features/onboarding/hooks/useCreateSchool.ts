@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setCredentials } from "../../../store/slices/authSlice";
+import { setToken } from "@/store/slices/authSlice";
 import { createSchoolApi } from "@/api/schools";
 import { toastError, toastSuccess } from "@/utils/helpers";
 
@@ -14,12 +14,10 @@ export function useCreateSchool() {
     onSuccess: (data) => {
       toastSuccess(data.message || "School created successfully!");
       
-      // Update credentials with new token that includes schoolId
       if (data.data?.token) {
-        dispatch(setCredentials(data.data));
+        dispatch(setToken(data.data.token));
       }
       
-      // Redirect to admin dashboard
       navigate("/admin/dashboard");
     },
     onError: (err) => {

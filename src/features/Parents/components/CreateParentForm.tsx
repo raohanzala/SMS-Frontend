@@ -7,14 +7,12 @@ import { useAddParent } from "../hooks/useAddParent";
 import { addParentSchema } from "../validations/parent.validation";
 import { CreateParentFormProps } from "../types/parent-components.interface";
 import { AddParentInput } from "../types/parent.types";
-import EntitySelect from "@/components/common/EntitySelect";
 import RadioGroup from "@/components/common/RadioGroup";
 
 const CreateParentForm = ({
   parentToEdit,
   onManageParentModalClose,
   onParentFormSuccess,
-  parentFormContext = "parent",
 }: CreateParentFormProps) => {
   const isEditMode = !!parentToEdit;
 
@@ -33,17 +31,11 @@ const CreateParentForm = ({
       nationalId: parentToEdit?.nationalId || "",
 
       // ✅ ADDED
-      gender: parentToEdit?.gender || "male",
-
-      childrenIds: parentToEdit?.children?.map((c) => c._id) || [],
+      gender: parentToEdit?.gender || "",
     },
     validationSchema: addParentSchema,
     onSubmit: async (values) => {
       const payload: AddParentInput = { ...values };
-
-      if (parentFormContext === "student") {
-        delete payload.childrenIds;
-      }
 
       if (!isEditMode) {
         addParentMutation(payload, {
@@ -72,7 +64,7 @@ const CreateParentForm = ({
         }}
         className="space-y-4"
       >
-        <FormRowVertical label="Full Name" name="name" error={errors.name}>
+        <FormRowVertical label="Full Name" name="name" error={errors.name} required>
           <Input
             type="text"
             placeholder="Enter full name"
@@ -81,7 +73,7 @@ const CreateParentForm = ({
           />
         </FormRowVertical>
 
-        <FormRowVertical label="Gender" name="gender" error={errors.gender}>
+        <FormRowVertical label="Gender" name="gender" error={errors.gender} required>
           <RadioGroup
             name="gender"
             value={values.gender}
@@ -90,7 +82,7 @@ const CreateParentForm = ({
         </FormRowVertical>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormRowVertical label="Email" name="email" error={errors.email}>
+          <FormRowVertical label="Email" name="email" error={errors.email} required>
             <Input
               type="email"
               placeholder="Enter email"
@@ -99,7 +91,7 @@ const CreateParentForm = ({
             />
           </FormRowVertical>
 
-          <FormRowVertical label="Phone" name="phone" error={errors.phone}>
+          <FormRowVertical label="Phone" name="phone" error={errors.phone} required>
             <Input
               type="text"
               placeholder="Enter phone number"
@@ -146,22 +138,6 @@ const CreateParentForm = ({
           />
         </FormRowVertical>
 
-        {parentFormContext === "parent" && (
-          <FormRowVertical
-            label="Children (Students)"
-            name="childrenIds"
-            error={errors.childrenIds}
-          >
-            <EntitySelect
-              entity="student"
-              isMulti={true}
-              value={values.childrenIds || []}
-              onChange={(ids) => setFieldValue("childrenIds", ids)}
-              isDisabled={isParentLoading}
-            />
-          </FormRowVertical>
-        )}
-
         {!isEditMode && (
           <p className="text-sm text-gray-500 italic">
             A secure password will be generated & emailed automatically.
@@ -171,6 +147,7 @@ const CreateParentForm = ({
         <Button
           fullWidth
           type="submit"
+          size="lg"
           disabled={isParentLoading}
           loading={isParentLoading}
         >

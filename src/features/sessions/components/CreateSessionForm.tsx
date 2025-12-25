@@ -62,7 +62,7 @@ const CreateSessionForm = ({ sessionToEdit, onClose }: CreateSessionFormProps) =
         }}
       >
         {/* Session Name */}
-        <FormRowVertical label="Session Name" name="name" error={errors.name}>
+        <FormRowVertical label="Session Name" name="name" error={errors.name} required>
           <Input
             type="text"
             placeholder="e.g., Academic Year 2024-2025"
@@ -72,7 +72,7 @@ const CreateSessionForm = ({ sessionToEdit, onClose }: CreateSessionFormProps) =
         </FormRowVertical>
 
         {/* Start Date */}
-        <FormRowVertical label="Start Date" name="startDate" error={errors.startDate}>
+        <FormRowVertical label="Start Date" name="startDate" error={errors.startDate} required>
           <Input
             type="date"
             disabled={isSessionLoading}
@@ -81,7 +81,7 @@ const CreateSessionForm = ({ sessionToEdit, onClose }: CreateSessionFormProps) =
         </FormRowVertical>
 
         {/* End Date */}
-        <FormRowVertical label="End Date" name="endDate" error={errors.endDate}>
+        <FormRowVertical label="End Date" name="endDate" error={errors.endDate} required>
           <Input
             type="date"
             disabled={isSessionLoading}
@@ -107,7 +107,7 @@ const CreateSessionForm = ({ sessionToEdit, onClose }: CreateSessionFormProps) =
 
         {/* Submit Button */}
         <div className="mt-5">
-          <Button fullWidth={true} type="submit" loading={isSessionLoading}>
+          <Button fullWidth={true} size="lg" type="submit" loading={isSessionLoading}>
             {!isEditMode ? "Add Session" : "Update Session"}
           </Button>
         </div>

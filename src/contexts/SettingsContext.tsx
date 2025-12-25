@@ -1,10 +1,10 @@
 // src/context/SettingsContext.tsx
-import { createContext, useContext } from "react";
+import React, { createContext, useContext } from "react";
 // import { useSettings } from "../features/useSettings";
 
 const SettingsContext = createContext(null);
 
-export const SettingsProvider = ({ children }) => {
+export const SettingsProvider = ({ children }: { children: React.ReactNode }) => {
   // const { settings, isPending, error } = useSettings() || {};
 
   const settings = {

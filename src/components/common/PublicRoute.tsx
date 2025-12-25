@@ -18,38 +18,31 @@ interface RootState {
   auth: AuthState;
 }
 
-interface ProtectedRouteProps {
+interface PublicRouteProps {
   children: ReactNode;
-  allowedRoles?: UserRole[];
 }
 
-const ProtectedRoute = ({ children, allowedRoles = [] }: ProtectedRouteProps) => {
-  const { user, isAuthenticated} = useSelector((state: RootState) => state.auth)
+const PublicRoute = ({ children }: PublicRouteProps) => {
+  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role as UserRole)) {
+  // If user is authenticated, redirect to their dashboard
+  if (isAuthenticated && user) {
     const roleRoutes: Record<UserRole, string> = {
-      super_admin: '/super-admin/dashboard',
-      school_owner: '/school-owner/dashboard',
+      super_admin: '/admin/dashboard',
+      school_owner: '/admin/dashboard',
       admin: '/admin/dashboard',
       teacher: '/teacher/dashboard',
       student: '/student/dashboard',
       parent: '/parent/dashboard',
     };
 
-    const redirectPath = roleRoutes[user?.role as UserRole] || '/login';
+    const redirectPath = roleRoutes[user.role as UserRole] || '/admin/dashboard';
     return <Navigate to={redirectPath} replace />;
   }
 
-  return (
-    <div>
-      {children}
-    </div>
-  );
+  // If not authenticated, show the public page
+  return <>{children}</>;
 };
 
-export default ProtectedRoute;
+export default PublicRoute;
 

@@ -34,10 +34,9 @@ const StudentFormPage = () => {
     initialValues: {
       name: student?.name || "",
       email: student?.email || "",
-      password: "",
       phone: student?.phone || "",
       address: student?.address || "",
-      gender: student?.gender || "male",
+      gender: student?.gender || "",
       rollNumber: student?.rollNumber || "",
       classId: student?.class?._id || "",
       religion: student?.religion || "",
@@ -191,22 +190,6 @@ const StudentFormPage = () => {
                     />
                   </FormRowVertical>
 
-                  {!isEditMode && (
-                    <FormRowVertical
-                      label="Password"
-                      name="password"
-                      error={errors.password}
-                      required
-                    >
-                      <Input
-                        {...getFieldProps("password")}
-                        placeholder="Set password"
-                        type="password"
-                        disabled={isStudentPending}
-                      />
-                    </FormRowVertical>
-                  )}
-
                   <FormRowVertical
                     label="Phone"
                     name="phone"
@@ -261,6 +244,7 @@ const StudentFormPage = () => {
                   label="Session"
                   name="session"
                   error={errors.session}
+                  required
                 >
                   <EntitySelect
                     entity="session"

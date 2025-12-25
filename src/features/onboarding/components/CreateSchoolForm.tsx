@@ -4,11 +4,16 @@ import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import { useCreateSchool } from "../hooks/useCreateSchool";
 import { createSchoolSchema } from "../validation/school.validation";
-import { FiInfo } from "react-icons/fi";
-// import { FiSchool } from "react-icons/bs";
-	
+import { Info, School } from "lucide-react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 const CreateSchoolForm = () => {
   const { createSchoolMutation, isCreatingSchool } = useCreateSchool();
+
+  const { user, permissions, isAuthenticated } = useSelector((state: RootState) => state.auth)
+  console.log('USER', user)
+  console.log('PERMISSIONS', permissions)
+  console.log('IS AUTHENTICATED', isAuthenticated)
 
   const formik = useFormik({
     initialValues: {
@@ -37,7 +42,7 @@ const CreateSchoolForm = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Info Banner */}
         <div className="bg-accent-cyan bg-opacity-10 border border-accent-cyan border-opacity-30 rounded-lg p-4 flex items-start gap-3">
-          <FiInfo className="h-5 w-5 text-accent-cyan mt-0.5 flex-shrink-0" />
+          <Info className="h-5 w-5 text-accent-cyan mt-0.5 flex-shrink-0" />
           <div className="text-sm text-accent-cyanDark">
             <p className="font-medium mb-1">Welcome to your school setup!</p>
             <p>
@@ -87,9 +92,9 @@ const CreateSchoolForm = () => {
             fullWidth
             type="submit"
             loading={isCreatingSchool}
+            size="lg"
             disabled={isCreatingSchool}
-            
-            // startIcon={<FiSchool className="h-5 w-5" />}
+            startIcon={<School className="h-5 w-5" />}
           >
             Create School
           </Button>
@@ -100,4 +105,3 @@ const CreateSchoolForm = () => {
 };
 
 export default CreateSchoolForm;
-

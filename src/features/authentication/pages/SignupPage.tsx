@@ -79,7 +79,7 @@ const SignupPage = () => {
               <span className="text-xl font-bold text-text-white">S</span>
             </div>
             <span className="text-xl font-bold text-text-primary">SchoolPro</span>
-          </div>
+            </div>
 
           <div className="text-left mb-8">
             <h2 className="text-3xl font-bold text-text-primary mb-2">Create Account</h2>

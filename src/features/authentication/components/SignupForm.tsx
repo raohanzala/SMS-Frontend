@@ -61,6 +61,7 @@ const SignupForm = () => {
           <Button
             fullWidth
             type="submit"
+            size="lg"
             loading={isSignupPending}
             disabled={isSignupPending}
           >

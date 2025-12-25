@@ -4,6 +4,7 @@ import { signinApi } from '../../../api/auth';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../../../store/slices/authSlice';
+import { toastError, toastSuccess } from '@/utils/helpers';
 
 export function useLogin() {
   const queryClient = useQueryClient();
@@ -21,6 +22,7 @@ export function useLogin() {
   const { mutate: loginMutation, isPending: isLoginPending } = useMutation({
     mutationFn: signinApi,
     onSuccess: (data) => {
+      toastSuccess(data.message || 'Login successful');
       queryClient.setQueryData(['user'], data.user);
       console.log(data.data)
       dispatch(setCredentials(data.data))
@@ -36,7 +38,7 @@ export function useLogin() {
     },
     onError: (err) => {
       console.log('ERROR', err);
-      toast.error(err.message || 'Provided email or password are incorrect');
+      toastError(err || 'Provided email or password are incorrect');
     },
   });
 

@@ -62,6 +62,7 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
           label="Class Teacher"
           name="classTeacherId"
           error={errors.classTeacherId}
+          required
         >
           <EntitySelect
             entity="teacher"
@@ -70,7 +71,7 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
             isDisabled={isClassLoading}
           />
         </FormRowVertical>
-        <FormRowVertical label="Class Level" name="level" error={errors.levelId}>
+        <FormRowVertical label="Class Level" name="level" error={errors.levelId} required>
           <EntitySelect
             entity="static"
             staticOptions={classLevels.map((classLevel) => ({
@@ -85,7 +86,7 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
         </FormRowVertical>
 
         {/* Class Name */}
-        <FormRowVertical label="Class Name" name="name" error={errors.name}>
+        <FormRowVertical label="Class Name" name="name" error={errors.name} required>
           <Input
             type="text"
             placeholder="Enter class name"
@@ -110,7 +111,7 @@ const CreateClassForm = ({ classToEdit, onClose }: CreateClassFormProps) => {
         </div>
         {/* Submit Button */}
         <div className="mt-6">
-          <Button fullWidth={true} type="submit" loading={isClassLoading} >
+          <Button fullWidth={true} size="lg" type="submit" loading={isClassLoading} >
             {!isEditMode ? "Add Class" : "Update Class"}
           </Button>
         </div>

@@ -32,3 +32,15 @@ export const changePasswordSchema = Yup.object({
     .oneOf([Yup.ref('newPassword')], 'Passwords must match')
     .required('Confirm password is required'),
 });
+
+export const setPasswordSchema = Yup.object({
+  password: Yup.string()
+    .min(8, 'Password must be at least 8 characters')
+    .matches(/[A-Z]/, 'Must contain an uppercase letter')
+    .matches(/[a-z]/, 'Must contain a lowercase letter')
+    .matches(/\d/, 'Must contain a number')
+    .required('Password is required'),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref('password')], 'Passwords must match')
+    .required('Confirm password is required'),
+});

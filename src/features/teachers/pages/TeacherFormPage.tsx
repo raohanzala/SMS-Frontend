@@ -38,7 +38,7 @@ const TeacherFormPage = () => {
       email: teacher?.email || "",
       phone: teacher?.phone || "",
       address: teacher?.address || "",
-      gender: teacher?.gender || "male",
+      gender: teacher?.gender || "",
       experience: teacher?.experience || "",
       education: teacher?.education || "",
       husband: teacher?.husband || "",
@@ -99,8 +99,6 @@ const TeacherFormPage = () => {
   }
 
 
-  const toErr = (e: unknown): string | undefined => (typeof e === "string" ? e : undefined);
-
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Header */}
@@ -157,7 +155,7 @@ const TeacherFormPage = () => {
                   <FormRowVertical 
                     label="Full Name" 
                     name="name" 
-                    error={toErr(errors.name)}
+                    error={errors.name}
                     required
                   >
                     <Input 
@@ -170,7 +168,7 @@ const TeacherFormPage = () => {
                   <FormRowVertical 
                     label="Email"
                     name="email" 
-                    error={toErr(errors.email)}
+                    error={errors.email}
                     required
                   >
                     <Input 
@@ -180,7 +178,7 @@ const TeacherFormPage = () => {
                     />
                   </FormRowVertical>
 
-                  <FormRowVertical label="Phone" name="phone" error={toErr(errors.phone)}>
+                  <FormRowVertical label="Phone" name="phone" error={errors.phone}>
                     <Input type="text" placeholder="Enter phone" disabled={isBusy} {...getFieldProps("phone")} />
                   </FormRowVertical>
                 </div>
@@ -194,19 +192,19 @@ const TeacherFormPage = () => {
             <Card title="Professional Information" description="Teaching roles, subjects, and class assignments">
               <div className="p-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormRowVertical label="Education" name="education" error={toErr(errors.education)}>
+              <FormRowVertical label="Education" name="education" error={errors.education}>
                 <Input type="text" placeholder="Enter education" disabled={isBusy} {...getFieldProps("education")} />
               </FormRowVertical>
 
-              <FormRowVertical label="Experience" name="experience" error={toErr(errors.experience)}>
+              <FormRowVertical label="Experience" name="experience" error={errors.experience}>
                 <Input type="text" placeholder="Enter experience" disabled={isBusy} {...getFieldProps("experience")} />
               </FormRowVertical>
 
-              <FormRowVertical label="Husband Name" name="husband" error={toErr(errors.husband)}>
+              <FormRowVertical label="Husband Name" name="husband" error={errors.husband}>
                 <Input type="text" placeholder="Enter husband name" disabled={isBusy} {...getFieldProps("husband")} />
               </FormRowVertical>
 
-              <FormRowVertical label="Date of Joining" name="dateOfJoining" error={toErr(errors.dateOfJoining)}>
+              <FormRowVertical label="Date of Joining" name="dateOfJoining" error={errors.dateOfJoining}>
                 <Input
                   type="date"
                   value={values.dateOfJoining || ""}
@@ -214,7 +212,7 @@ const TeacherFormPage = () => {
                   disabled={isBusy}
                 />
               </FormRowVertical>
-            <FormRowVertical label="Teacher Level" name="levelsIds" error={toErr(errors.levelsIds)}>
+            <FormRowVertical label="Teacher Level" name="levelsIds" error={errors.levelsIds}>
               <EntitySelect
                 entity="static"
                 staticOptions={classLevels.map(classLevel => ({ value: classLevel._id, label: classLevel.name })) }
@@ -233,7 +231,7 @@ const TeacherFormPage = () => {
             <Card title="Salary & Employment Details" description="Compensation and employment-related information">
               <div className="p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormRowVertical label="Salary Amount" name="salary.amount" error={toErr(errors.salary?.amount)}>
+              <FormRowVertical label="Salary Amount" name="salary.amount" error={errors.salary?.amount}>
                 <Input
                   type="number"
                   value={values.salary?.amount || 0}
@@ -245,7 +243,7 @@ const TeacherFormPage = () => {
                 />
               </FormRowVertical>
 
-              <FormRowVertical label="Currency" name="salary.currency" error={toErr(errors.salary?.currency)}>
+              <FormRowVertical label="Currency" name="salary.currency" error={errors.salary?.currency}>
                 <EntitySelect
                   entity="static"
                   staticOptions={[
@@ -267,7 +265,7 @@ const TeacherFormPage = () => {
             <Card title="Other Information" description="Additional personal or administrative details">
               <div className="p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormRowVertical label="Date of Birth" name="dob" error={toErr(errors.dob)}>
+              <FormRowVertical label="Date of Birth" name="dob" error={errors.dob}>
                 <Input
                   type="date"
                   value={values.dob || ""}
@@ -276,19 +274,19 @@ const TeacherFormPage = () => {
                 />
               </FormRowVertical>
 
-              <FormRowVertical label="Address" name="address" error={toErr(errors.address)}>
+              <FormRowVertical label="Address" name="address" error={errors.address}>
                 <Input type="text" placeholder="Enter address" disabled={isBusy} {...getFieldProps("address")} />
               </FormRowVertical>
 
-              <FormRowVertical label="Religion" name="religion" error={toErr(errors.religion)}>
+              <FormRowVertical label="Religion" name="religion" error={errors.religion}>
                 <Input type="text" placeholder="Enter religion" disabled={isBusy} {...getFieldProps("religion")} />
               </FormRowVertical>
 
-              <FormRowVertical label="National ID" name="nationalId" error={toErr(errors.nationalId)}>
+              <FormRowVertical label="National ID" name="nationalId" error={errors.nationalId}>
                 <Input type="text" placeholder="Enter CNIC" disabled={isBusy} {...getFieldProps("nationalId")} />
               </FormRowVertical>
 
-              <FormRowVertical label="Gender" name="gender" error={toErr(errors.gender)}>
+              <FormRowVertical label="Gender" name="gender" error={errors.gender} required>
                 <div className="flex items-center gap-4">
                   <label className="flex items-center gap-2">
                     <input
@@ -318,16 +316,6 @@ const TeacherFormPage = () => {
               </div>
             </div>
           </Card>
-
-            {/* Actions */}
-            {/* <div className="flex justify-end gap-2">
-              <Button variant="ghost" type="button" onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button type="submit" loading={isBusy}>
-                {isEditMode ? "Update Teacher" : "Create Teacher"}
-              </Button>
-            </div> */}
           </form>
         </FormikProvider>
     </div>

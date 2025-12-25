@@ -65,7 +65,7 @@ const CreateSubjectForm = ({
         }}
       >
         <div className="space-y-4">
-        <FormRowVertical label="Class" name="classId" error={errors.classId}>
+        <FormRowVertical label="Class" name="classId" error={errors.classId} required>
           <EntitySelect
             entity="class"
             value={values.classId}
@@ -80,6 +80,7 @@ const CreateSubjectForm = ({
           label="Subject Teacher"
           name="teacherId"
           error={errors.teacherId}
+          required
         >
           <EntitySelect
             entity="teacher"
@@ -91,7 +92,7 @@ const CreateSubjectForm = ({
           />
         </FormRowVertical>
 
-        <FormRowVertical label="Subject Name" name="name" error={errors.name}>
+        <FormRowVertical label="Subject Name" name="name" error={errors.name} required>
           <Input {...getFieldProps("name")} placeholder="Enter Subject Name" />
         </FormRowVertical>
 
@@ -99,6 +100,7 @@ const CreateSubjectForm = ({
           label="Exam Marks"
           name="examMarks"
           error={errors.examMarks}
+          required
         >
           <Input
             type="number"
@@ -113,7 +115,7 @@ const CreateSubjectForm = ({
           <Button
             fullWidth
             type="submit"
-            
+            size="lg"            
             disabled={isLoadingSubject}
             loading={isLoadingSubject}
           >
