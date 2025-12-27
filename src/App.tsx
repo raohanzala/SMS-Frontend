@@ -64,7 +64,6 @@ import SettingsPage from "./features/settings/pages/SettingsPage";
 
 // Teacher Pages
 import TeacherDashboard from "./features/dashboard/teacher/pages/TeacherDashboard";
-import TeacherAttendancePage from "./features/attendance/pages/TeacherAttendancePage";
 
 // Student Pages
 import StudentDashboard from "./features/dashboard/student/pages/StudentDashboard";
@@ -91,6 +90,24 @@ import FeeStructurePage from "./features/fees/pages/FeeStructurePage";
 import AdminFeesPage from "./features/fees/pages/AdminFeesPage";
 import StudentFeesPage from "./features/fees/pages/StudentFeesPage";
 import ParentFeesPage from "./features/fees/pages/ParentFeesPage";
+
+// Exam Pages
+import AdminExamsPage from "./features/exams/pages/AdminExamsPage";
+import TeacherMarksPage from "./features/exams/pages/TeacherMarksPage";
+import StudentResultsPage from "./features/exams/pages/StudentResultsPage";
+import ParentResultsPage from "./features/exams/pages/ParentResultsPage";
+
+// Certificate Pages
+import AdminCertificatesPage from "./features/certificates/pages/AdminCertificatesPage";
+
+// Leave Pages
+import UserLeaveRequestPage from "./features/leaves/pages/UserLeaveRequestPage";
+import AdminLeavesPage from "./features/leaves/pages/AdminLeavesPage";
+
+// Salary Pages
+import AdminPayrollPage from "./features/salary/pages/AdminPayrollPage";
+import TeacherSalaryPage from "./features/salary/pages/TeacherSalaryPage";
+import StaffSalaryPage from "./features/salary/pages/StaffSalaryPage";
 
 // Campus Pages
 import CampusesPage from "./features/campuses/pages/CampusesPage";
@@ -243,8 +260,23 @@ function App() {
                     path="fees/structure"
                     element={<FeeStructurePage />}
                   />
+                  <Route
+                    path="exams"
+                    element={<AdminExamsPage />}
+                  />
+                  <Route
+                    path="certificates"
+                    element={<AdminCertificatesPage />}
+                  />
+                  <Route
+                    path="leaves"
+                    element={<AdminLeavesPage />}
+                  />
+                  <Route
+                    path="payroll"
+                    element={<AdminPayrollPage />}
+                  />
                   {/* <Route path="attendance/employees" element={<EmployeesAttendance />} />
-                  <Route path="exams" element={<ExamsPage />} />
                   <Route path="results" element={<ResultsPage />} />
                   <Route path="noticeboard" element={<NoticeboardPage />} /> */}
                   <Route path="settings" element={<SettingsPage />} />
@@ -266,6 +298,9 @@ function App() {
                   />
                   <Route path="dashboard" element={<TeacherDashboard />} />
                   <Route path="attendance" element={<TeacherMyAttendancePage />} />
+                  <Route path="marks" element={<TeacherMarksPage />} />
+                  <Route path="leaves" element={<UserLeaveRequestPage />} />
+                  <Route path="salary" element={<TeacherSalaryPage />} />
                   <Route path="timetable" element={<TeacherTimetablePage />} />
                   <Route
                     path="timetable/:teacherId"
@@ -297,6 +332,7 @@ function App() {
                   <Route path="dashboard" element={<StudentDashboard />} />
                   <Route path="attendance" element={<StudentAttendancePage />} />
                   <Route path="fees" element={<StudentFeesPage />} />
+                  <Route path="results" element={<StudentResultsPage />} />
                   <Route path="timetable" element={<StudentTimetablePage />} />
                   <Route
                     path="timetable/:studentId"
@@ -320,11 +356,30 @@ function App() {
                   <Route path="dashboard" element={<ParentDashboard />} />
                   <Route path="attendance" element={<ParentAttendancePage />} />
                   <Route path="fees" element={<ParentFeesPage />} />
+                  <Route path="results" element={<ParentResultsPage />} />
                   <Route path="timetable" element={<StudentTimetablePage />} />
                   <Route
                     path="timetable/:studentId"
                     element={<StudentTimetablePage />}
                   />
+                </Route>
+
+                {/* Staff Routes */}
+                <Route
+                  path="/staff"
+                  element={
+                    <ProtectedRoute allowedRoles={["staff"]}>
+                      <Layout navigation={teacherNav} />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route
+                    index
+                    element={<Navigate to="/staff/dashboard" replace />}
+                  />
+                  <Route path="dashboard" element={<TeacherDashboard />} />
+                  <Route path="salary" element={<StaffSalaryPage />} />
+                  <Route path="leaves" element={<UserLeaveRequestPage />} />
                 </Route>
 
                 {/* Catch all route */}

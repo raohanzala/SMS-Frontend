@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
-type UserRole = 'super_admin' | 'admin' | 'teacher' | 'student' | 'parent' | 'school_owner';
+type UserRole = 'super_admin' | 'admin' | 'teacher' | 'student' | 'parent' | 'school_owner' | 'staff';
 
 interface User {
   role: UserRole;

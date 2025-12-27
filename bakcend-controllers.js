@@ -1,57 +1,19 @@
-import express from 'express';
-import { authenticate } from '../middleware/auth.middleware.js';
-import {
-  createFeeStructure,
-  updateFeeStructure,
-  getFeeStructure,
-  toggleFeeStructure
-} from '../controllers/feeStructure.controller.js';
-import {
-  generateMonthlyFees,
-  getStudentFees,
-  payFee,
-  getFeeReport
-} from '../controllers/studentFee.controller.js';
+// POST /api/salary/generate - Generate Salary
+router.post('/generate', generateSalary);
 
-const router = express.Router();
+// GET /api/salary?employeeId=xxx&month=August&year=2025 - Get Salary Slips
+router.get('/', getSalarySlips);
 
-// All routes require authentication
-router.use(authenticate);
-
-// ========== FEE STRUCTURE APIs ==========
-// POST /api/fees/structure - Create/Update Fee Structure
-router.post('/structure', createFeeStructure);
-
-// PUT /api/fees/structure/:id - Update Fee Structure
-router.put('/structure/:id', updateFeeStructure);
-
-// GET /api/fees/structure?classId=xxx - Get Fee Structure
-router.get('/structure', getFeeStructure);
-
-// PATCH /api/fees/structure/:id/toggle - Toggle Fee Structure
-router.patch('/structure/:id/toggle', toggleFeeStructure);
-
-// ========== STUDENT FEE APIs ==========
-// POST /api/fees/students/generate - Auto Generate Monthly Fees
-router.post('/students/generate', generateMonthlyFees);
-
-// GET /api/fees/students?studentId=xxx - Get Student Fees
-router.get('/students', getStudentFees);
-
-// POST /api/fees/students/:feeId/pay - Pay Fee
-router.post('/students/:feeId/pay', payFee);
-
-// GET /api/fees/students/report?classId=xxx&month=August - Fee Report
-router.get('/students/report', getFeeReport);
-
+// POST /api/salary/:id/pay - Mark Salary as Paid
+router.post('/:id/pay', markSalaryPaid);
 
 /**
- * Create / Update Fee Structure
- * POST /api/fees/structure
+ * Generate Salary
+ * POST /api/salary/generate
  */
-export const createFeeStructure = async (req, res) => {
+export const generateSalary = async (req, res) => {
   try {
-    const { classId, monthlyFee, admissionFee, examFee } = req.body;
+    const { month, year, employeeType, employeeId } = req.body;
     const schoolId = req.schoolId;
     const campusId = req.campusId;
     const userId = req.user.userId;
@@ -66,315 +28,85 @@ export const createFeeStructure = async (req, res) => {
     }
 
     if (user.role !== 'school_owner' && 
-        (user.role !== 'admin' || !user.permissions?.includes(PERMISSIONS.FEES_MANAGE))) {
+        (user.role !== 'admin' || !user.permissions?.includes(PERMISSIONS.SALARY_MANAGE))) {
       return res.status(403).json({
         success: false,
-        message: 'You do not have permission to manage fee structures'
+        message: 'You do not have permission to generate salary slips'
       });
     }
 
     // Validation
-    if (!classId || !monthlyFee) {
+    if (!month || !year || !employeeType) {
       return res.status(400).json({
         success: false,
-        message: 'classId and monthlyFee are required'
+        message: 'month, year, and employeeType are required'
       });
     }
 
-    // Verify class exists
-    const classDoc = await Class.findOne({
-      _id: classId,
-      schoolId: schoolId,
-      campusId: campusId,
-      isDeleted: false
-    });
-
-    if (!classDoc) {
-      return res.status(404).json({
-        success: false,
-        message: 'Class not found'
-      });
-    }
-
-    // Check if fee structure already exists for this class
-    const existing = await FeeStructure.findOne({
-      schoolId: schoolId,
-      campusId: campusId,
-      classId: classId
-    });
-
-    if (existing) {
-      // Update existing
-      existing.monthlyFee = monthlyFee;
-      existing.admissionFee = admissionFee || 0;
-      existing.examFee = examFee || 0;
-      await existing.save();
-
-      return res.status(200).json({
-        success: true,
-        message: 'Fee structure updated successfully',
-        data: existing
-      });
-    }
-
-    // Create new
-    const feeStructure = await FeeStructure.create({
-      schoolId: schoolId,
-      campusId: campusId,
-      classId: classId,
-      monthlyFee: monthlyFee,
-      admissionFee: admissionFee || 0,
-      examFee: examFee || 0,
-      isActive: true
-    });
-
-    res.status(201).json({
-      success: true,
-      message: 'Fee structure created successfully',
-      data: feeStructure
-    });
-
-  } catch (error) {
-    console.error('Create fee structure error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error creating fee structure',
-      error: error.message
-    });
-  }
-};
-
-/**
- * Update Fee Structure
- * PUT /api/fees/structure/:id
- */
-export const updateFeeStructure = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { monthlyFee, admissionFee, examFee, isActive } = req.body;
-    const schoolId = req.schoolId;
-    const userId = req.user.userId;
-
-    // Check permissions
-    const user = await User.findById(userId).select('role permissions');
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    if (user.role !== 'school_owner' && 
-        (user.role !== 'admin' || !user.permissions?.includes(PERMISSIONS.FEES_MANAGE))) {
-      return res.status(403).json({
-        success: false,
-        message: 'You do not have permission to update fee structures'
-      });
-    }
-
-    // Get fee structure
-    const feeStructure = await FeeStructure.findOne({
-      _id: id,
-      schoolId: schoolId
-    });
-
-    if (!feeStructure) {
-      return res.status(404).json({
-        success: false,
-        message: 'Fee structure not found'
-      });
-    }
-
-    // Update fields
-    if (monthlyFee !== undefined) feeStructure.monthlyFee = monthlyFee;
-    if (admissionFee !== undefined) feeStructure.admissionFee = admissionFee;
-    if (examFee !== undefined) feeStructure.examFee = examFee;
-    if (isActive !== undefined) feeStructure.isActive = isActive;
-
-    await feeStructure.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Fee structure updated successfully',
-      data: feeStructure
-    });
-
-  } catch (error) {
-    console.error('Update fee structure error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error updating fee structure',
-      error: error.message
-    });
-  }
-};
-
-/**
- * Get Fee Structure
- * GET /api/fees/structure?classId=xxx
- */
-export const getFeeStructure = async (req, res) => {
-  try {
-    const { classId } = req.query;
-    const schoolId = req.schoolId;
-    const campusId = req.campusId;
-
-    let query = {
-      schoolId: schoolId,
-      campusId: campusId
-    };
-
-    if (classId) {
-      query.classId = classId;
-    }
-
-    const feeStructures = await FeeStructure.find(query)
-      .populate('classId', 'name')
-      .sort({ createdAt: -1 });
-
-    res.status(200).json({
-      success: true,
-      message: 'Fee structures retrieved successfully',
-      data: feeStructures
-    });
-
-  } catch (error) {
-    console.error('Get fee structure error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching fee structures',
-      error: error.message
-    });
-  }
-};
-
-/**
- * Toggle Fee Structure (Activate/Deactivate)
- * PATCH /api/fees/structure/:id/toggle
- */
-export const toggleFeeStructure = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const schoolId = req.schoolId;
-    const userId = req.user.userId;
-
-    // Check permissions
-    const user = await User.findById(userId).select('role permissions');
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    if (user.role !== 'school_owner' && 
-        (user.role !== 'admin' || !user.permissions?.includes(PERMISSIONS.FEES_MANAGE))) {
-      return res.status(403).json({
-        success: false,
-        message: 'You do not have permission to toggle fee structures'
-      });
-    }
-
-    // Get fee structure
-    const feeStructure = await FeeStructure.findOne({
-      _id: id,
-      schoolId: schoolId
-    });
-
-    if (!feeStructure) {
-      return res.status(404).json({
-        success: false,
-        message: 'Fee structure not found'
-      });
-    }
-
-    // Toggle
-    feeStructure.isActive = !feeStructure.isActive;
-    await feeStructure.save();
-
-    res.status(200).json({
-      success: true,
-      message: `Fee structure ${feeStructure.isActive ? 'activated' : 'deactivated'} successfully`,
-      data: feeStructure
-    });
-
-  } catch (error) {
-    console.error('Toggle fee structure error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error toggling fee structure',
-      error: error.message
-    });
-  }
-};
-
-/**
- * Auto Generate Monthly Fees
- * POST /api/fees/students/generate
- */
-export const generateMonthlyFees = async (req, res) => {
-  try {
-    const { month, year, classId, sessionId } = req.body;
-    const schoolId = req.schoolId;
-    const campusId = req.campusId;
-    const userId = req.user.userId;
-
-    // Check permissions
-    const user = await User.findById(userId).select('role permissions');
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    if (user.role !== 'school_owner' && 
-        (user.role !== 'admin' || !user.permissions?.includes(PERMISSIONS.FEES_MANAGE))) {
-      return res.status(403).json({
-        success: false,
-        message: 'You do not have permission to generate fees'
-      });
-    }
-
-    // Validation
-    if (!month || !year || !sessionId) {
+    const validTypes = ['TEACHER', 'STAFF'];
+    if (!validTypes.includes(employeeType)) {
       return res.status(400).json({
         success: false,
-        message: 'month, year, and sessionId are required'
+        message: `Invalid employeeType. Must be one of: ${validTypes.join(', ')}`
       });
     }
 
-    // Get students (all or by class)
-    let studentQuery = {
-      schoolId: schoolId,
-      campusId: campusId,
-      isDeleted: false
-    };
-    if (classId) {
-      studentQuery.classId = classId;
+    // Get employees (all or specific)
+    let employees = [];
+    if (employeeId) {
+      if (employeeType === 'TEACHER') {
+        const teacher = await Teacher.findOne({
+          _id: employeeId,
+          schoolId: schoolId,
+          campusId: campusId,
+          isDeleted: false
+        });
+        if (teacher) employees = [teacher];
+      } else {
+        const staff = await Staff.findOne({
+          _id: employeeId,
+          schoolId: schoolId,
+          campusId: campusId,
+          isDeleted: false
+        });
+        if (staff) employees = [staff];
+      }
+    } else {
+      // Get all employees of this type
+      if (employeeType === 'TEACHER') {
+        employees = await Teacher.find({
+          schoolId: schoolId,
+          campusId: campusId,
+          isDeleted: false
+        });
+      } else {
+        employees = await Staff.find({
+          schoolId: schoolId,
+          campusId: campusId,
+          isDeleted: false
+        });
+      }
     }
 
-    const students = await Student.find(studentQuery);
-
-    if (students.length === 0) {
+    if (employees.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'No students found'
+        message: 'No employees found'
       });
     }
 
-    // Generate fees using transaction
+    // Generate salary slips using transaction
     const { generated, skipped } = await runTransaction(async (session) => {
       let generated = 0;
       let skipped = 0;
 
-      for (const student of students) {
-        // Check if fee already exists
-        const existing = await StudentFee.findOne({
+      for (const employee of employees) {
+        // Check if salary slip already exists
+        const existing = await SalarySlip.findOne({
           schoolId: schoolId,
           campusId: campusId,
-          studentId: student._id,
-          sessionId: sessionId,
+          employeeType: employeeType,
+          employeeId: employee._id,
           month: month,
           year: year
         }).session(session);
@@ -384,31 +116,72 @@ export const generateMonthlyFees = async (req, res) => {
           continue;
         }
 
-        // Get fee structure for student's class
-        const feeStructure = await FeeStructure.findOne({
-          schoolId: schoolId,
-          campusId: campusId,
-          classId: student.classId,
-          isActive: true
-        }).session(session);
-
-        if (!feeStructure) {
-          skipped++;
-          continue;
+        // Calculate salary based on attendance
+        const basicSalary = employee.salary?.amount || 0;
+        
+        // Get attendance for the month
+        const monthStart = new Date(year, getMonthNumber(month), 1);
+        const monthEnd = new Date(year, getMonthNumber(month) + 1, 0, 23, 59, 59);
+        
+        let attendanceRecords = [];
+        if (employeeType === 'TEACHER') {
+          attendanceRecords = await TeacherAttendance.find({
+            schoolId: schoolId,
+            campusId: campusId,
+            date: { $gte: monthStart, $lte: monthEnd },
+            'records.teacherId': employee._id,
+            isFinalized: true
+          }).session(session);
+        } else {
+          attendanceRecords = await StaffAttendance.find({
+            schoolId: schoolId,
+            campusId: campusId,
+            date: { $gte: monthStart, $lte: monthEnd },
+            'records.staffId': employee._id,
+            isFinalized: true
+          }).session(session);
         }
 
-        // Create fee record
-        await StudentFee.create([{
+        // Calculate deductions based on attendance
+        let deductions = 0;
+        let presentDays = 0;
+        let absentDays = 0;
+        let leaveDays = 0;
+
+        attendanceRecords.forEach(attendance => {
+          const record = employeeType === 'TEACHER' 
+            ? attendance.records.find(r => r.teacherId.toString() === employee._id.toString())
+            : attendance.records.find(r => r.staffId.toString() === employee._id.toString());
+          
+          if (record) {
+            if (record.status === 'PRESENT' || record.status === 'LATE') {
+              presentDays++;
+            } else if (record.status === 'ABSENT') {
+              absentDays++;
+            } else if (record.status === 'LEAVE') {
+              leaveDays++;
+            }
+          }
+        });
+
+        // Calculate deductions (example: deduct for absent days)
+        const dailySalary = basicSalary / 30; // Assuming 30 days per month
+        deductions = absentDays * dailySalary;
+
+        const netSalary = Math.max(0, basicSalary - deductions);
+
+        // Create salary slip
+        await SalarySlip.create([{
           schoolId: schoolId,
           campusId: campusId,
-          studentId: student._id,
-          sessionId: sessionId,
+          employeeType: employeeType,
+          employeeId: employee._id,
           month: month,
           year: year,
-          amount: feeStructure.monthlyFee,
-          paidAmount: 0,
-          status: 'PENDING',
-          dueDate: new Date(year, getMonthNumber(month) + 1, 1) // First day of next month
+          basicSalary: basicSalary,
+          deductions: deductions,
+          netSalary: netSalary,
+          status: 'UNPAID'
         }], { session });
 
         generated++;
@@ -419,19 +192,19 @@ export const generateMonthlyFees = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Monthly fees generated successfully',
+      message: 'Salary slips generated successfully',
       data: {
         generated,
         skipped,
-        total: students.length
+        total: employees.length
       }
     });
 
   } catch (error) {
-    console.error('Generate monthly fees error:', error);
+    console.error('Generate salary error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error generating monthly fees',
+      message: 'Error generating salary slips',
       error: error.message
     });
   }
@@ -450,12 +223,12 @@ const getMonthNumber = (monthName) => {
 };
 
 /**
- * Get Student Fees
- * GET /api/fees/students?studentId=xxx
+ * Get Salary Slips
+ * GET /api/salary?employeeId=xxx&month=August&year=2025
  */
-export const getStudentFees = async (req, res) => {
+export const getSalarySlips = async (req, res) => {
   try {
-    const { studentId, sessionId, month, year } = req.query;
+    const { employeeId, employeeType, month, year } = req.query;
     const schoolId = req.schoolId;
     const campusId = req.campusId;
 
@@ -464,11 +237,11 @@ export const getStudentFees = async (req, res) => {
       campusId: campusId
     };
 
-    if (studentId) {
-      query.studentId = studentId;
+    if (employeeId) {
+      query.employeeId = employeeId;
     }
-    if (sessionId) {
-      query.sessionId = sessionId;
+    if (employeeType) {
+      query.employeeType = employeeType;
     }
     if (month) {
       query.month = month;
@@ -477,35 +250,46 @@ export const getStudentFees = async (req, res) => {
       query.year = parseInt(year);
     }
 
-    const fees = await StudentFee.find(query)
-      .populate('studentId', 'name rollNumber')
-      .populate('sessionId', 'name')
+    const salarySlips = await SalarySlip.find(query)
       .sort({ year: -1, month: -1 });
+
+    // Populate employee details
+    const populatedSlips = await Promise.all(salarySlips.map(async (slip) => {
+      let employee = null;
+      if (slip.employeeType === 'TEACHER') {
+        employee = await Teacher.findById(slip.employeeId).select('name');
+      } else {
+        employee = await Staff.findById(slip.employeeId).select('name designation');
+      }
+      return {
+        ...slip.toObject(),
+        employee
+      };
+    }));
 
     res.status(200).json({
       success: true,
-      message: 'Student fees retrieved successfully',
-      data: fees
+      message: 'Salary slips retrieved successfully',
+      data: populatedSlips
     });
 
   } catch (error) {
-    console.error('Get student fees error:', error);
+    console.error('Get salary slips error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching student fees',
+      message: 'Error fetching salary slips',
       error: error.message
     });
   }
 };
 
 /**
- * Pay Fee
- * POST /api/fees/students/:feeId/pay
+ * Mark Salary as Paid
+ * POST /api/salary/:id/pay
  */
-export const payFee = async (req, res) => {
+export const markSalaryPaid = async (req, res) => {
   try {
-    const { feeId } = req.params;
-    const { paidAmount } = req.body;
+    const { id } = req.params;
     const schoolId = req.schoolId;
     const userId = req.user.userId;
 
@@ -519,136 +303,50 @@ export const payFee = async (req, res) => {
     }
 
     if (user.role !== 'school_owner' && 
-        (user.role !== 'admin' || !user.permissions?.includes(PERMISSIONS.FEES_MANAGE))) {
+        (user.role !== 'admin' || !user.permissions?.includes(PERMISSIONS.SALARY_MANAGE))) {
       return res.status(403).json({
         success: false,
-        message: 'You do not have permission to process payments'
+        message: 'You do not have permission to mark salary as paid'
       });
     }
 
-    // Validation
-    if (!paidAmount || paidAmount <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'paidAmount must be greater than 0'
-      });
-    }
-
-    // Get fee
-    const fee = await StudentFee.findOne({
-      _id: feeId,
+    // Get salary slip
+    const salarySlip = await SalarySlip.findOne({
+      _id: id,
       schoolId: schoolId
     });
 
-    if (!fee) {
+    if (!salarySlip) {
       return res.status(404).json({
         success: false,
-        message: 'Fee record not found'
+        message: 'Salary slip not found'
       });
     }
 
-    // Update payment
-    const newPaidAmount = fee.paidAmount + paidAmount;
-    fee.paidAmount = newPaidAmount;
-    fee.paidOn = new Date();
-
-    // Update status
-    if (newPaidAmount >= fee.amount) {
-      fee.status = 'PAID';
-    } else if (newPaidAmount > 0) {
-      fee.status = 'PARTIAL';
+    if (salarySlip.status === 'PAID') {
+      return res.status(400).json({
+        success: false,
+        message: 'Salary is already marked as paid'
+      });
     }
 
-    await fee.save();
+    // Mark as paid
+    salarySlip.status = 'PAID';
+    await salarySlip.save();
 
     res.status(200).json({
       success: true,
-      message: 'Payment recorded successfully',
-      data: fee
+      message: 'Salary marked as paid successfully',
+      data: salarySlip
     });
 
   } catch (error) {
-    console.error('Pay fee error:', error);
+    console.error('Mark salary paid error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error processing payment',
+      message: 'Error marking salary as paid',
       error: error.message
     });
   }
 };
 
-/**
- * Fee Report
- * GET /api/fees/students/report?classId=xxx&month=August
- */
-export const getFeeReport = async (req, res) => {
-  try {
-    const { classId, month, year, sessionId } = req.query;
-    const schoolId = req.schoolId;
-    const campusId = req.campusId;
-
-    let query = {
-      schoolId: schoolId,
-      campusId: campusId
-    };
-
-    if (classId) {
-      // Get students in this class
-      const students = await Student.find({
-        classId: classId,
-        schoolId: schoolId,
-        campusId: campusId,
-        isDeleted: false
-      }).select('_id');
-      query.studentId = { $in: students.map(s => s._id) };
-    }
-    if (month) {
-      query.month = month;
-    }
-    if (year) {
-      query.year = parseInt(year);
-    }
-    if (sessionId) {
-      query.sessionId = sessionId;
-    }
-
-    const fees = await StudentFee.find(query)
-      .populate('studentId', 'name rollNumber')
-      .populate('sessionId', 'name')
-      .sort({ createdAt: -1 });
-
-    // Calculate statistics
-    const total = fees.length;
-    const paid = fees.filter(f => f.status === 'PAID').length;
-    const partial = fees.filter(f => f.status === 'PARTIAL').length;
-    const pending = fees.filter(f => f.status === 'PENDING').length;
-    const totalAmount = fees.reduce((sum, f) => sum + f.amount, 0);
-    const totalPaid = fees.reduce((sum, f) => sum + f.paidAmount, 0);
-    const totalPending = totalAmount - totalPaid;
-
-    res.status(200).json({
-      success: true,
-      message: 'Fee report retrieved successfully',
-      data: {
-        fees,
-        statistics: {
-          total,
-          paid,
-          partial,
-          pending,
-          totalAmount,
-          totalPaid,
-          totalPending
-        }
-      }
-    });
-
-  } catch (error) {
-    console.error('Get fee report error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching fee report',
-      error: error.message
-    });
-  }
-};

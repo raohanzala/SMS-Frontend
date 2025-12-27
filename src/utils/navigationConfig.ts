@@ -17,6 +17,7 @@ import {
   Book,
   Layers,
   GitBranch,
+  Award,
 } from 'lucide-react';
 
 
@@ -67,6 +68,9 @@ export const adminNav = [
     ],
   },
   { name: 'Exams', href: '/admin/exams', icon: FileText },
+  { name: 'Certificates', href: '/admin/certificates', icon: Award },
+  { name: 'Leaves', href: '/admin/leaves', icon: Calendar },
+  { name: 'Payroll', href: '/admin/payroll', icon: DollarSign },
   { name: 'Results', href: '/admin/results', icon: BarChart2 },
   { name: 'Noticeboard', href: '/admin/noticeboard', icon: Bell },
   {
@@ -84,6 +88,7 @@ export const teacherNav = [
   { name: 'Attendance', href: '/teacher/attendance', icon: Clipboard },
   { name: 'Homework', href: '/teacher/homework', icon: BookOpen },
   { name: 'Marks', href: '/teacher/marks', icon: BarChart2 },
+  { name: 'Leaves', href: '/teacher/leaves', icon: Calendar },
   {
     name: 'Timetable',
     icon: Calendar,
