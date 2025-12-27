@@ -9,6 +9,7 @@ import Table from "@/components/common/Table";
 
 const StudentsTable = React.memo(
   ({
+    totalStudents,
     onEditStudent,
     onDeleteStudent,
     students,
@@ -128,7 +129,7 @@ const StudentsTable = React.memo(
 
     return (
       <Table
-        title="Students"
+        title={`Students (${totalStudents})`}
         data={studentsTableData}
         columns={studentColumns}
         selectable={true}

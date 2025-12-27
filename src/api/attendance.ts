@@ -1,75 +1,94 @@
 import axiosInstance from "./axiosInstance";
 import {
-  ClassForAttendance,
-  StudentsByClassResponse,
+  AttendanceByClassResponse,
   MarkAttendanceInput,
   UpdateAttendanceInput,
-  Attendance,
-} from "@/features/ClassAttendance/types/attendance.types";
+  AttendanceReportResponse,
+} from "@/features/attendance/types/attendance.types";
 
-// Get classes for attendance dropdown
-export const getClassesForAttendanceApi = async (): Promise<{
-  success: boolean;
-  message: string;
-  data: ClassForAttendance[];
-}> => {
-  const { data } = await axiosInstance.get("/attendance/classes");
-  return data;
-};
-
-// Get students by class for attendance marking
-export const getStudentsByClassForAttendanceApi = async (
+// Get attendance by class and date
+// GET /api/attendance/students?classId=xxx&date=2025-03-20
+export const getAttendanceByClassAndDateApi = async (
   classId: string,
-  date?: string
+  date: string
 ): Promise<{
   success: boolean;
   message: string;
-  data: StudentsByClassResponse;
+  data: AttendanceByClassResponse;
 }> => {
-  const url = `/attendance/students/class/${classId}${date ? `?date=${date}` : ""}`;
-  const { data } = await axiosInstance.get(url);
+  const { data } = await axiosInstance.get("/attendance/students", {
+    params: { classId, date },
+  });
   return data;
 };
 
-// Mark attendance (bulk)
+// Mark attendance
+// POST /api/attendance/students
 export const markAttendanceApi = async (
   payload: MarkAttendanceInput
 ): Promise<{
   success: boolean;
   message: string;
-  data: {
-    matched: number;
-    modified: number;
-    upserted: number;
-    totalRecords: number;
-  };
+  data: any;
 }> => {
-  const { data } = await axiosInstance.post("/attendance/mark", payload);
+  const { data } = await axiosInstance.post("/attendance/students", payload);
   return data;
 };
 
 // Update attendance
+// PUT /api/attendance/students/:attendanceId
 export const updateAttendanceApi = async (
   attendanceId: string,
   payload: UpdateAttendanceInput
 ): Promise<{
   success: boolean;
   message: string;
-  data: Attendance;
+  data: any;
 }> => {
-  const { data } = await axiosInstance.put(`/attendance/${attendanceId}`, payload);
+  const { data } = await axiosInstance.put(`/attendance/students/${attendanceId}`, payload);
   return data;
 };
 
-// Delete attendance
-export const deleteAttendanceApi = async (
+// Finalize attendance
+// POST /api/attendance/students/:attendanceId/finalize
+export const finalizeAttendanceApi = async (
   attendanceId: string
 ): Promise<{
   success: boolean;
   message: string;
-  data: Attendance;
+  data: any;
 }> => {
-  const { data } = await axiosInstance.delete(`/attendance/${attendanceId}`);
+  const { data } = await axiosInstance.post(`/attendance/students/${attendanceId}/finalize`);
+  return data;
+};
+
+// Reopen attendance
+// POST /api/attendance/students/:attendanceId/reopen
+export const reopenAttendanceApi = async (
+  attendanceId: string
+): Promise<{
+  success: boolean;
+  message: string;
+  data: any;
+}> => {
+  const { data } = await axiosInstance.post(`/attendance/students/${attendanceId}/reopen`);
+  return data;
+};
+
+// Get attendance report
+// GET /api/attendance/students/report?studentId=xxx&from=2025-03-01&to=2025-03-31
+export const getAttendanceReportApi = async (
+  studentId: string,
+  from: string,
+  to: string
+): Promise<{
+  success: boolean;
+  message: string;
+  data: AttendanceReportResponse;
+}> => {
+  const { data } = await axiosInstance.get("/attendance/students/report", {
+    params: { studentId, from, to },
+  });
   return data;
 };
 

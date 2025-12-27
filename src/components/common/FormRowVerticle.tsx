@@ -5,6 +5,7 @@ interface FormRowVerticalProps {
   label?: string;
   error?: string | string[] | FormikErrors<any> | FormikErrors<any>[] | undefined;
   name: string;
+  icon?: ReactNode;
   children: ReactNode;
   required?: boolean;
   helperText?: string;
@@ -13,6 +14,7 @@ interface FormRowVerticalProps {
 const FormRowVertical = ({
   label,
   name,
+  icon,
   children,
   error,
   required = false,
@@ -23,12 +25,15 @@ const FormRowVertical = ({
       {label && (
         <label 
           htmlFor={name} 
-          className="block text-base font-medium text-gray-600 capitalize"
+          className="block text-base font-medium text-gray-700 capitalize"
         >
-          {label}
-          {required && (
-            <span className="text-status-error ml-1" aria-label="required">*</span>
-          )}
+          <div className="flex items-center gap-[6px]">
+            {icon && icon}
+            {label && label}
+            {required && (
+              <span className="text-status-error" aria-label="required">*</span>
+            )}
+          </div>
         </label>
       )}
       {children}

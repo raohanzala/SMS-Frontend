@@ -52,15 +52,31 @@ export const adminNav = [
     icon: Clipboard,
     children: [
       { name: 'Class Attendance', href: '/admin/attendance/class' },
+      { name: 'Teacher Attendance', href: '/admin/attendance/teachers' },
+      { name: 'Staff Attendance', href: '/admin/attendance/staff' },
       { name: 'Employees Attendance', href: '/admin/attendance/employees' },
       // { name: 'Class wise Report', href: '/admin/attendance/classwise-report' },
     ],
   },
-  { name: 'Fees', href: '/admin/fees', icon: DollarSign },
+  {
+    name: 'Fees',
+    icon: DollarSign,
+    children: [
+      { name: 'Student Fees', href: '/admin/fees' },
+      { name: 'Fee Structure', href: '/admin/fees/structure' },
+    ],
+  },
   { name: 'Exams', href: '/admin/exams', icon: FileText },
   { name: 'Results', href: '/admin/results', icon: BarChart2 },
   { name: 'Noticeboard', href: '/admin/noticeboard', icon: Bell },
-  { name: 'Settings', href: '/admin/settings', icon: Settings },
+  {
+    name: 'Settings',
+    icon: Settings,
+    children: [
+      { name: 'General Settings', href: '/admin/settings' },
+      { name: 'Campuses', href: '/admin/settings/campuses' },
+    ],
+  },
 ];
 
 export const teacherNav = [
@@ -91,6 +107,7 @@ export const studentNav = [
 export const ParentNav = [
   { name: 'Dashboard', href: '/parent/dashboard', icon: Home },
   { name: 'Timetable', href: '/parent/timetable', icon: Calendar },
+  { name: 'Attendance', href: '/parent/attendance', icon: Clipboard },
   { name: 'Fees', href: '/parent/fees', icon: DollarSign },
   { name: 'Results', href: '/parent/results', icon: BarChart2 },
   { name: 'Messages', href: '/parent/messages', icon: MessageSquare },

@@ -212,7 +212,7 @@ const TeacherFormPage = () => {
                   disabled={isBusy}
                 />
               </FormRowVertical>
-            <FormRowVertical label="Teacher Level" name="levelsIds" error={errors.levelsIds}>
+            <FormRowVertical label="Teacher Level" name="levelsIds" error={errors.levelsIds} required>
               <EntitySelect
                 entity="static"
                 staticOptions={classLevels.map(classLevel => ({ value: classLevel._id, label: classLevel.name })) }

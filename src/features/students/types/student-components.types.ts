@@ -19,6 +19,7 @@ export interface StudentsCardsProps {
 
 export interface StudentsTableProps {
   students: Student[];
+  totalStudents: number;
   onEditStudent: (student: Student) => void;
   onDeleteStudent: (student: Student) => void;
   selectedStudents?: Set<string>;

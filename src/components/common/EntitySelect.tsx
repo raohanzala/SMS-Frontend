@@ -4,9 +4,10 @@ import { getClassByIdApi, getClassesApi } from "@/api/classes";
 import { getAllTeachersApi, getTeacherByIdApi } from "@/api/teachers";
 import { getAllStudentsApi, getStudentByIdApi } from "@/api/students";
 import { getSessionsApi, getSessionByIdApi } from "@/api/sessions";
+import { getAllCampusesApi, getCampusByIdApi } from "@/api/campuses";
 import { useCallback } from "react";
 
-type EntityType = "parent" | "class" | "teacher" | "student" | "session" | "static";
+type EntityType = "parent" | "class" | "teacher" | "student" | "session" | "campus" | "static";
 
 interface Option {
   value: string;
@@ -32,28 +33,6 @@ function EntitySelect({
   staticOptions = [],
   isDisabled = false,
 }: EntitySelectProps) {
-  if (entity === "static") {
-    return (
-      <SearchableSelect
-        value={value}
-        isMulti={isMulti}
-        onChange={onChange}
-        placeholder={placeholder}
-        fetchOptions={async (search: string) => {
-          if (!search) return staticOptions;
-          return staticOptions.filter((option) =>
-            option.label.toLowerCase().includes(search.toLowerCase())
-          );
-        }}
-        fetchById={async (id: string) => {
-          return staticOptions.find((option) => option.value === id) || null;
-        }}
-        isDisabled={isDisabled}
-        forceRefreshKey={staticOptions.length}
-      />
-    );
-  }
-
   const apiMap = {
     parent: {
       fetchList: async (search: string): Promise<Option[]> => {
@@ -163,11 +142,57 @@ function EntitySelect({
           : null;
       },
     },
+    campus: {
+      fetchList: async (search: string): Promise<Option[]> => {
+        const response = await getAllCampusesApi();
+        const campuses = response.data || [];
+        return (
+          campuses
+            .filter((c) => 
+              !search || 
+              c.name.toLowerCase().includes(search.toLowerCase()) ||
+              c.code.toLowerCase().includes(search.toLowerCase())
+            )
+            .map((c) => ({
+              value: c._id,
+              label: `${c.name} (${c.code})`,
+            })) || []
+        );
+      },
+      fetchById: async (id: string): Promise<Option | null> => {
+        if (!id) return null;
+        const response = await getCampusByIdApi(id);
+        return response.data
+          ? { value: response.data._id, label: `${response.data.name} (${response.data.code})` }
+          : null;
+      },
+    },
   };
 
-  const { fetchList, fetchById } = apiMap[entity];
-  const memoFetchList = useCallback(fetchList, []);
-  const memoFetchById = useCallback(fetchById, []);
+  const getApiFunctions = () => {
+    if (entity === "static") {
+      return {
+        fetchList: async (search: string) => {
+          if (!search) return staticOptions;
+          return staticOptions.filter((option) =>
+            option.label.toLowerCase().includes(search.toLowerCase())
+          );
+        },
+        fetchById: async (id: string) => {
+          return staticOptions.find((option) => option.value === id) || null;
+        },
+      };
+    }
+    return apiMap[entity as keyof typeof apiMap] || { 
+      fetchList: async () => [], 
+      fetchById: async () => null 
+    };
+  };
+
+  const { fetchList, fetchById } = getApiFunctions();
+  
+  const memoFetchList = useCallback(fetchList, [entity, staticOptions]);
+  const memoFetchById = useCallback(fetchById, [entity, staticOptions]);
 
   return (
     <SearchableSelect
@@ -176,8 +201,9 @@ function EntitySelect({
       onChange={onChange}
       fetchOptions={memoFetchList}
       fetchById={memoFetchById}
-      placeholder={placeholder || `Search ${entity}...`}
+      placeholder={placeholder || (entity === "static" ? "Select..." : `Search ${entity}...`)}
       isDisabled={isDisabled}
+      forceRefreshKey={entity === "static" ? staticOptions.length : undefined}
     />
   );
 }

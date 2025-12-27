@@ -55,7 +55,6 @@ import CreateTimetablePage from "./features/timetable/pages/CreateTimetablePage"
 import ClassTimetablePage from "./features/timetable/pages/ClassTimetablePage";
 import TeacherTimetablePage from "./features/timetable/pages/TeacherTimetablePage";
 import StudentTimetablePage from "./features/timetable/pages/StudentTimetablePage";
-import ClassAttendancePage from "./features/ClassAttendance/pages/ClassAttendancePage";
 // import EmployeesAttendance from './pages/private/admin/EmployeesAttendance';
 // import FeesPage from './pages/private/admin/Fees';
 // import ExamsPage from './pages/private/admin/Exams';
@@ -65,15 +64,36 @@ import SettingsPage from "./features/settings/pages/SettingsPage";
 
 // Teacher Pages
 import TeacherDashboard from "./features/dashboard/teacher/pages/TeacherDashboard";
-// import TeacherAttendance from './pages/private/teacher/Attendance';
+import TeacherAttendancePage from "./features/attendance/pages/TeacherAttendancePage";
 
 // Student Pages
 import StudentDashboard from "./features/dashboard/student/pages/StudentDashboard";
+import StudentAttendancePage from "./features/attendance/pages/StudentAttendancePage";
 
 // Parent Pages
 import ParentDashboard from "./features/dashboard/parent/pages/ParentDashboard";
+import ParentAttendancePage from "./features/attendance/pages/ParentAttendancePage";
 import SubjectsPage from "./features/subjects/pages/SubjectsPage";
 import TimetablesPage from "./features/timetable/pages/TimetablesPage";
+
+// Attendance Pages
+import AdminClassAttendancePage from "./features/attendance/pages/AdminClassAttendancePage";
+
+// Teacher Attendance Pages
+import AdminTeacherAttendancePage from "./features/teacherAttendance/pages/AdminTeacherAttendancePage";
+import TeacherMyAttendancePage from "./features/teacherAttendance/pages/TeacherMyAttendancePage";
+
+// Staff Attendance Pages
+import AdminStaffAttendancePage from "./features/staffAttendance/pages/AdminStaffAttendancePage";
+
+// Fee Pages
+import FeeStructurePage from "./features/fees/pages/FeeStructurePage";
+import AdminFeesPage from "./features/fees/pages/AdminFeesPage";
+import StudentFeesPage from "./features/fees/pages/StudentFeesPage";
+import ParentFeesPage from "./features/fees/pages/ParentFeesPage";
+
+// Campus Pages
+import CampusesPage from "./features/campuses/pages/CampusesPage";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -205,14 +225,30 @@ function App() {
                   />
                   <Route
                     path="attendance/class"
-                    element={<ClassAttendancePage />}
+                    element={<AdminClassAttendancePage />}
+                  />
+                  <Route
+                    path="attendance/teachers"
+                    element={<AdminTeacherAttendancePage />}
+                  />
+                  <Route
+                    path="attendance/staff"
+                    element={<AdminStaffAttendancePage />}
+                  />
+                  <Route
+                    path="fees"
+                    element={<AdminFeesPage />}
+                  />
+                  <Route
+                    path="fees/structure"
+                    element={<FeeStructurePage />}
                   />
                   {/* <Route path="attendance/employees" element={<EmployeesAttendance />} />
-                  <Route path="fees" element={<FeesPage />} />
                   <Route path="exams" element={<ExamsPage />} />
                   <Route path="results" element={<ResultsPage />} />
                   <Route path="noticeboard" element={<NoticeboardPage />} /> */}
                   <Route path="settings" element={<SettingsPage />} />
+                  <Route path="settings/campuses" element={<CampusesPage />} />
                 </Route>
 
                 {/* Teacher Routes */}
@@ -229,7 +265,7 @@ function App() {
                     element={<Navigate to="/teacher/dashboard" replace />}
                   />
                   <Route path="dashboard" element={<TeacherDashboard />} />
-                  {/* <Route path="attendance" element={<TeacherAttendance />} /> */}
+                  <Route path="attendance" element={<TeacherMyAttendancePage />} />
                   <Route path="timetable" element={<TeacherTimetablePage />} />
                   <Route
                     path="timetable/:teacherId"
@@ -259,6 +295,8 @@ function App() {
                     element={<Navigate to="/student/dashboard" replace />}
                   />
                   <Route path="dashboard" element={<StudentDashboard />} />
+                  <Route path="attendance" element={<StudentAttendancePage />} />
+                  <Route path="fees" element={<StudentFeesPage />} />
                   <Route path="timetable" element={<StudentTimetablePage />} />
                   <Route
                     path="timetable/:studentId"
@@ -280,6 +318,8 @@ function App() {
                     element={<Navigate to="/parent/dashboard" replace />}
                   />
                   <Route path="dashboard" element={<ParentDashboard />} />
+                  <Route path="attendance" element={<ParentAttendancePage />} />
+                  <Route path="fees" element={<ParentFeesPage />} />
                   <Route path="timetable" element={<StudentTimetablePage />} />
                   <Route
                     path="timetable/:studentId"

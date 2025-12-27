@@ -187,6 +187,8 @@ const TimetableSettingsSection = ({ settings }: TimetableSettingsSectionProps) =
 
   const { errors, values, setFieldValue, getFieldProps, handleSubmit, isSubmitting } = formik;
 
+  console.log(errors, values)
+
   return (
     <Card
       title="Timetable Settings"

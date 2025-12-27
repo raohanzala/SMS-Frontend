@@ -38,6 +38,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }: ProtectedRouteProps) =>
       teacher: '/teacher/dashboard',
       student: '/student/dashboard',
       parent: '/parent/dashboard',
+      staff: '/admin/dashboard',
     };
 
     const redirectPath = roleRoutes[user?.role as UserRole] || '/login';

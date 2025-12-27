@@ -13,6 +13,10 @@ export const addStudentApi = async (addStudentInput: AddStudentInput) => {
   });
   return data;
 };
+export const addStudentsDummyApi = async () => {
+  const { data } = await axiosInstance.post("/students/seed");
+  return data;
+};
 
 export const updateStudentApi = async ({
   studentId,
@@ -90,5 +94,12 @@ export const promoteStudentsApi = async (
     "/students/promote",
     promoteStudent
   );
+  return data;
+};
+
+export const bulkDeleteStudentsApi = async (studentIds: string[]) => {
+  const { data } = await axiosInstance.delete("/students/bulk-delete", {
+    data: { studentIds },
+  });
   return data;
 };

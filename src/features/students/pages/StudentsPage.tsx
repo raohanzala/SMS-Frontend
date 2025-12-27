@@ -12,6 +12,8 @@ import Spinner from "../../../components/common/Spinner";
 import StudentsCards from "../components/StudentsCards";
 import StudentsTable from "../components/StudentsTable";
 import StudentsToolbar from "../components/StudentsToolbar";
+import { useSelectable } from "@/hooks/useSelectable";
+import { useBulkDeleteStudents } from "../hooks/useBulkDeleteStudents";
 
 const StudentsPage = () => {
   const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
@@ -22,6 +24,17 @@ const StudentsPage = () => {
   const view = searchParams.get("view") || "cards";
   const { pagination, students, studentsError, isStudentsLoading } = useStudents();
   const { deleteStudentMutation, isDeletingStudent } = useDeleteStudent();
+  const { bulkDeleteStudentsMutation, isBulkDeletingStudents } = useBulkDeleteStudents();
+  const [isShowBulkDeleteModal, setIsShowBulkDeleteModal] = useState(false);
+
+
+  const {
+    selectedItems: selectedStudents,
+    handleToggleSelect,
+    handleSelectAll,
+    handleDeselectAll,
+    setSelectedItems
+  } = useSelectable(students || []);
 
   const handleEditStudent = useCallback((studentToEdit: Student) => {
     navigate(`/admin/students/${studentToEdit._id}/edit`);
@@ -52,9 +65,34 @@ const StudentsPage = () => {
     }
   }, [deleteStudentMutation, studentToDelete]);
 
+  const handleBulkDelete = useCallback(() => {
+    setIsShowBulkDeleteModal(true);
+  }, []);
+
+  const handleConfirmBulkDelete = useCallback(() => {
+    if (selectedStudents) {
+      bulkDeleteStudentsMutation(Array.from(selectedStudents), {
+        onSuccess: () => {
+          setIsShowBulkDeleteModal(false);
+          setSelectedItems(new Set());
+        },
+      });
+    }
+  }, [bulkDeleteStudentsMutation, selectedStudents, setSelectedItems]);
+
+  const handleCloseBulkDeleteModal = useCallback(() => {
+    setIsShowBulkDeleteModal(false);
+  }, []);
+
   return (
     <div className="space-y-6">
-      <StudentsToolbar onClickAddStudent={handleShowManageStudentModal} />
+      <StudentsToolbar 
+      onClickAddStudent={handleShowManageStudentModal}
+      selectedCount={selectedStudents.size}
+      onBulkDelete={handleBulkDelete}
+      onCancelSelection={()=> setSelectedItems(new Set())}
+      isDeleting={isBulkDeletingStudents}
+       />
 
       {isStudentsLoading && (
         <div className="flex justify-center py-6">
@@ -84,14 +122,21 @@ const StudentsPage = () => {
               {view === "table" ? (
                 <StudentsTable
                   students={students}
+                  totalStudents={pagination.totalStudents}
                   onEditStudent={handleEditStudent}
                   onDeleteStudent={handleDeleteStudent}
+                  selectedStudents={selectedStudents}
+                  onToggleSelect={handleToggleSelect}
+                  onSelectAll={handleSelectAll}
+                  onDeselectAll={handleDeselectAll}
                 />
               ) : (
                 <StudentsCards
                   students={students}
                   onEditStudent={handleEditStudent}
                   onDeleteStudent={handleDeleteStudent}
+                  selectedStudents={selectedStudents}
+                  onToggleSelect={handleToggleSelect}
                 />
               )}
 
@@ -109,6 +154,18 @@ const StudentsPage = () => {
         onClose={handleCloseStudentDeleteModal}
         onConfirm={handleConfirmStudentDelete}  
         isLoading={isDeletingStudent} />
+
+<ConfirmationModal
+        title="Delete Selected Students"
+        message={`Are you sure you want to delete ${selectedStudents.size} selected students? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        isOpen={isShowBulkDeleteModal}
+        onClose={handleCloseBulkDeleteModal}
+        onConfirm={handleConfirmBulkDelete}
+        isLoading={isBulkDeletingStudents}
+      />
     </div>
   );
 };

@@ -34,6 +34,7 @@ const PublicRoute = ({ children }: PublicRouteProps) => {
       teacher: '/teacher/dashboard',
       student: '/student/dashboard',
       parent: '/parent/dashboard',
+      staff: '/admin/dashboardd',
     };
 
     const redirectPath = roleRoutes[user.role as UserRole] || '/admin/dashboard';

@@ -43,8 +43,8 @@ export const settingsSchema = Yup.object().shape({
         name: Yup.string().required("Level name is required"),
         classIds: Yup.array()
           .of(Yup.string().required())
-          .min(1, "At least one class is required")
-          .required("Class IDs are required"),
+          .min(1, "At least one class is required"),
+          // .required("Class IDs are required"),
         timings: levelTimingsSchema.optional(),
       })
     )

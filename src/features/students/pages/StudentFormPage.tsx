@@ -38,7 +38,7 @@ const StudentFormPage = () => {
       address: student?.address || "",
       gender: student?.gender || "",
       rollNumber: student?.rollNumber || "",
-      classId: student?.class?._id || "",
+      classId: student?.classId?._id || "",
       religion: student?.religion || "",
       session: student?.session || "",
       dob: student?.DOB || "",
@@ -81,6 +81,8 @@ const StudentFormPage = () => {
   });
 
   const { values, errors, handleSubmit, setFieldValue, getFieldProps } = formik;
+
+  console.log(values, errors)
 
   const handleCancel = useCallback(() => navigate(-1), [navigate]);
   const handleParentModalClose = useCallback(
@@ -130,6 +132,7 @@ const StudentFormPage = () => {
           </Button>
           <Button
             type="submit"
+            onClick={() => handleSubmit()}
             loading={isStudentPending}
             disabled={isStudentPending}
           >

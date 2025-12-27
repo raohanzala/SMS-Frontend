@@ -8,7 +8,7 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>
   size?: InputSize;
 }
 
-const Input = ({ name, type = "text", size = "medium", value, onChange, onBlur, ...props }: InputProps) => {
+const Input = ({ name, type = "text", size = "medium", className, value, onChange, onBlur, ...props }: InputProps) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
     const sizes: Record<InputSize, string> = {
@@ -22,7 +22,7 @@ const Input = ({ name, type = "text", size = "medium", value, onChange, onBlur, 
         id={name}
         name={name}
         type={type === "password" && isPasswordVisible ? "text" : type}
-        className={`w-full mt-1 text-sm px-4 py-3 border border-border bg-bg-main text-text-primary placeholder:text-text-tertiary focus:outline-none ${sizes[size]} focus:ring-1 focus:ring-primary`}
+        className={`w-full mt-1 text-sm px-4 py-3 border border-border bg-bg-main text-text-primary placeholder:text-text-tertiary focus:outline-none ${sizes[size]} focus:ring-1 focus:ring-primary ${className}`}
         value={value}
         onChange={onChange}
         onBlur={onBlur}
