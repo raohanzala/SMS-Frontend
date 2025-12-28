@@ -9,10 +9,11 @@ import { useStudentTimetable } from "../hooks/useStudentTimetable";
 import { getStudentByIdApi } from "@/api/students";
 import { useQuery } from "@tanstack/react-query";
 import EntitySelect from "../../../components/common/EntitySelect";
+import { RootState } from "@/store/store";
 
 const StudentTimetablePage = () => {
   const { studentId: paramStudentId } = useParams<{ studentId?: string }>();
-  const user = useSelector((state: any) => state.auth.user);
+  const {user} = useSelector((state: RootState) => state.auth);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
     paramStudentId || null
   );
@@ -21,8 +22,8 @@ const StudentTimetablePage = () => {
   // For parents, they can view their children's timetables
   // For admins/teachers, they can view any student's timetable
   useEffect(() => {
-    if (user?.role === "student" && user?.userRef) {
-      setSelectedStudentId(user.userRef);
+    if (user?.role === "student") {
+      setSelectedStudentId(user?.profile?._id);
     }
   }, [user]);
 
@@ -68,11 +69,11 @@ const StudentTimetablePage = () => {
           </div>
         )}
 
-        {isStudentTimetableLoading && (
+        {/* {isStudentTimetableLoading && (
           <div className="flex justify-center py-12">
             <Spinner />
           </div>
-        )}
+        )} */}
 
         {studentTimetableError && (
           <ErrorMessage

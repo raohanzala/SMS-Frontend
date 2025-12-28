@@ -136,7 +136,7 @@ const AdminFeesPage = () => {
       />
 
       {/* Session, Month, Year Filters */}
-      <div className="bg-white rounded-lg border border-border shadow-sm p-4 mb-4">
+      <Card className="mb-4">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <FormRowVertical
             label="Session"
@@ -190,7 +190,7 @@ const AdminFeesPage = () => {
             </select>
           </FormRowVertical>
         </div>
-      </div>
+      </Card>
 
       {reportError ? (
         <ErrorMessage message={reportError.message || "Failed to load fees"} />

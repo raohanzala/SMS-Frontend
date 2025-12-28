@@ -12,7 +12,7 @@ import { formatShortDate } from "@/utils/helpers";
 
 const StudentAttendancePage = () => {
   const user = useSelector((state: RootState) => state.auth.user);
-  const studentId = user?.profile as string;
+  const studentId = user?.profile?._id as string;
 
   // Get current month start and end
   const today = new Date();

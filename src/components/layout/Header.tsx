@@ -24,21 +24,23 @@ interface HeaderProps {
   } | null;
 }
 
-export default function Header({ setSidebarOpen, user }: HeaderProps) {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+export default function Header({ setSidebarOpen }: HeaderProps) {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showCampusMenu, setShowCampusMenu] = useState(false);
-  const pageTitle = usePageTitle();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const campusMenuRef = useRef<HTMLDivElement>(null);
   
-  const {user: currentUser, campus: currentCampus} = useSelector((state: RootState) => state.auth);
-  const canSwitchCampus = currentUser?.role === "school_owner";
+  const {user, campus: currentCampus} = useSelector((state: RootState) => state.auth);
+  
+  const pageTitle = usePageTitle();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { campuses } = useCampuses();
   const { switchCampusMutation, isSwitchingCampus } = useSwitchCampus();
+
   const currentCampusId = currentCampus?._id;
+  const canSwitchCampus = user?.role === "school_owner";
 
   const handleLogout = () => {
     dispatch(logout());
@@ -46,12 +48,10 @@ export default function Header({ setSidebarOpen, user }: HeaderProps) {
     navigate("/login");
   };
 
-  // Get user display name
-  const userName = user?.name || user?.profile?.name || "User";
+  const userName = user?.name || "User";
   const userEmail = user?.email || "";
   const userImage = user?.profileImage;
 
-  // Get user initials
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -59,9 +59,14 @@ export default function Header({ setSidebarOpen, user }: HeaderProps) {
       .join("")
       .toUpperCase()
       .slice(0, 2);
-  };
+    };
+    
+    const handleSwitchCampus = (campusId: string) => {
+      if (campusId === currentCampusId) return;
+      switchCampusMutation(campusId);
+      setShowCampusMenu(false);
+    };
 
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
@@ -78,11 +83,6 @@ export default function Header({ setSidebarOpen, user }: HeaderProps) {
     };
   }, []);
 
-  const handleSwitchCampus = (campusId: string) => {
-    if (campusId === currentCampusId) return;
-    switchCampusMutation(campusId);
-    setShowCampusMenu(false);
-  };
 
   return (
     <>
@@ -213,7 +213,7 @@ export default function Header({ setSidebarOpen, user }: HeaderProps) {
                   {userName}
                 </p>
                 <p className="text-xs text-text-secondary capitalize">
-                  {currentUser?.role}
+                  {user?.role}
                 </p>
               </div>
 
@@ -234,7 +234,7 @@ export default function Header({ setSidebarOpen, user }: HeaderProps) {
                   {userEmail && (
                     <p className="text-xs text-text-secondary mt-0.5 truncate">{userEmail}</p>
                   )}
-                  <p className="text-xs text-text-tertiary capitalize mt-1">{currentUser?.role}</p>
+                  <p className="text-xs text-text-tertiary capitalize mt-1">{user?.role}</p>
                 </div>
 
                 {/* Menu Items */}
@@ -251,8 +251,8 @@ export default function Header({ setSidebarOpen, user }: HeaderProps) {
                   </button>
                   <button
                     onClick={() => {
+                      navigate('/settings')
                       setShowUserMenu(false);
-                      // Navigate to settings page if exists
                     }}
                     className="w-full flex items-center gap-3 px-4 py-2 text-sm text-text-secondary hover:bg-bg-secondary hover:text-text-primary transition-colors"
                   >

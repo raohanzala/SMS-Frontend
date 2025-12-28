@@ -21,10 +21,13 @@ const LoginForm = () => {
   })
 
   const demoCredentials = [
-    { email: 'saleem@gmail.com', password: 'saleem1234', role: 'Admin' },
-    { email: 'kamal@gmail.com', password: 'kamal1234', role: 'Teacher' },
-    { email: 'salman@gmail.com', password: 'salman1234', role: 'Student' },
-    { email: 'akhtar@gmail.com', password: 'akhtar123', role: 'Parent' },
+    { email: 'shaman@gmail.com', password: 'Sh@man123', role : 'student' },
+    { email: 'sohail@gmail.com', password: 'Soh@il123', role : 'teacher' },
+    { email: 'asghar@gmail.com', password: 'Asgh@r123', role : 'parent' },
+    { email: 'zafar@gmail.com', password: 'Z@far123', role : 'staff' },
+    { email: 'akhtar@gmail.com', password: 'akhtar123', role : 'admnin' },
+    { email: 'ashraf@gmail.com', password: 'ashraf', role : 'school_owner' },
+    { email: 'akhtar@gmail.com', password: 'akhtar123', role : 'super_admin' },
   ];
 
   const fillDemoCredentials = (credentials: { email: string; password: string }) => {
@@ -79,6 +82,16 @@ const LoginForm = () => {
                 Sign up
               </Link>
             </span>
+          </div>
+
+          <div className='mt-4 space-y-2'>
+            {
+              demoCredentials.map((credential) => (
+                <div className='text-sm text-text-secondary hover:text-primary cursor-pointer' key={credential.email} onClick={() => fillDemoCredentials(credential)}>
+                  {credential.email} - {credential.role}
+                </div>
+              ))
+            }
           </div>
         </form>
       </FormikProvider>

@@ -6,6 +6,11 @@ export const getAllSubjectsApi = async (params = {}) => {
   return data;
 };
 
+export const getSubjectByIdApi = async (id: string) => {
+  const { data } = await axiosInstance.get(`/subjects/${id}`);
+  return data;
+};
+
 export const addSubjectApi = async (addSubjectInput: AddSubjectInput) => {
   const { data } = await axiosInstance.post("/subjects", addSubjectInput);
   return data;

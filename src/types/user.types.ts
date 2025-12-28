@@ -1,4 +1,4 @@
-export type UserRole = "admin" | "teacher" | "student" | "parent" | "school_owner";
+export type UserRole = "admin" | "staff" | "teacher" | "student" | "parent" | "school_owner" | 'super_admin';
 export type Gender = "male" | "female";
 
 export interface User {

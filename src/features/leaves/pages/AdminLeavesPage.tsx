@@ -10,6 +10,7 @@ import FormRowVertical from "@/components/common/FormRowVerticle";
 import { Calendar, User } from "lucide-react";
 import EmptyState from "@/components/common/EmptyState";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
+import Card from "@/components/common/Card";
 
 const AdminLeavesPage = () => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -67,7 +68,7 @@ const AdminLeavesPage = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg border border-border shadow-sm p-4 mb-4">
+      <Card>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormRowVertical
             label="User"
@@ -102,7 +103,7 @@ const AdminLeavesPage = () => {
             </select>
           </FormRowVertical>
         </div>
-      </div>
+      </Card>
 
       {leaveRequestsError ? (
         <ErrorMessage message={leaveRequestsError.message || "Failed to load leave requests"} />

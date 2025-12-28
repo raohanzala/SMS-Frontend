@@ -6,8 +6,10 @@ import { getAllStudentsApi, getStudentByIdApi } from "@/api/students";
 import { getSessionsApi, getSessionByIdApi } from "@/api/sessions";
 import { getAllCampusesApi, getCampusByIdApi } from "@/api/campuses";
 import { useCallback } from "react";
+import { getAllSubjectsApi } from "@/api/subjects";
+import { getSubjectByIdApi } from "@/api/subjects";
 
-type EntityType = "parent" | "class" | "teacher" | "student" | "session" | "campus" | "static";
+type EntityType = "parent" | "class" | "teacher" | "student" | "session" | "campus" | "static" | "subject";
 
 interface Option {
   value: string;
@@ -165,6 +167,22 @@ function EntitySelect({
         return response.data
           ? { value: response.data._id, label: `${response.data.name} (${response.data.code})` }
           : null;
+      },
+    },
+    subject: {
+      fetchList: async (search: string): Promise<Option[]> => {
+        const { data } = await getAllSubjectsApi({ page: 1, limit: 10, search });
+        return (
+          data?.subjects?.map((s: any) => ({
+            value: s._id,
+            label: s.name,
+          })) || []
+        );
+      },
+      fetchById: async (id: string): Promise<Option | null> => {
+        if (!id) return null;
+        const { data } = await getSubjectByIdApi(id);
+        return data ? { value: data._id, label: data.name } : null;
       },
     },
   };

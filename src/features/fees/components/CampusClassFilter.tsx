@@ -1,6 +1,7 @@
 import { Building2, Book } from "lucide-react";
 import FormRowVertical from "@/components/common/FormRowVerticle";
 import EntitySelect from "@/components/common/EntitySelect";
+import Card from "@/components/common/Card";
 
 interface CampusClassFilterProps {
   selectedCampusId: string | null;
@@ -16,7 +17,7 @@ const CampusClassFilter = ({
   onClassChange,
 }: CampusClassFilterProps) => {
   return (
-    <div className="bg-white rounded-lg border border-border shadow-sm p-4 mb-4">
+    <Card>
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <div className="flex-1 w-full sm:w-auto">
           <FormRowVertical
@@ -52,7 +53,7 @@ const CampusClassFilter = ({
           </FormRowVertical>
         </div>
       </div>
-    </div>
+    </Card>
   );
 };
 
