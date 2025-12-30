@@ -2,8 +2,6 @@ import React, { Suspense, useState } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import { Outlet } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { RootState } from "../../store/store";
 import Spinner from "../common/Spinner";
 
 interface NavigationItem {
@@ -20,7 +18,6 @@ interface LayoutProps {
 export default function Layout({ navigation }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { user } = useSelector((state: RootState) => state.auth)
 
 
   return (
@@ -38,7 +35,6 @@ export default function Layout({ navigation }: LayoutProps) {
       <div className={`transition-all duration-300 ${isCollapsed ? 'lg:pl-20' : 'lg:pl-72'}`}>
         <Header
           setSidebarOpen={setSidebarOpen}
-          user={user}
         />
 
         <Suspense fallback={

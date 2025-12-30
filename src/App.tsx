@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Provider } from "react-redux";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { store } from "./store/store";
@@ -30,8 +30,9 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               {/* Public Routes */}
-              <Route element={<PublicRoutes />}>
+              <Route path="/"  element={<PublicRoutes />}>
                 <Route element={<PublicLayout />}>
+                <Route index element={<Navigate to="/login" replace />} />
                   <Route
                     path="/login"
                     element={

@@ -1,26 +1,66 @@
 import {
   Home,
   Clipboard,
-  BookOpen,
   BarChart2,
   Calendar,
-  MessageSquare,
   Users,
   UserCheck,
   DollarSign,
   FileText,
-  Bell,
   Settings,
-  User,
-  UserPlus,
   Briefcase,
   Book,
   Layers,
-  GitBranch,
   Award,
 } from 'lucide-react';
 
+// Super Admin Navigation
+export const superAdminNav = [
+  { name: 'Dashboard', href: '/super-admin/dashboard', icon: Home },
+  // TODO: Implement these
+  // { name: 'Schools', href: '/super-admin/schools', icon: Building },
+  // { name: 'Owners', href: '/super-admin/owners', icon: UserCheck },
+  // { name: 'Subscriptions', href: '/super-admin/subscriptions', icon: CreditCard },
+  // { name: 'System Logs', href: '/super-admin/logs', icon: FileText },
+  // { name: 'SaaS Settings', href: '/super-admin/settings', icon: Settings },
+];
 
+// School Owner Navigation
+export const ownerNav = [
+  { name: 'Dashboard', href: '/owner/dashboard', icon: Home },
+  { name: 'Campuses', href: '/owner/settings/campuses', icon: Layers },
+  {
+    name: 'Users',
+    icon: Users,
+    children: [
+      { name: 'Students', href: '/owner/students' },
+      { name: 'Teachers', href: '/owner/teachers' },
+      { name: 'Staff', href: '/owner/staff' },
+    ],
+  },
+  {
+    name: 'Academics',
+    icon: Book,
+    children: [
+      { name: 'Sessions', href: '/owner/sessions' },
+      { name: 'Classes', href: '/owner/classes' },
+      // TODO: { name: 'Levels', href: '/owner/levels' },
+    ],
+  },
+  {
+    name: 'Finance',
+    icon: DollarSign,
+    children: [
+      { name: 'Fee Structure', href: '/owner/fees/structure' },
+      // TODO: { name: 'Fee Reports', href: '/owner/fees/reports' },
+      // TODO: { name: 'Salary Reports', href: '/owner/salary/reports' },
+    ],
+  },
+  { name: 'Settings', href: '/owner/settings', icon: Settings },
+  // TODO: { name: 'Audit Logs', href: '/owner/audit-logs', icon: FileText },
+];
+
+// Admin Navigation
 export const adminNav = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: Home },
   {
@@ -28,26 +68,13 @@ export const adminNav = [
     icon: Users,
     children: [
       { name: 'All Students', href: '/admin/students' },
-      { name: 'Family Tree', href: '/admin/students/family-tree', icon: GitBranch },
-      { name: 'Manage Promotions', href: '/admin/students/promotions' },
+      { name: 'Add Student', href: '/admin/students/new' },
     ],
   },
-  { name: 'Parents', href: '/admin/parents', icon: UserPlus },
-  { name: 'Employees', href: '/admin/employees', icon: Briefcase },
   { name: 'Teachers', href: '/admin/teachers', icon: UserCheck },
+  { name: 'Staff', href: '/admin/employees', icon: Briefcase },
   { name: 'Classes', href: '/admin/classes', icon: Layers },
   { name: 'Subjects', href: '/admin/subjects', icon: Book },
-  { name: 'Sessions', href: '/admin/sessions', icon: Calendar },
-  {
-    name: 'Timetable',
-    icon: Calendar,
-    children: [
-      { name: 'Manage Timetables', href: '/admin/timetable' },
-      { name: 'Class Timetable', href: '/admin/timetable/class' },
-      { name: 'Teacher Timetable', href: '/admin/timetable/teacher' },
-      { name: 'Student Timetable', href: '/admin/timetable/student' },
-    ],
-  },
   {
     name: 'Attendance',
     icon: Clipboard,
@@ -55,8 +82,13 @@ export const adminNav = [
       { name: 'Class Attendance', href: '/admin/attendance/class' },
       { name: 'Teacher Attendance', href: '/admin/attendance/teachers' },
       { name: 'Staff Attendance', href: '/admin/attendance/staff' },
-      { name: 'Employees Attendance', href: '/admin/attendance/employees' },
-      // { name: 'Class wise Report', href: '/admin/attendance/classwise-report' },
+    ],
+  },
+  {
+    name: 'Exams',
+    icon: FileText,
+    children: [
+      { name: 'Manage Exams', href: '/admin/exams' },
     ],
   },
   {
@@ -67,54 +99,53 @@ export const adminNav = [
       { name: 'Fee Structure', href: '/admin/fees/structure' },
     ],
   },
-  { name: 'Exams', href: '/admin/exams', icon: FileText },
   { name: 'Certificates', href: '/admin/certificates', icon: Award },
-  { name: 'Leaves', href: '/admin/leaves', icon: Calendar },
-  { name: 'Payroll', href: '/admin/payroll', icon: DollarSign },
-  { name: 'Results', href: '/admin/results', icon: BarChart2 },
-  { name: 'Noticeboard', href: '/admin/noticeboard', icon: Bell },
-  {
-    name: 'Settings',
-    icon: Settings,
-    children: [
-      { name: 'General Settings', href: '/admin/settings' },
-      { name: 'Campuses', href: '/admin/settings/campuses' },
-    ],
-  },
 ];
 
+// Staff Navigation
+export const staffNav = [
+  { name: 'Dashboard', href: '/staff/dashboard', icon: Home },
+  { name: 'Fees', href: '/staff/fees', icon: DollarSign },
+  { name: 'Leaves', href: '/staff/leaves', icon: Calendar },
+  // TODO: { name: 'Attendance', href: '/staff/attendance', icon: Clipboard },
+  // TODO: { name: 'Student Records', href: '/staff/students', icon: Users },
+];
+
+// Teacher Navigation
 export const teacherNav = [
   { name: 'Dashboard', href: '/teacher/dashboard', icon: Home },
   { name: 'Attendance', href: '/teacher/attendance', icon: Clipboard },
-  { name: 'Homework', href: '/teacher/homework', icon: BookOpen },
   { name: 'Marks', href: '/teacher/marks', icon: BarChart2 },
   { name: 'Leaves', href: '/teacher/leaves', icon: Calendar },
-  {
-    name: 'Timetable',
-    icon: Calendar,
-    children: [
-      { name: 'My Timetable', href: '/teacher/timetable' },
-      { name: 'Class Timetable', href: '/teacher/timetable/class' },
-    ],
-  },
-  { name: 'Messages', href: '/teacher/messages', icon: MessageSquare },
-];
-export const studentNav = [
-  { name: 'Dashboard', href: '/student/dashboard', icon: Home },
-  { name: 'Timetable', href: '/student/timetable', icon: Calendar },
-  { name: 'Homework', href: '/student/homework', icon: BookOpen },
-  { name: 'Attendance', href: '/student/attendance', icon: Clipboard },
-  { name: 'Results', href: '/student/results', icon: BarChart2 },
-  { name: 'Notices', href: '/student/notices', icon: Bell },
-  { name: 'Profile', href: '/student/profile', icon: User },
+  { name: 'Salary', href: '/teacher/salary', icon: DollarSign },
+  // TODO: { name: 'My Classes', href: '/teacher/classes', icon: BookOpen },
+  // TODO: {
+  //   name: 'Timetable',
+  //   icon: Calendar,
+  //   children: [
+  //     { name: 'My Timetable', href: '/teacher/timetable' },
+  //     { name: 'Class Timetable', href: '/teacher/timetable/class' },
+  //   ],
+  // },
 ];
 
+// Student Navigation
+export const studentNav = [
+  { name: 'Dashboard', href: '/student/dashboard', icon: Home },
+  { name: 'Attendance', href: '/student/attendance', icon: Clipboard },
+  { name: 'Results', href: '/student/results', icon: BarChart2 },
+  { name: 'Fees', href: '/student/fees', icon: DollarSign },
+  // TODO: { name: 'Profile', href: '/student/profile', icon: User },
+  // TODO: { name: 'Timetable', href: '/student/timetable', icon: Calendar },
+  // TODO: { name: 'Certificates', href: '/student/certificates', icon: Award },
+];
+
+// Parent Navigation
 export const ParentNav = [
   { name: 'Dashboard', href: '/parent/dashboard', icon: Home },
-  { name: 'Timetable', href: '/parent/timetable', icon: Calendar },
   { name: 'Attendance', href: '/parent/attendance', icon: Clipboard },
-  { name: 'Fees', href: '/parent/fees', icon: DollarSign },
   { name: 'Results', href: '/parent/results', icon: BarChart2 },
-  { name: 'Messages', href: '/parent/messages', icon: MessageSquare },
-  { name: 'Notices', href: '/parent/notices', icon: Bell },
+  { name: 'Fees', href: '/parent/fees', icon: DollarSign },
+  // TODO: { name: 'Child Profile', href: '/parent/child', icon: User },
+  // TODO: { name: 'Leave Requests', href: '/parent/leaves', icon: Calendar },
 ];

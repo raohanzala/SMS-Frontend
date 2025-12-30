@@ -12,16 +12,6 @@ import { isMainCampus } from "../../features/campuses/types/campus.types";
 
 interface HeaderProps {
   setSidebarOpen: (open: boolean) => void;
-  user: {
-    name?: string;
-    email?: string;
-    role?: string;
-    profileImage?: string;
-    profile?: {
-      name?: string;
-      role?: string;
-    };
-  } | null;
 }
 
 export default function Header({ setSidebarOpen }: HeaderProps) {
