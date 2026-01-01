@@ -1,10 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Menu, Bell, LogOut, User, Settings, ChevronDown, Building2, Check } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../store/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import ConfirmationModal from "../common/ConfirmationModal";
 import { usePageTitle } from "../../hooks/usePageTitle";
+import { useOutsideClick } from "../../hooks/useOutsideClick";
 import { RootState } from "../../store/store";
 import { useCampuses } from "../../features/campuses/hooks/useCampuses";
 import { useSwitchCampus } from "../../features/campuses/hooks/useSwitchCampus";
@@ -18,8 +19,6 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showCampusMenu, setShowCampusMenu] = useState(false);
-  const userMenuRef = useRef<HTMLDivElement>(null);
-  const campusMenuRef = useRef<HTMLDivElement>(null);
   
   const {user, campus: currentCampus} = useSelector((state: RootState) => state.auth);
   
@@ -31,6 +30,10 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
 
   const currentCampusId = currentCampus?._id;
   const canSwitchCampus = user?.role === "school_owner";
+
+  // Use outside click hooks for both menus
+  const userMenuRef = useOutsideClick(() => setShowUserMenu(false));
+  const campusMenuRef = useOutsideClick(() => setShowCampusMenu(false));
 
   const handleLogout = () => {
     dispatch(logout());
@@ -56,22 +59,6 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
       switchCampusMutation(campusId);
       setShowCampusMenu(false);
     };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
-        setShowUserMenu(false);
-      }
-      if (campusMenuRef.current && !campusMenuRef.current.contains(event.target as Node)) {
-        setShowCampusMenu(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
 
   return (

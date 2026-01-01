@@ -33,7 +33,7 @@ const TeachersPage = () => {
   } = useSelectable(teachers || []);
 
   const handleEditTeacher = useCallback((teacher: Teacher) => {
-    navigate(`/admin/teachers/${teacher._id}/edit`);
+    navigate(`/owner/teachers/${teacher._id}/edit`);
   }, [navigate]);
 
   const handleDeleteTeacher = useCallback((teacherId: string) => {
@@ -42,7 +42,7 @@ const TeachersPage = () => {
   }, []);
 
   const handleShowAddTeacher = useCallback(() => {
-    navigate("/admin/teachers/new");
+    navigate("/owner/teachers/new");
   }, [navigate]);
 
   const handleCloseTeacherDeleteModal = useCallback(() => {

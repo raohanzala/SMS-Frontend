@@ -12,6 +12,10 @@ export const PublicRoute = ({ children }: { children: React.ReactNode }) => {
       case "super_admin":
         return <Navigate to="/super-admin/dashboard" replace />;
       case "school_owner":
+        // If school owner doesn't have a school, redirect to create school page
+        if (!user.schoolId) {
+          return <Navigate to="/onboarding/create-school" replace />;
+        }
         return <Navigate to="/owner/dashboard" replace />;
       case "admin":
         return <Navigate to="/admin/dashboard" replace />;
@@ -33,13 +37,17 @@ export const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Component for public route layout (uses Outlet)
 const PublicRoutes = () => {
-  const { user, token } = useSelector((state: RootState) => state?.auth);
+  const { user, token, isSchoolCreated } = useSelector((state: RootState) => state?.auth);
 
   if (token && user) {
     switch (user.role) {
       case "super_admin":
         return <Navigate to="/super-admin/dashboard" replace />;
       case "school_owner":
+        // If school owner doesn't have a school, redirect to create school page
+        if (!user.schoolId && !isSchoolCreated) {
+          return <Navigate to="/onboarding/create-school" replace />;
+        }
         return <Navigate to="/owner/dashboard" replace />;
       case "admin":
         return <Navigate to="/admin/dashboard" replace />;

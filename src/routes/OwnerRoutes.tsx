@@ -14,6 +14,9 @@ import ClassesPage from "@/features/classes/pages/ClassesPage";
 import SettingsPage from "@/features/settings/pages/SettingsPage";
 import FeeStructurePage from "@/features/fees/pages/FeeStructurePage";
 import AdminPayrollPage from "@/features/salary/pages/AdminPayrollPage";
+import CreateSchoolPage from "@/features/onboarding/pages/CreateSchoolPage";
+import OwnerAuditLogsPage from "@/features/auditLogs/pages/OwnerAuditLogsPage";
+import ParentsPage from "@/features/parents/pages/ParentsPage";
 
 const OwnerRoutes = () => (
   <Routes>
@@ -27,6 +30,7 @@ const OwnerRoutes = () => (
       <Route path="students/new" element={<StudentFormPage />} />
       <Route path="teachers" element={<TeachersPage />} />
       <Route path="teachers/new" element={<TeacherFormPage />} />
+      <Route path="parents" element={<ParentsPage />} />
       <Route path="staff" element={<EmployeesPage />} />
       <Route path="staff/new" element={<EmployeeFormPage />} />
       
@@ -45,8 +49,8 @@ const OwnerRoutes = () => (
       {/* Settings */}
       <Route path="settings" element={<SettingsPage />} />
       
-      {/* TODO: Implement Audit Logs */}
-      {/* <Route path="audit-logs" element={<AuditLogsPage />} /> */}
+      {/* Audit Logs */}
+      <Route path="audit-logs" element={<OwnerAuditLogsPage />} />
     </Route>
   </Routes>
 );

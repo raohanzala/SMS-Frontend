@@ -3,7 +3,7 @@ import { FormikErrors } from "formik";
 
 interface FormRowVerticalProps {
   label?: string;
-  error?: string | string[] | FormikErrors<any> | FormikErrors<any>[] | undefined;
+  error?: string | string[] | FormikErrors<unknown> | FormikErrors<unknown>[] | undefined;
   name: string;
   icon?: ReactNode;
   children: ReactNode;
@@ -60,7 +60,7 @@ const FormRowVertical = ({
               clipRule="evenodd" 
             />
           </svg>
-          <span>{Array.isArray(error) ? error.join(", ") : error}</span>
+          <span>{Array.isArray(error) ? error.join(", ") : error as string}</span>
         </div>
       )}
     </div>

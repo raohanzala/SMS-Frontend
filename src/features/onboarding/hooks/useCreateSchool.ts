@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setToken } from "@/store/slices/authSlice";
+import { setCredentials } from "@/store/slices/authSlice";
 import { createSchoolApi } from "@/api/schools";
 import { toastError, toastSuccess } from "@/utils/helpers";
 
@@ -14,11 +14,9 @@ export function useCreateSchool() {
     onSuccess: (data) => {
       toastSuccess(data.message || "School created successfully!");
       
-      if (data.data?.token) {
-        dispatch(setToken(data.data.token));
-      }
+        dispatch(setCredentials(data.data));
       
-      navigate("/admin/dashboard");
+      navigate("/owner/dashboard");
     },
     onError: (err) => {
      toastError(

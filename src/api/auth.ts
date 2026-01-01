@@ -1,11 +1,17 @@
 // src/api/auth.ts
 import axiosInstance from "./axiosInstance";
 
-export const signupApi = async (formData: FormData) => {
-  const { data } = await axiosInstance.post("/auth/signup-owner", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  return data;
+export const signupApi = async (formData: FormData | { name: string; email: string; password: string; planId?: string }) => {
+  // If it's FormData, use multipart/form-data, otherwise use JSON
+  if (formData instanceof FormData) {
+    const { data } = await axiosInstance.post("/auth/signup-owner", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  } else {
+    const { data } = await axiosInstance.post("/auth/signup-owner", formData);
+    return data;
+  }
 };
 
 export const signinApi = async (credentials: { email: string; password: string }) => {

@@ -12,17 +12,20 @@ import {
   Book,
   Layers,
   Award,
+  CreditCard,
+  Activity,
+  Building2,
 } from 'lucide-react';
 
 // Super Admin Navigation
 export const superAdminNav = [
   { name: 'Dashboard', href: '/super-admin/dashboard', icon: Home },
-  // TODO: Implement these
-  // { name: 'Schools', href: '/super-admin/schools', icon: Building },
-  // { name: 'Owners', href: '/super-admin/owners', icon: UserCheck },
-  // { name: 'Subscriptions', href: '/super-admin/subscriptions', icon: CreditCard },
-  // { name: 'System Logs', href: '/super-admin/logs', icon: FileText },
-  // { name: 'SaaS Settings', href: '/super-admin/settings', icon: Settings },
+  { name: 'Plans', href: '/super-admin/plans', icon: CreditCard },
+  { name: 'Schools', href: '/super-admin/schools', icon: Building2 },
+  { name: 'Subscriptions', href: '/super-admin/subscriptions', icon: CreditCard },
+  { name: 'Owners', href: '/super-admin/owners', icon: UserCheck },
+  { name: 'Audit Logs', href: '/super-admin/audit-logs', icon: FileText },
+  { name: 'SaaS Settings', href: '/super-admin/settings', icon: Settings },
 ];
 
 // School Owner Navigation
@@ -35,6 +38,7 @@ export const ownerNav = [
     children: [
       { name: 'Students', href: '/owner/students' },
       { name: 'Teachers', href: '/owner/teachers' },
+      { name: 'Parents', href: '/owner/parents' },
       { name: 'Staff', href: '/owner/staff' },
     ],
   },
@@ -57,7 +61,7 @@ export const ownerNav = [
     ],
   },
   { name: 'Settings', href: '/owner/settings', icon: Settings },
-  // TODO: { name: 'Audit Logs', href: '/owner/audit-logs', icon: FileText },
+  { name: 'Audit Logs', href: '/owner/audit-logs', icon: FileText },
 ];
 
 // Admin Navigation
@@ -100,6 +104,7 @@ export const adminNav = [
     ],
   },
   { name: 'Certificates', href: '/admin/certificates', icon: Award },
+  { name: 'Activity Logs', href: '/admin/activity-logs', icon: Activity },
 ];
 
 // Staff Navigation

@@ -37,7 +37,7 @@ const StudentsPage = () => {
   } = useSelectable(students || []);
 
   const handleEditStudent = useCallback((studentToEdit: Student) => {
-    navigate(`/admin/students/${studentToEdit._id}/edit`);
+    navigate(`/owner/students/${studentToEdit._id}/edit`);
   }, [navigate]);
 
   const handleDeleteStudent = useCallback((student: Student) => {
@@ -46,7 +46,7 @@ const StudentsPage = () => {
   }, []);
 
   const handleShowManageStudentModal = useCallback(() => {
-    navigate('/admin/students/new');
+    navigate('/owner/students/new');
   }, [navigate]);
 
   const handleCloseStudentDeleteModal = useCallback(() => {

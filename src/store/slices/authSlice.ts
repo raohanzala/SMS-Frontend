@@ -8,6 +8,7 @@ interface AuthState {
   permissions: string[] | "ALL";
   user: User | null;
   campus: Campus | null;
+  isSchoolCreated: boolean;
 }
 
 const initialState: AuthState = {
@@ -15,7 +16,8 @@ const initialState: AuthState = {
   isAuthenticated: false,
   permissions: [],
   user: null,
-  campus: null
+  campus: null,
+  isSchoolCreated: false
 };
 
 console.log('AUTH STATE', initialState)
@@ -29,6 +31,7 @@ export const authSlice = createSlice({
       state.isAuthenticated = true
       state.user = payload.user
       state.permissions = payload.user.permissions
+      state.isSchoolCreated = payload.isSchoolCreated
     },
     setToken: (state, { payload }) => {
       state.token = payload
@@ -41,6 +44,7 @@ export const authSlice = createSlice({
       state.isAuthenticated = false
       state.permissions = initialState.permissions
       state.user = initialState.user
+      state.isSchoolCreated = initialState.isSchoolCreated
     },
     userData: () => {
 

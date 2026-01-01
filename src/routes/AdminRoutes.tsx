@@ -16,6 +16,7 @@ import AdminStaffAttendancePage from "@/features/staffAttendance/pages/AdminStaf
 import AdminExamsPage from "@/features/exams/pages/AdminExamsPage";
 import AdminFeesPage from "@/features/fees/pages/AdminFeesPage";
 import AdminCertificatesPage from "@/features/certificates/pages/AdminCertificatesPage";
+import AdminActivityLogsPage from "@/features/auditLogs/pages/AdminActivityLogsPage";
 
 const AdminRoutes = () => (
   <Routes>
@@ -55,6 +56,9 @@ const AdminRoutes = () => (
       
       {/* Certificates */}
       <Route path="certificates" element={<AdminCertificatesPage />} />
+      
+      {/* Activity Logs */}
+      <Route path="activity-logs" element={<AdminActivityLogsPage />} />
     </Route>
   </Routes>
 );

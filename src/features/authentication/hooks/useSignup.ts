@@ -14,10 +14,13 @@ export function useSignup() {
         mutationFn: signupApi,
         onSuccess: (data) => {
             toastSuccess(
-                data.message || "Account successfully created! Please verufy the new account from the user's email address."
+                data.message || "Account successfully created! Please verify the new account from the user's email address."
             );
-            dispatch(setCredentials(data.data))
-            navigate('/onboarding/create-school')
+            // Set credentials first, then navigate
+            // The PublicRoutes will check if school exists and redirect accordingly
+            dispatch(setCredentials(data.data));
+            // Navigate to create school page - PublicRoutes will handle redirect if needed
+            navigate('/onboarding/create-school', { replace: true });
         },
         onError: (err) => {
             toastError(

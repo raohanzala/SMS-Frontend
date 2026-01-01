@@ -1,352 +1,276 @@
-// POST /api/salary/generate - Generate Salary
-router.post('/generate', generateSalary);
 
-// GET /api/salary?employeeId=xxx&month=August&year=2025 - Get Salary Slips
-router.get('/', getSalarySlips);
+// GET /api/school-owners - Get all school owners with filters and pagination
+router.get('/', getAllOwners);
 
-// POST /api/salary/:id/pay - Mark Salary as Paid
-router.post('/:id/pay', markSalaryPaid);
+// GET /api/school-owners/:id - Get single school owner by ID with details
+router.get('/:id', getSchoolOwnerById);
 
 /**
- * Generate Salary
- * POST /api/salary/generate
+ * Get All School Owners
+ * GET /api/school-owners
+ * 
+ * Only accessible by super_admin
+ * 
+ * Query params:
+ * - page: pagination page (default: 1)
+ * - limit: items per page (default: 20)
+ * - search: search by name or email
+ * - status: filter by status (ACTIVE, SUSPENDED)
+ * - hasSchool: filter by whether owner has a school (true/false)
  */
-export const generateSalary = async (req, res) => {
+export const getAllOwners = async (req, res) => {
   try {
-    const { month, year, employeeType, employeeId } = req.body;
-    const schoolId = req.schoolId;
-    const campusId = req.campusId;
-    const userId = req.user.userId;
+    const {
+      page = 1,
+      limit = 20,
+      search,
+      status,
+      hasSchool
+    } = req.query;
 
-    // Check permissions
-    const user = await User.findById(userId).select('role permissions');
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
+    // Build filter
+    const filter = {};
+
+    // Search filter (name or email via user)
+    if (search) {
+      // Find users matching email
+      const users = await User.find({
+        role: 'school_owner',
+        email: { $regex: search, $options: 'i' }
+      }).select('_id');
+
+      const userIds = users.map(u => u._id);
+      
+      // Find owners matching name
+      const ownersByName = await SchoolOwner.find({
+        name: { $regex: search, $options: 'i' }
+      }).select('user');
+
+      const ownerUserIds = ownersByName.map(o => o.user);
+      
+      // Combine all matching user IDs (keep as ObjectIds)
+      const allUserIds = [...new Set([...userIds, ...ownerUserIds])];
+      
+      if (allUserIds.length > 0) {
+        filter.user = { $in: allUserIds };
+      } else {
+        // No matches, return empty result
+        filter.user = { $in: [] };
+      }
     }
 
-    if (user.role !== 'school_owner' && 
-        (user.role !== 'admin' || !user.permissions?.includes(PERMISSIONS.SALARY_MANAGE))) {
-      return res.status(403).json({
-        success: false,
-        message: 'You do not have permission to generate salary slips'
-      });
+    // Status filter
+    if (status) {
+      filter.status = status;
     }
 
-    // Validation
-    if (!month || !year || !employeeType) {
+    // Has school filter
+    if (hasSchool === 'true') {
+      filter.schoolId = { $ne: null };
+    } else if (hasSchool === 'false') {
+      filter.schoolId = null;
+    }
+
+    // Pagination
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Validate pagination
+    if (pageNum < 1) {
       return res.status(400).json({
         success: false,
-        message: 'month, year, and employeeType are required'
+        message: 'Page must be greater than 0'
       });
     }
-
-    const validTypes = ['TEACHER', 'STAFF'];
-    if (!validTypes.includes(employeeType)) {
+    if (limitNum < 1 || limitNum > 100) {
       return res.status(400).json({
         success: false,
-        message: `Invalid employeeType. Must be one of: ${validTypes.join(', ')}`
+        message: 'Limit must be between 1 and 100'
       });
     }
 
-    // Get employees (all or specific)
-    let employees = [];
-    if (employeeId) {
-      if (employeeType === 'TEACHER') {
-        const teacher = await Teacher.findOne({
-          _id: employeeId,
-          schoolId: schoolId,
-          campusId: campusId,
-          isDeleted: false
-        });
-        if (teacher) employees = [teacher];
-      } else {
-        const staff = await Staff.findOne({
-          _id: employeeId,
-          schoolId: schoolId,
-          campusId: campusId,
-          isDeleted: false
-        });
-        if (staff) employees = [staff];
-      }
-    } else {
-      // Get all employees of this type
-      if (employeeType === 'TEACHER') {
-        employees = await Teacher.find({
-          schoolId: schoolId,
-          campusId: campusId,
-          isDeleted: false
-        });
-      } else {
-        employees = await Staff.find({
-          schoolId: schoolId,
-          campusId: campusId,
-          isDeleted: false
-        });
-      }
-    }
+    // Get total count
+    const totalOwners = await SchoolOwner.countDocuments(filter);
 
-    if (employees.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'No employees found'
-      });
-    }
-
-    // Generate salary slips using transaction
-    const { generated, skipped } = await runTransaction(async (session) => {
-      let generated = 0;
-      let skipped = 0;
-
-      for (const employee of employees) {
-        // Check if salary slip already exists
-        const existing = await SalarySlip.findOne({
-          schoolId: schoolId,
-          campusId: campusId,
-          employeeType: employeeType,
-          employeeId: employee._id,
-          month: month,
-          year: year
-        }).session(session);
-
-        if (existing) {
-          skipped++;
-          continue;
+    // Fetch school owners with pagination
+    const owners = await SchoolOwner.find(filter)
+      .populate({
+        path: 'user',
+        select: 'email role status isFirstLogin createdAt',
+        populate: {
+          path: 'schoolId',
+          select: 'name code isActive'
         }
-
-        // Calculate salary based on attendance
-        const basicSalary = employee.salary?.amount || 0;
-        
-        // Get attendance for the month
-        const monthStart = new Date(year, getMonthNumber(month), 1);
-        const monthEnd = new Date(year, getMonthNumber(month) + 1, 0, 23, 59, 59);
-        
-        let attendanceRecords = [];
-        if (employeeType === 'TEACHER') {
-          attendanceRecords = await TeacherAttendance.find({
-            schoolId: schoolId,
-            campusId: campusId,
-            date: { $gte: monthStart, $lte: monthEnd },
-            'records.teacherId': employee._id,
-            isFinalized: true
-          }).session(session);
-        } else {
-          attendanceRecords = await StaffAttendance.find({
-            schoolId: schoolId,
-            campusId: campusId,
-            date: { $gte: monthStart, $lte: monthEnd },
-            'records.staffId': employee._id,
-            isFinalized: true
-          }).session(session);
+      })
+      .populate({
+        path: 'schoolId',
+        select: 'name code isActive ownerId createdAt',
+        populate: {
+          path: 'ownerId',
+          select: 'email role'
         }
+      })
+      .populate('campusId', 'name')
+      .sort({ createdAt: -1 }) // Latest first
+      .skip(skip)
+      .limit(limitNum)
+      .lean();
 
-        // Calculate deductions based on attendance
-        let deductions = 0;
-        let presentDays = 0;
-        let absentDays = 0;
-        let leaveDays = 0;
-
-        attendanceRecords.forEach(attendance => {
-          const record = employeeType === 'TEACHER' 
-            ? attendance.records.find(r => r.teacherId.toString() === employee._id.toString())
-            : attendance.records.find(r => r.staffId.toString() === employee._id.toString());
-          
-          if (record) {
-            if (record.status === 'PRESENT' || record.status === 'LATE') {
-              presentDays++;
-            } else if (record.status === 'ABSENT') {
-              absentDays++;
-            } else if (record.status === 'LEAVE') {
-              leaveDays++;
-            }
-          }
-        });
-
-        // Calculate deductions (example: deduct for absent days)
-        const dailySalary = basicSalary / 30; // Assuming 30 days per month
-        deductions = absentDays * dailySalary;
-
-        const netSalary = Math.max(0, basicSalary - deductions);
-
-        // Create salary slip
-        await SalarySlip.create([{
-          schoolId: schoolId,
-          campusId: campusId,
-          employeeType: employeeType,
-          employeeId: employee._id,
-          month: month,
-          year: year,
-          basicSalary: basicSalary,
-          deductions: deductions,
-          netSalary: netSalary,
-          status: 'UNPAID'
-        }], { session });
-
-        generated++;
-      }
-
-      return { generated, skipped };
-    });
-
-    res.status(201).json({
-      success: true,
-      message: 'Salary slips generated successfully',
-      data: {
-        generated,
-        skipped,
-        total: employees.length
-      }
-    });
-
-  } catch (error) {
-    console.error('Generate salary error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error generating salary slips',
-      error: error.message
-    });
-  }
-};
-
-/**
- * Helper: Get month number from month name
- */
-const getMonthNumber = (monthName) => {
-  const months = {
-    'January': 0, 'February': 1, 'March': 2, 'April': 3,
-    'May': 4, 'June': 5, 'July': 6, 'August': 7,
-    'September': 8, 'October': 9, 'November': 10, 'December': 11
-  };
-  return months[monthName] ?? 0;
-};
-
-/**
- * Get Salary Slips
- * GET /api/salary?employeeId=xxx&month=August&year=2025
- */
-export const getSalarySlips = async (req, res) => {
-  try {
-    const { employeeId, employeeType, month, year } = req.query;
-    const schoolId = req.schoolId;
-    const campusId = req.campusId;
-
-    let query = {
-      schoolId: schoolId,
-      campusId: campusId
-    };
-
-    if (employeeId) {
-      query.employeeId = employeeId;
-    }
-    if (employeeType) {
-      query.employeeType = employeeType;
-    }
-    if (month) {
-      query.month = month;
-    }
-    if (year) {
-      query.year = parseInt(year);
-    }
-
-    const salarySlips = await SalarySlip.find(query)
-      .sort({ year: -1, month: -1 });
-
-    // Populate employee details
-    const populatedSlips = await Promise.all(salarySlips.map(async (slip) => {
-      let employee = null;
-      if (slip.employeeType === 'TEACHER') {
-        employee = await Teacher.findById(slip.employeeId).select('name');
-      } else {
-        employee = await Staff.findById(slip.employeeId).select('name designation');
-      }
-      return {
-        ...slip.toObject(),
-        employee
-      };
-    }));
+    // Calculate pagination info
+    const totalPages = Math.ceil(totalOwners / limitNum);
+    const hasNextPage = pageNum < totalPages;
+    const hasPrevPage = pageNum > 1;
 
     res.status(200).json({
       success: true,
-      message: 'Salary slips retrieved successfully',
-      data: populatedSlips
+      message: 'School owners retrieved successfully',
+      data: {
+        owners,
+        pagination: {
+          currentPage: pageNum,
+          totalPages,
+          totalOwners,
+          limit: limitNum,
+          hasNextPage,
+          hasPrevPage
+        }
+      }
     });
 
   } catch (error) {
-    console.error('Get salary slips error:', error);
+    console.error('Get all owners error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching salary slips',
+      message: 'Error retrieving school owners',
       error: error.message
     });
   }
 };
 
 /**
- * Mark Salary as Paid
- * POST /api/salary/:id/pay
+ * Get School Owner by ID with Details
+ * GET /api/school-owners/:id
+ * 
+ * Only accessible by super_admin
+ * 
+ * Returns detailed information including:
+ * - Owner profile details
+ * - User account details
+ * - School details (if exists)
+ * - Campus details (if exists)
+ * - Subscription details (if exists)
  */
-export const markSalaryPaid = async (req, res) => {
+export const getSchoolOwnerById = async (req, res) => {
   try {
     const { id } = req.params;
-    const schoolId = req.schoolId;
-    const userId = req.user.userId;
 
-    // Check permissions
-    const user = await User.findById(userId).select('role permissions');
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    if (user.role !== 'school_owner' && 
-        (user.role !== 'admin' || !user.permissions?.includes(PERMISSIONS.SALARY_MANAGE))) {
-      return res.status(403).json({
-        success: false,
-        message: 'You do not have permission to mark salary as paid'
-      });
-    }
-
-    // Get salary slip
-    const salarySlip = await SalarySlip.findOne({
-      _id: id,
-      schoolId: schoolId
-    });
-
-    if (!salarySlip) {
-      return res.status(404).json({
-        success: false,
-        message: 'Salary slip not found'
-      });
-    }
-
-    if (salarySlip.status === 'PAID') {
+    if (!id) {
       return res.status(400).json({
         success: false,
-        message: 'Salary is already marked as paid'
+        message: 'School owner ID is required'
       });
     }
 
-    // Mark as paid
-    salarySlip.status = 'PAID';
-    await salarySlip.save();
+    // Fetch school owner with all related details
+    const owner = await SchoolOwner.findById(id)
+      .populate({
+        path: 'user',
+        select: 'email role status isFirstLogin permissions createdAt updatedAt',
+        populate: [
+          {
+            path: 'schoolId',
+            select: 'name code isActive ownerId createdAt updatedAt',
+            populate: {
+              path: 'ownerId',
+              select: 'email role'
+            }
+          }
+        ]
+      })
+      .populate({
+        path: 'schoolId',
+        select: 'name code isActive ownerId createdAt updatedAt',
+        populate: {
+          path: 'ownerId',
+          select: 'email role name'
+        }
+      })
+      .populate('campusId', 'name address')
+      .lean();
+
+    if (!owner) {
+      return res.status(404).json({
+        success: false,
+        message: 'School owner not found'
+      });
+    }
+
+    // If owner has a school, get additional school details
+    let schoolDetails = null;
+    if (owner.schoolId) {
+      schoolDetails = await School.findById(owner.schoolId)
+        .populate('ownerId', 'email role')
+        .lean();
+    }
+
+    // Get subscription details if school exists
+    let subscriptionDetails = null;
+    if (owner.schoolId) {
+      try {
+        subscriptionDetails = await Subscription.findOne({
+          schoolId: owner.schoolId
+        })
+          .populate('planId', 'name price features')
+          .lean();
+      } catch (err) {
+        // Subscription model might not exist or have issues
+        console.error('Error fetching subscription:', err);
+      }
+    }
+
+    // Get campuses count if school exists
+    let campusesCount = 0;
+    if (owner.schoolId) {
+      try {
+        campusesCount = await Campus.countDocuments({
+          schoolId: owner.schoolId,
+          isDeleted: false
+        });
+      } catch (err) {
+        console.error('Error counting campuses:', err);
+      }
+    }
+
+    // Combine all details
+    const ownerDetails = {
+      ...owner,
+      school: schoolDetails,
+      subscription: subscriptionDetails,
+      campusesCount
+    };
 
     res.status(200).json({
       success: true,
-      message: 'Salary marked as paid successfully',
-      data: salarySlip
+      message: 'School owner retrieved successfully',
+      data: ownerDetails
     });
 
   } catch (error) {
-    console.error('Mark salary paid error:', error);
+    console.error('Get school owner by ID error:', error);
+    
+    // Handle invalid ObjectId
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid school owner ID format'
+      });
+    }
+
     res.status(500).json({
       success: false,
-      message: 'Error marking salary as paid',
+      message: 'Error retrieving school owner',
       error: error.message
     });
   }
 };
-

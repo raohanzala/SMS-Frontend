@@ -20,6 +20,8 @@ import ForgotPasswordPage from "./features/authentication/pages/ForgotPasswordPa
 import ChangePasswordPage from "./features/authentication/pages/ChangePasswordPage";
 import SetPasswordPage from "./features/authentication/pages/SetPasswordPage";
 import PublicLayout from "./components/layout/PublicLayout";
+import CreateSchoolPage from "./features/onboarding/pages/CreateSchoolPage";
+import PlansListingPage from "./features/plans/pages/PlansListingPage";
 
 const App = () => {
   const queryClient = new QueryClient();
@@ -33,6 +35,14 @@ const App = () => {
               <Route path="/"  element={<PublicRoutes />}>
                 <Route element={<PublicLayout />}>
                 <Route index element={<Navigate to="/login" replace />} />
+                  <Route
+                    path="/plans"
+                    element={
+                      <PublicRoute>
+                        <PlansListingPage />
+                      </PublicRoute>
+                    }
+                  />
                   <Route
                     path="/login"
                     element={
@@ -73,11 +83,23 @@ const App = () => {
                       </PublicRoute>
                     }
                   />
+                  {/* <Route
+                    path="/onboarding/create-school"
+                    element={
+                      <PublicRoute>
+                        <CreateSchoolPage />
+                      </PublicRoute>
+                    }
+                  /> */}
                 </Route>
               </Route>
 
               {/* Protected */}
               <Route element={<ProtectedRoute />}>
+              <Route element={<RoleGuard allowedRoles={["school_owner"]} />}>
+                <Route path="/onboarding/create-school" element={<CreateSchoolPage />} />
+              </Route>
+
                 {/* Super Admin */}
                 <Route element={<RoleGuard allowedRoles={["super_admin"]} />}>
                   <Route path="/super-admin/*" element={<SuperAdminRoutes />} />

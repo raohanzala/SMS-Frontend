@@ -22,13 +22,23 @@ const CreateSchoolForm = () => {
     },
     validationSchema: createSchoolSchema,
     onSubmit: async (formValues) => {
-      const payload: { name: string; code?: string } = {
+      // Get planId from localStorage (set from plans page)
+      const planId = localStorage.getItem("selectedPlanId");
+      
+      const payload: { name: string; code?: string; planId?: string } = {
         name: formValues.name.trim(),
       };
       
       // Only include code if provided
       if (formValues.code && formValues.code.trim()) {
         payload.code = formValues.code.trim().toUpperCase();
+      }
+      
+      // Include planId if available
+      if (planId) {
+        payload.planId = planId;
+        // Clear planId from localStorage after using it
+        localStorage.removeItem("selectedPlanId");
       }
       
       createSchoolMutation(payload);

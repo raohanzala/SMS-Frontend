@@ -25,7 +25,7 @@ const LoginForm = () => {
     { email: 'sohail@gmail.com', password: 'Soh@il123', role : 'teacher' },
     { email: 'asghar@gmail.com', password: 'Asgh@r123', role : 'parent' },
     { email: 'zafar@gmail.com', password: 'Z@far123', role : 'staff' },
-    { email: 'akhtar@gmail.com', password: 'akhtar123', role : 'admnin' },
+    { email: 'zohaib@gmail.com', password: 'Zoh@ib123', role : 'admnin' },
     { email: 'ashraf@gmail.com', password: 'ashraf', role : 'school_owner' },
     { email: 'akhtar@gmail.com', password: 'akhtar123', role : 'super_admin' },
   ];

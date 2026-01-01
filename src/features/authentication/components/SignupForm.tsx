@@ -1,4 +1,6 @@
 import { FormikProvider, useFormik } from "formik";
+import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 import FormRowVertical from "@/components/common/FormRowVerticle";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
@@ -8,6 +10,15 @@ import { signupSchema } from "../validation/authentication.validation";
 
 const SignupForm = () => {
   const { signupMutation, isSignupPending } = useSignup();
+  const [searchParams] = useSearchParams();
+
+  // Get planId from URL or localStorage
+  useEffect(() => {
+    const planIdFromUrl = searchParams.get("plan");
+    if (planIdFromUrl) {
+      localStorage.setItem("selectedPlanId", planIdFromUrl);
+    }
+  }, [searchParams]);
 
   const formik = useFormik({
     initialValues: {
@@ -18,7 +29,9 @@ const SignupForm = () => {
     },
     validationSchema: signupSchema,
     onSubmit: async (formValues) => {
-      signupMutation(formValues);
+      // Get planId from localStorage (set from plans page or URL param)
+      const planId = localStorage.getItem("selectedPlanId");
+      signupMutation({ ...formValues, planId: planId || undefined });
     },
   });
 
